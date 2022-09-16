@@ -1,5 +1,6 @@
 <script lang="ts">
   import { client } from "$lib/pocketbase";
+  import { alerts } from "./Alerts.svelte";
   const DEFAULTS = {
     email: "",
     password: "",
@@ -21,7 +22,7 @@
       user = { ...DEFAULTS };
     } catch (e: any) {
       const { code, message, data } = e;
-      alert(message);
+      alerts.error(message, 5000);
       console.error(e);
     }
   }

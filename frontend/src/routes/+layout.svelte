@@ -1,4 +1,5 @@
 <script context="module">
+  import Alerts from "$lib/components/Alerts.svelte";
   import Nav from "$lib/components/Nav.svelte";
 
   // static frontend, prerendered with @sveltejs/adapter-static
@@ -6,6 +7,7 @@
 </script>
 
 <Nav />
+<Alerts />
 <main>
   <slot />
 </main>
