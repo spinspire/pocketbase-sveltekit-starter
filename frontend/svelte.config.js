@@ -8,6 +8,9 @@ const config = {
   preprocess: preprocess(),
 
   kit: {
+    alias: {
+      $lib: 'src/lib',
+    },
     adapter: adapter({
       fallback: 'index.html' // enable SPA mode
     })
