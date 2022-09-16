@@ -19,14 +19,14 @@
   </ul>
 </nav>
 
-<style>
+<style lang="scss">
   nav {
     margin: 0 auto;
     max-width: var(--width-content);
     padding: 0 1rem;
     background-color: #ddd;
-  }
-  li.active a {
-    text-decoration: underline;
+    li.active a {
+      text-decoration: underline;
+    }
   }
 </style>
