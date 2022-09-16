@@ -1,11 +1,18 @@
 <script lang="ts">
+  import { base } from "$app/paths";
+  import { page } from "$app/stores";
   import Login from "./Login.svelte";
+  const links = [
+    ["Home", "/"],
+    ["Hello", "/hello"],
+  ].map(([text, href]) => [text, base + href]);
 </script>
 
 <nav>
   <ul>
-    <li><a href="/">Home</a></li>
-    <li><a href="/hello">Hello</a></li>
+    {#each links as [text, href]}
+      <li class:active={href === $page.url.pathname}><a {href}>{text}</a></li>
+    {/each}
   </ul>
   <ul>
     <li><Login /></li>
@@ -18,5 +25,8 @@
     max-width: var(--width-content);
     padding: 0 1rem;
     background-color: #ddd;
+  }
+  li.active a {
+    text-decoration: underline;
   }
 </style>
