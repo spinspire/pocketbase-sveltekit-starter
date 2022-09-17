@@ -13,7 +13,8 @@ const config = {
     },
     adapter: adapter({
       fallback: 'index.html' // enable SPA mode
-    })
+    }),
+    trailingSlash: "always",
   }
 };
 
