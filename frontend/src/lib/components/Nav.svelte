@@ -5,7 +5,10 @@
   const links = [
     ["Home", "/"],
     ["Hello", "/hello"],
-  ].map(([text, href]) => [text, base + href]);
+  ].map(([text, href]) => [
+    text,
+    base + href.replace(/\/?$/, "/"), // prefix=base, suffix=a trailing slash if not present
+  ]);
 </script>
 
 <nav>
