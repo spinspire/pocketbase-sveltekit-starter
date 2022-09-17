@@ -23,10 +23,10 @@
             alt={post.title}
           />
         </td>
-        <td><a href={`${post.slug}?id=${post.id}`}>{post.title}</a></td>
+        <td><a href={post.slug}>{post.title}</a></td>
         <td>{post.updated}</td>
         <td><a href={`${post.id}/edit`}>Edit</a></td>
-        <td><a href={`${post.slug}?op=delete`}>Delete</a></td>
+        <td><a href={`${post.slug}#delete`}>Delete</a></td>
       </tr>
     {:else}
       <tr>

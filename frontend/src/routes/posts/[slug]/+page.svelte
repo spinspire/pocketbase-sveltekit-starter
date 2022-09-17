@@ -11,7 +11,7 @@
   $: $metadata.title = title;
 </script>
 
-{#if $page.url.searchParams.get("op") === "delete"}
+{#if $page.url.hash === "#delete"}
   <Delete table="posts" {id} />
 {/if}
 

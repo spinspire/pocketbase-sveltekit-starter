@@ -1,4 +1,4 @@
-import { env } from "$env/dynamic/public";
+import { browser } from "$app/environment";
 import PocketBase from "pocketbase";
 
 /*
@@ -7,5 +7,5 @@ import PocketBase from "pocketbase";
  * - the frontend itself is served by the backend as static files
  * ... hence the backend url of ''
  */
-const url = env.BACKEND_URL || '';
+const url = browser ? '' : 'http://127.0.0.1:8090'
 export const client = new PocketBase(url);
