@@ -4,6 +4,7 @@
   import Login from "./Login.svelte";
   const links = [
     ["Home", "/"],
+    ["Posts", "/posts"],
     ["Hello", "/hello"],
   ].map(([text, href]) => [
     text,
