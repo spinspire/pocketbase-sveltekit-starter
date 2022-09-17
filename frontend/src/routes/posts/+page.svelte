@@ -9,6 +9,8 @@
   $metadata.title = "Recent Posts";
 </script>
 
+<a href="new/edit">Create New</a>
+<hr />
 <table>
   <tbody>
     {#each posts as post}
@@ -24,6 +26,7 @@
         <td><a href={`${post.slug}?id=${post.id}`}>{post.title}</a></td>
         <td>{post.updated}</td>
         <td><a href={`${post.id}/edit`}>Edit</a></td>
+        <td><a href={`${post.slug}?op=delete`}>Delete</a></td>
       </tr>
     {:else}
       <tr>

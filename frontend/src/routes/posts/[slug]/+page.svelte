@@ -1,13 +1,19 @@
 <script lang="ts">
+  import { page } from "$app/stores";
   import { metadata } from "$lib/app/stores";
+  import Delete from "$lib/components/Delete.svelte";
   import { client } from "$lib/pocketbase";
   import type { PageData } from "./$types";
   export let data: PageData;
   $: ({
-    post: { title, body, files },
+    post: { id, title, body, files },
   } = data);
   $: $metadata.title = title;
 </script>
+
+{#if $page.url.searchParams.get("op") === "delete"}
+  <Delete table="posts" {id} />
+{/if}
 
 {#if files && files[0]}
   <img
