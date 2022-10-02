@@ -21,11 +21,13 @@ See https://pocketbase.io/docs/use-as-framework/ for details.
 # Running the backend
 
 You can run the PocketBase backend direct with `./pocketbase serve`
-or using `npm run backend` in the `app` directory.
+or using `npm run backend` in the `app` directory. Note that if you
+want the backend to also serve the frontend assets, then you must
+add the `--publicDir ../frontend/build` option.
 
 ## Docker
 
-Another options is to run it inside a Docker container. A `Dockerfile`
+Another option is to run it inside a Docker container. A `Dockerfile`
 is included that builds the binary from your `main.go` sources and
 builds a minimial container with nothing other than that statically
 compiled binary. You can use it with your own `docker-compose.yml`
