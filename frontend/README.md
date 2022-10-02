@@ -1,9 +1,18 @@
-# create-svelte
+# Static SvekteKit frontend for PocketBase backend
+
+## Setup
+
+```bash
+cp .env.example .env # and then edit it to taste
+npx pnpm install
+```
 
 ## Developing
 
 ```bash
-npx pnpm install
+# make sure backend is running
+npm run dev:backend
+# and then ...
 npm run dev
 ```
 
@@ -12,6 +21,9 @@ npm run dev
 To create a production version of your app (static HTML/JS app):
 
 ```bash
+# make sure backend is running
+npm run backend
+# and then ...
 npm run build
 ```
 

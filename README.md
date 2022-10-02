@@ -21,8 +21,8 @@ is static and backend is a single compiled Golang binary (JAMstack).
 
 ## Setup
 
-1. Follow the README.md in the `backend` folder.
-2. Follow the README.md in the `frontend` folder.
+1. Follow [./backend/README.md](./backend/README.md)
+2. Follow [./frontend/README.md](./frontend/README.md)
 
 ## Developing
 

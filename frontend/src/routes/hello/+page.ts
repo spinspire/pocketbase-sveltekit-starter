@@ -5,5 +5,5 @@ export const load: PageLoad = async function ({ fetch }) {
   const json = await response.json();
   return {
     ...json,
-  }
-}
+  };
+};
