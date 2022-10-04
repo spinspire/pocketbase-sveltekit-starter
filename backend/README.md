@@ -18,6 +18,11 @@ and build using `go build`
 
 See https://pocketbase.io/docs/use-as-framework/ for details.
 
+# Running the migrations
+
+Before you can run the actual backend, you must run the migrations using `./pocketbase migrate up` in the current directory. It will create appropriate
+schema tables/collections.
+
 # Running the backend
 
 You can run the PocketBase backend direct with `./pocketbase serve`
@@ -48,3 +53,37 @@ Once the PocketBase server is running, login as admin and then
 import the `pb_schema.json` schema file by visiting
 `/_/#/settings/import-collections` to get a "posts" collection
 that the frontend app uses.
+
+# Hooks
+
+PocketBase provides API's like .OnModelBefore* and .OnModelAfter* to run
+callbacks when records change. This app builds on top of that by providing
+a "hooks" table that drives those hooks using configuration. It has the
+following fields:
+
+- collection: name of the collection that triggers an action
+- event: insert/update/delete event that triggers the action
+- action_type: "command" if you want to run a program/script or "post" if
+  you want to POST to a webhook endpoint. The record will be marshaled to
+  JSON and passed to the command as STDIN or to the webhook POST as
+  request body (with header 'content-type: application/json')
+- action: path to the command/script or URL of the webhook to POST to
+- action_params: a string that will be passed as argument to the action
+
+So now by configuring the above table, you can execute external commands/scripts
+and POST data to external webhooks in reaction to insert/update/delete of
+records.
+
+Most web services these days provide webhook endpoints (e.g. sendgrid, mailchimp, stripe, etc) which you can POST directly to. But if you need special
+processing then you can write a script that receives changed data as JSON, parses and manipulates it using [`jq`](https://github.com/stedolan/jq) before
+sending it on its way.
+
+See `example-hook-script.sh` for a demonstration.
+
+Possible use cases:
+
+- Send an acknowledgement email when a "contact" form table is inserted to.
+- Charge a credit card when payment_token table is inserted to and then
+  send email upon success/failure
+- Recalculate inventory levels as "orders" table is inserted to, and then
+  send notifications when inventory becomes low.

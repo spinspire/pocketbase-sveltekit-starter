@@ -7,11 +7,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	hooks "pocketbase/hooks"
+	_ "pocketbase/migrations"
+
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
-	"github.com/pocketbase/pocketbase/models"
 )
 
 func defaultPublicDir() string {
@@ -24,6 +26,7 @@ func defaultPublicDir() string {
 }
 
 func main() {
+	pocketbase.New()
 	app := pocketbase.New()
 
 	var publicDirFlag string
@@ -35,6 +38,8 @@ func main() {
 		defaultPublicDir(),
 		"the directory to serve static files",
 	)
+	// call this only if you want to use the configurable "hooks" functionality
+	hooks.PocketBaseInit(app)
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		// serves static files from the provided public dir (if exists)
@@ -44,18 +49,12 @@ func main() {
 			Method: http.MethodGet,
 			Path:   "/api/hello",
 			Handler: func(c echo.Context) error {
-				return c.JSON(200, map[string]interface{}{"message": "Hello world!"})
+				obj := map[string]interface{}{"message": "Hello world!"}
+				return c.JSON(200, obj)
 			},
 			// Middlewares: []echo.MiddlewareFunc{
 			// 	apis.RequireAdminOrUserAuth(),
 			// },
-		})
-		app.OnModelAfterCreate().Add(func(e *core.ModelEvent) error {
-			if table := e.Model.TableName(); table == "posts" {
-				record := e.Model.(*models.Record)
-				log.Printf("%s %+v\n", record.Id, record.Data())
-			}
-			return nil
 		})
 
 		return nil

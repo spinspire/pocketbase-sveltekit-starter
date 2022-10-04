@@ -48,6 +48,12 @@ So now just visting `http://127.0.0.1:8090/`
 will serve your SvelteKit frontend along with your PocketBase backend - a
 single binary serving frontend, backend, API, auth, uploaded files, etc.
 
+# Configurable Hooks
+
+Please read about the "hooks" system in [./backend/README.md](./backend/README.md)
+It is a very easy and powerful way to extend your application with minimal
+configuration and perhaps no code.
+
 # Feedback
 
 Please provide feedback by
