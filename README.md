@@ -21,17 +21,23 @@ is static and backend is a single compiled Golang binary (JAMstack).
 
 ## Setup
 
+Follow these step EXACTLY, or else it won't work.
+
 1. Follow [./backend/README.md](./backend/README.md)
 2. Follow [./frontend/README.md](./frontend/README.md)
 
 ## Developing
 
-In the `frontend` folder, to start a development server:
+After you've done the setup in the above two README files, run
+the backend and the frontend in dev mode.
 
 ```bash
-npx pnpm install
+npm run backend:dev
 npm run dev
 ```
+
+Now making changes in the Svelte code (frontend) or Go code (backend) will show
+results (almost) immediately.
 
 ## Building
 
@@ -41,9 +47,11 @@ To create a production version of your app:
 npm run build
 ```
 
+The above creates `backend/pocketbase` (customized version) and client-app
+in `frontend/build`.
+
 Now not only can you serve this app with `npm run preview` but much better ...
-you can serve it statically using PocketBase since `./backend/pb_public` is
-symbolically linked to `./app/build`.
+_you can serve it statically using PocketBase_ using `--publicDir ../frontend/build` option
 So now just visting `http://127.0.0.1:8090/`
 will serve your SvelteKit frontend along with your PocketBase backend - a
 single binary serving frontend, backend, API, auth, uploaded files, etc.

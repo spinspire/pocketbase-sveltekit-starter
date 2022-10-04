@@ -20,6 +20,10 @@ npm run dev
 
 To create a production version of your app (static HTML/JS app):
 
+_NOTE_: The build below will fail unless the backend has at least 1
+post created. So please create a "posts" record using the app UI or
+the admin UI before running build below.
+
 ```bash
 # make sure backend is running
 npm run backend
