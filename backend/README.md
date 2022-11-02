@@ -18,12 +18,24 @@ and build using `go build`
 
 See https://pocketbase.io/docs/use-as-framework/ for details.
 
-# Running the migrations
+# Setup
+
+## Build
+
+Assuming you have Go language tools installed ...
+
+`go build`
+
+If you don't have Go and don't want to install it, then your only choice is to
+download the binary from https://github.com/pocketbase/pocketbase/releases/latest, and placing it in this folder. But then you will not be able to use
+any of the custom code (such as "config-driven hooks")
+
+## Run migrations
 
 Before you can run the actual backend, you must run the migrations using `./pocketbase migrate up` in the current directory. It will create appropriate
 schema tables/collections.
 
-# Running the backend
+## Run the backend
 
 You can run the PocketBase backend direct with `./pocketbase serve`
 or using `npm run backend` in the `app` directory. Note that if you

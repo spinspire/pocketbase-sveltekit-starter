@@ -26,7 +26,6 @@ func defaultPublicDir() string {
 }
 
 func main() {
-	pocketbase.New()
 	app := pocketbase.New()
 
 	var publicDirFlag string
@@ -50,7 +49,7 @@ func main() {
 			Path:   "/api/hello",
 			Handler: func(c echo.Context) error {
 				obj := map[string]interface{}{"message": "Hello world!"}
-				return c.JSON(200, obj)
+				return c.JSON(http.StatusOK, obj)
 			},
 			// Middlewares: []echo.MiddlewareFunc{
 			// 	apis.RequireAdminOrUserAuth(),
