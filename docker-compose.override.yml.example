@@ -1,0 +1,15 @@
+version: "3.5"
+
+services:
+  pb:
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pb.rule=Host(`${HTTP_HOSTNAME}`)
+      - traefik.docker.network=traefik_default
+    networks:
+      - traefik_default
+      - default
+
+networks:
+  traefik_default:
+    external: true

@@ -1,0 +1,13 @@
+version: '3.5'
+
+services:
+  pb:
+    build: backend
+    image: pocketbase-custom
+    command: /pocketbase serve --http 0.0.0.0:8090 --dir /app/pb_data
+    user: ${UID}:${GID}
+    expose:
+      - 8090
+    working_dir: /app
+    volumes:
+      - ${PWD}/backend:/app

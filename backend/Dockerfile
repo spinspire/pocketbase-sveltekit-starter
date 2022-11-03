@@ -11,5 +11,5 @@ RUN apk --no-cache add upx make git gcc libtool musl-dev ca-certificates dumb-in
 
 FROM scratch
 WORKDIR /
-COPY --from=builder /build/pocketbase /app/pocketbase
+COPY --from=builder /build/pocketbase /pocketbase
 CMD ["/pocketbase","serve"]
