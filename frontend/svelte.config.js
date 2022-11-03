@@ -1,5 +1,5 @@
-import adapter from '@sveltejs/adapter-static';
-import preprocess from 'svelte-preprocess';
+import adapter from "@sveltejs/adapter-static";
+import preprocess from "svelte-preprocess";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -9,13 +9,15 @@ const config = {
 
   kit: {
     alias: {
-      $lib: 'src/lib',
+      $lib: "src/lib",
     },
     adapter: adapter({
-      fallback: 'index.html' // enable SPA mode
+      // Prerendering turned off. Turn it on if you know what you're doing.
+      prerender: { entries: [] },
+      fallback: "index.html", // enable SPA mode
     }),
     trailingSlash: "always",
-  }
+  },
 };
 
 export default config;

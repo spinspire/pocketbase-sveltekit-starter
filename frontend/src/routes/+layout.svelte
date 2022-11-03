@@ -4,9 +4,6 @@
   import Alerts from "$lib/components/Alerts.svelte";
   import Nav from "$lib/components/Nav.svelte";
   import { site } from "$lib/config";
-
-  // static frontend, prerendered with @sveltejs/adapter-static
-  export const prerender = true;
 </script>
 
 <script lang="ts">
