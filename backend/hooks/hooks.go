@@ -19,9 +19,13 @@ import (
 func PocketBaseInit(app *pocketbase.PocketBase) error {
 	createHandler := func(event string) func(e *core.ModelEvent) error {
 		return func(e *core.ModelEvent) error {
-			record := e.Model.(*models.Record)
 			table := e.Model.TableName()
-			executeEventActions(app.DB(), event, table, record)
+			// we don't want to executeEventActions if the event is a system event (e.g. "_collections" changes)
+			if record, ok := e.Model.(*models.Record); ok {
+				executeEventActions(app.DB(), event, table, record)
+			} else {
+				log.Println("Skipping executeEventActions for table:", table)
+			}
 			return nil
 		}
 	}
