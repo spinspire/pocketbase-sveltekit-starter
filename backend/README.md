@@ -20,6 +20,15 @@ See https://pocketbase.io/docs/use-as-framework/ for details.
 
 # Setup
 
+## Arcitecture
+
+> **Note:** For optimal set up, ensure you are using a standard distribution of Linux. For other operating systems, you may run into issues, or need additional configuration 
+
+<!-- **for Win10/11 users:**  -->
+
+<!-- **for MacOs users:** -->
+
+
 ## Build
 
 Assuming you have Go language tools installed ...
