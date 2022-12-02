@@ -16,9 +16,11 @@
   async function submit() {
     try {
       if (user.register) {
-        await client.users.create(user);
+        await client.collection("users").create(user);
       }
-      await client.users.authViaEmail(user.email, user.password);
+      await client
+        .collection("users")
+        .authWithPassword(user.email, user.password);
       user = { ...DEFAULTS };
     } catch (e: any) {
       const { code, message, data } = e;

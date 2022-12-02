@@ -17,7 +17,7 @@
   "devDependencies": {
     "@sveltejs/adapter-auto": "next",
     "@sveltejs/adapter-static": "1.0.0-next.43",
-    "@sveltejs/kit": "next",
+    "@sveltejs/kit": "1.0.0-next.507",
     "env-cmd": "^10.1.0",
     "prettier": "^2.6.2",
     "prettier-plugin-svelte": "^2.7.0",
@@ -31,6 +31,6 @@
   },
   "type": "module",
   "dependencies": {
-    "pocketbase": "^0.7.0"
+    "pocketbase": "^0.8.0"
   }
 }

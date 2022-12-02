@@ -9,7 +9,7 @@
   let props: any;
   $: ({ record, file, thumb, ...props } = $$props);
   $: src = file
-    ? client.records.getFileUrl(record, file, { thumb })
+    ? client.getFileUrl(record, file, { thumb })
     : `https://via.placeholder.com/${thumb ?? "100x100"}`;
 </script>
 

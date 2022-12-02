@@ -11,10 +11,10 @@
       formData.append("files", file);
     }
     if (post.id) {
-      await client.records.update("posts", post.id, formData);
+      await client.collection("posts").update(post.id, formData);
     } else {
-      formData.set("uid", client.authStore.model?.id ?? "");
-      await client.records.create("posts", formData);
+      formData.set("user", client.authStore.model?.id ?? "");
+      await client.collection("posts").create(formData);
     }
     goto("../..");
   }

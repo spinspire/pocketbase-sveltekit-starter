@@ -5,7 +5,7 @@
   export let id: string;
   export let table: string;
   async function submit() {
-    await client.records.delete(table, id);
+    await client.collection(table).delete(id);
     goto("..");
   }
 </script>

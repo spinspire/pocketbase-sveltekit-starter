@@ -17,7 +17,7 @@
 
 {#if files && files[0]}
   <img
-    src={client.records.getFileUrl(data.post, files[0], { thumb: "600x0" })}
+    src={client.getFileUrl(data.post, files[0], { thumb: "600x0" })}
     alt={title}
   />
 {/if}
