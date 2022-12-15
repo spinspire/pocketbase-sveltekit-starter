@@ -16,7 +16,6 @@ const config = {
       prerender: { entries: [] },
       fallback: "index.html", // enable SPA mode
     }),
-    trailingSlash: "always",
   },
 };
 

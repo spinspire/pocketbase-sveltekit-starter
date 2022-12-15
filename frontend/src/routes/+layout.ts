@@ -3,3 +3,4 @@
 
 // Prerendering turned off. Turn it on if you know what you're doing.
 // export const prerender = true;
+export const trailingSlash = "always";
