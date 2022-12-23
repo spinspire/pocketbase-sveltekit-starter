@@ -8,12 +8,13 @@ import (
 	"strings"
 
 	hooks "pocketbase/hooks"
-	_ "pocketbase/migrations"
 
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/plugins/jsvm"
+	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
 
 func defaultPublicDir() string {
@@ -37,6 +38,20 @@ func main() {
 		defaultPublicDir(),
 		"the directory to serve static files",
 	)
+	migrationsDir := "" // default to "pb_migrations" (for js) and "migrations" (for go)
+
+	// load js files to allow loading external JavaScript migrations
+	jsvm.MustRegisterMigrations(app, &jsvm.MigrationsOptions{
+		Dir: migrationsDir,
+	})
+
+	// register the `migrate` command
+	migratecmd.MustRegister(app, app.RootCmd, &migratecmd.Options{
+		TemplateLang: migratecmd.TemplateLangJS, // or migratecmd.TemplateLangGo (default)
+		Dir:          migrationsDir,
+		Automigrate:  true,
+	})
+
 	// call this only if you want to use the configurable "hooks" functionality
 	hooks.PocketBaseInit(app)
 
