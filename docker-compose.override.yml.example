@@ -2,6 +2,13 @@ version: "3.5"
 
 services:
   pb:
+    # golang live dev using "air"
+    # each of the following overrides are important
+    build: ""
+    image: cosmtrek/air
+    entrypoint: "/go/bin/air"
+    command: "serve --http 0.0.0.0:8090 --dir /app/pb_data --publicDir /frontend/build"
+    # use the following if you want to reverse proxy through traefik
     labels:
       - traefik.enable=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pb.rule=Host(`${HTTP_HOSTNAME}`)

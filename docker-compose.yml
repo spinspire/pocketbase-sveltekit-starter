@@ -4,10 +4,15 @@ services:
   pb:
     build: backend
     image: pocketbase-custom
-    command: /pocketbase serve --http 0.0.0.0:8090 --dir /app/pb_data
+    entrypoint: /pocketbase
+    command: "serve --http 0.0.0.0:8090 --dir /app/pb_data --publicDir /frontend/build"
     user: ${UID}:${GID}
     expose:
       - 8090
     working_dir: /app
+    environment:
+      - HOME=/app
     volumes:
       - ${PWD}/backend:/app
+      - ${PWD}/frontend:/frontend
+      - ${PWD}/backend/.go:/go/pkg
