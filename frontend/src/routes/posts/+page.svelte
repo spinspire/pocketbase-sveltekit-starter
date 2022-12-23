@@ -4,12 +4,16 @@
 
   import { metadata } from "$lib/app/stores";
   import Image from "$lib/components/Image.svelte";
-  import { client } from "$lib/pocketbase";
+  import { currentUser } from "$lib/pocketbase";
   import type { PageData } from ".svelte-kit/types/src/routes/posts/$types";
   $metadata.title = "Recent Posts";
 </script>
 
-<a href="new/edit">Create New</a>
+{#if $currentUser}
+  <a href="new/edit">Create New</a>
+{:else}
+  <p>Please login to create new posts.</p>
+{/if}
 <hr />
 <table>
   <tbody>

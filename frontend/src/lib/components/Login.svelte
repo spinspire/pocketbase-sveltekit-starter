@@ -1,41 +1,28 @@
 <script lang="ts">
-  import { client } from "$lib/pocketbase";
-  import { alerts } from "./Alerts.svelte";
+  import { client, currentUser, login, logout } from "$lib/pocketbase";
+  import { alertOnFailure } from "$lib/pocketbase/ui";
   const DEFAULTS = {
     email: "",
     password: "",
     passwordConfirm: "",
     register: false,
   };
-  let user = { ...DEFAULTS },
-    authStore = client.authStore;
-  client.authStore.onChange(function () {
-    authStore = client.authStore;
-  });
+  let user = { ...DEFAULTS };
 
   async function submit() {
-    try {
-      if (user.register) {
-        await client.collection("users").create(user);
-      }
-      await client
-        .collection("users")
-        .authWithPassword(user.email, user.password);
+    await alertOnFailure(async function () {
+      await login(user.email, user.password, user.register, user);
       user = { ...DEFAULTS };
-    } catch (e: any) {
-      const { code, message, data } = e;
-      alerts.error(message, 5000);
-      console.error(e);
-    }
+    });
   }
 </script>
 
-{#if authStore.isValid}
-  <samp on:click={() => console.log({ authStore })}>
-    {authStore.model?.email}
-  </samp>
+{#if $currentUser}
+  <button on:click={() => console.log({ $currentUser })}>
+    <samp>{$currentUser?.email}</samp>
+  </button>
   <ul>
-    <li><button on:click={() => authStore.clear()}>Logout</button></li>
+    <li><button on:click={logout}>Logout</button></li>
   </ul>
 {:else}
   <details>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { client } from "$lib/pocketbase";
+  import { client, currentUser } from "$lib/pocketbase";
   import type { PageData } from "./$types";
   export let data: PageData;
   let files: FileList;
@@ -13,7 +13,7 @@
     if (post.id) {
       await client.collection("posts").update(post.id, formData);
     } else {
-      formData.set("user", client.authStore.model?.id ?? "");
+      formData.set("user", $currentUser?.id ?? "");
       await client.collection("posts").create(formData);
     }
     goto("../..");
