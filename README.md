@@ -1,8 +1,8 @@
-# PocketBase / SvelteKit Demo App
+# PocketBase / SvelteKit Starter App
 
-A starter-kit showing how to use _customized_
-[PocketBase](https://pocketbase.io/) as a backend
-to [SvelteKit](https://kit.svelte.dev) frontend.
+Use this app as a starting point for your own _customized_
+[PocketBase](https://pocketbase.io/) backend
+with [SvelteKit](https://kit.svelte.dev) frontend.
 This is a high-performance frontend+backend combination since frontend
 is static and backend is a single compiled Golang binary (JAMstack).
 
@@ -19,14 +19,14 @@ is static and backend is a single compiled Golang binary (JAMstack).
   extensions such as custom endpoints (e.g. `/api/hello`) and database event
   hooks (e.g. executing Go handler functions when a database row is created)
 
-## Setup
+# Setup
 
 Follow these step EXACTLY, or else it won't work.
 
 1. Follow [./backend/README.md](./backend/README.md)
 2. Follow [./frontend/README.md](./frontend/README.md)
 
-## Developing
+# Developing
 
 After you've done the setup in the above two README files, run
 the backend and the frontend in dev mode.
@@ -39,22 +39,24 @@ npm run dev
 Now making changes in the Svelte code (frontend) or Go code (backend) will show
 results (almost) immediately.
 
-## Building
+# Usage
 
-To create a production version of your app:
+To use the app as a user / tester ...
 
-```bash
-npm run build
-```
+- visit the frontend URL (e.g. http://localhost:5173)
+- Navigate around. The Home page is not very interesting.
+- The `hello` page shows and example of frontend calling a custom backend API implemented in Go.
+- The `posts` page shows all existing posts. If that page is empty, then you might want to create some posts. You must be logged in to be able to create posts.
+- Into the `Login` form, you can enter an existing username/password, or check the `register` checkbox to create a new account (it registers the user and log in immediately).
 
-The above creates `backend/pocketbase` (customized version) and client-app
-in `frontend/build`.
+The above are just some sample features. Now go ahead and implement all kinds of new features.
 
-Now not only can you serve this app with `npm run preview` but much better ...
-_you can serve it statically using PocketBase_ using `--publicDir ../frontend/build` option
-So now just visting `http://127.0.0.1:8090/`
-will serve your SvelteKit frontend along with your PocketBase backend - a
-single binary serving frontend, backend, API, auth, uploaded files, etc.
+- Create new collections.
+- Create new pages that manipulate the above collections.
+
+# Building
+
+See the build process details in the README files for backend and frontend.
 
 # Configurable Hooks
 

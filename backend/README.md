@@ -5,29 +5,32 @@ There are two flavors of the backend:
 1. standard release ([downloaded](https://ms-cp.office2.spinspire.com))
 2. custom compiled (`go build`), possibly with your customizations
 
-## standard release
+Out of the box, the project assumes #2 (custom compiled).
 
-Download from release archive from https://github.com/pocketbase/pocketbase/releases/latest, unzip it and place the `pocketbase`
-binary in this folder.
+## standard (official) release of pocketbase
+
+Download from release archive from https://github.com/pocketbase/pocketbase/releases/latest, unzip it and place the `pocketbase` binary in this folder.
 
 ## custom build
 
-If you would like to extend PocketBase and use it as a framework
-then there is a `main.go` in this folder that you can customize
-and build using `go build`
+If you would like to extend PocketBase and use it as a framework then there is a `main.go` in this folder that you can customize and build using `go build` or do live development using `air`.
 
 See https://pocketbase.io/docs/use-as-framework/ for details.
 
 # Setup
 
-## Arcitecture
+## Architecture
 
-> **Note:** For optimal set up, ensure you are using a standard distribution of Linux. For other operating systems, you may run into issues, or need additional configuration 
+> **Note:** For optimal set up, ensure you are using a standard distribution of Linux. For other operating systems, you may run into issues, or need additional configuration.
+> A docker-compose setup is included with the project, which can be used on any OS.
 
-<!-- **for Win10/11 users:**  -->
+### TBD: For Windows users
 
-<!-- **for MacOs users:** -->
+_please contribute if you are a Windows user_
 
+### TBD: For MacOS users
+
+_please contribute if you are a MacOS user_
 
 ## Build
 
@@ -35,45 +38,29 @@ Assuming you have Go language tools installed ...
 
 `go build`
 
-If you don't have Go and don't want to install it, then your only choice is to
-download the binary from https://github.com/pocketbase/pocketbase/releases/latest, and placing it in this folder. But then you will not be able to use
-any of the custom code (such as "config-driven hooks")
+If you don't have Go and don't want to install it, you can use docker-compose setup. Otherwise, your only choice is to download the binary from https://github.com/pocketbase/pocketbase/releases/latest, and placing it in this folder. But then you will not be able to use any of the custom code (such as "config-driven hooks")
 
 ## Run migrations
 
-Before you can run the actual backend, you must run the migrations using `./pocketbase migrate up` in the current directory. It will create appropriate
-schema tables/collections.
+Before you can run the actual backend, you must run the migrations using `./pocketbase migrate up` in the current directory. It will create appropriate schema tables/collections.
 
 ## Run the backend
 
-You can run the PocketBase backend direct with `./pocketbase serve`
-or using `npm run backend` in the `app` directory. Note that if you
-want the backend to also serve the frontend assets, then you must
-add the `--publicDir ../frontend/build` option.
+You can run the PocketBase backend direct with `./pocketbase serve` or using `npm run backend` in the `app` directory. Note that if you want the backend to also serve the frontend assets, then you must add the `--publicDir ../frontend/build` option.
 
 ## Docker
 
-Another option is to run it inside a Docker container. A `Dockerfile`
-is included that builds the binary from your `main.go` sources and
-builds a minimial container with nothing other than that statically
-compiled binary. You can use it with your own `docker-compose.yml`
-file.
+A highly recommended option is to run it inside a Docker container. A `Dockerfile` is included that builds the binary from your `main.go` sources and builds a minimial container with nothing other than that statically compiled binary. Also, a `docker-compose.yml` along with an _override_ file example are included.
 
 ## Active development with `air`
 
-Finally, if you are going to actively develop using Go using PocketBase
-as a framework, then you probably want to use [air](https://github.com/cosmtrek/air), a development tool that rebuilds and restarts your Go binary
-everytime a source file changes (live reload on change). An basic
-`air.toml` config file is included in this setup. You can run it
-by installing `air` (`go install github.com/cosmtrek/air@latest`)
-and then running `air serve`
+Finally, if you are going to actively develop using Go using PocketBase as a framework, then you probably want to use [air](https://github.com/cosmtrek/air), a development tool that rebuilds and restarts your Go binary everytime a source file changes (live reload on change). An basic `.air.toml` config file is included in this setup. You can run it by installing `air` (`go install github.com/cosmtrek/air@latest`) and then running `air serve`. Also the docker compose override file shows how to use `air` inside Docker.
 
-# Sample Schema
+# Schema (Collections)
 
-Once the PocketBase server is running, login as admin and then
-import the `pb_schema.json` schema file by visiting
-`/_/#/settings/import-collections` to get a "posts" collection
-that the frontend app uses.
+With the 0.9 version of PocketBase, JavaScript auto-migrations as implemented. So we don't have to manually import pb_schema.json to create collections. The JS files in `pb_migrations` can create/drop/modify collections and data. These are executed automatically by PocketBase on startup.
+
+Not only that, they are also generated automatically whenever you change the schema! So go ahead and make changes to the schema and watch new JS files generated in the `pb_migrations` folder. Just remember to commit them to version control.
 
 # Hooks
 

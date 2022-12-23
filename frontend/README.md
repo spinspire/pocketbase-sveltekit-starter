@@ -10,9 +10,9 @@ npx pnpm install
 ## Developing
 
 ```bash
-# make sure backend is running
+# if the backend is not already running ...
 npm run dev:backend
-# and then ...
+# and then start the frontend ...
 npm run dev
 ```
 
@@ -31,6 +31,4 @@ npm run backend
 npm run build
 ```
 
-Now you can serve production compiled version of the frontend using the backend
-or any static file web server. You can preview the production build with
-`npm preview`.
+The above generates output in the `build` folder. Now you can serve production compiled version of the frontend using the backend (with `--publicDir ../frontend/build`), any static file web server, or `npm preview`.
