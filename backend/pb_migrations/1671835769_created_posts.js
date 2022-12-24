@@ -80,7 +80,7 @@ migrate((db) => {
     "viewRule": "",
     "createRule": "@request.auth.id != null",
     "updateRule": "user = @request.auth.id",
-    "deleteRule": null,
+    "deleteRule": "user = @request.auth.id",
     "options": {}
   });
 
