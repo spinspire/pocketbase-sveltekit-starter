@@ -44,7 +44,10 @@
 <article>
   {#each $alerts as alert}
     <aside class={alert.type}>
-      <span on:click={() => dismiss(alert)} class="dismiss">&times;</span>
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <span role="button" on:click={() => dismiss(alert)} class="dismiss"
+        >&times;</span
+      >
       {alert.message}
     </aside>
   {/each}
