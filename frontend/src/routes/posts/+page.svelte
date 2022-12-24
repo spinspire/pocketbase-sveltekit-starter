@@ -1,12 +1,11 @@
 <script lang="ts">
-  export let data: PageData;
-  $: ({ posts } = data);
-
   import { metadata } from "$lib/app/stores";
   import Image from "$lib/components/Image.svelte";
-  import { currentUser } from "$lib/pocketbase";
-  import type { PageData } from ".svelte-kit/types/src/routes/posts/$types";
+  import { currentUser, watch } from "$lib/pocketbase";
   $metadata.title = "Recent Posts";
+  const posts = watch("posts", {
+    sort: "-updated",
+  });
 </script>
 
 {#if $currentUser}
@@ -17,7 +16,7 @@
 <hr />
 <table>
   <tbody>
-    {#each posts as post}
+    {#each $posts.items as post}
       <tr>
         <td>
           <Image

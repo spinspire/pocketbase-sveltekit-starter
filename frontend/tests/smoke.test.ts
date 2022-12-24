@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import playwright from "playwright";
 
 const ts = Date.now();
 const email = ts + "@test.com";
@@ -55,6 +56,11 @@ const title = "post at " + ts;
 const slug = "post-" + ts;
 
 test("create post", async ({ page }) => {
+  // second browser to test realtime subscriptions
+  const b2 = (await (await playwright.chromium.launch()).newPage()) as Page;
+  await b2.goto("/posts");
+  await doLogin(b2);
+
   await page.goto("/posts");
   await doLogin(page);
   await page.getByRole("link", { name: "Create New" }).click();
@@ -71,6 +77,9 @@ test("create post", async ({ page }) => {
   await expect(page).toHaveURL(/\/posts\/.+\/$/);
   const heading = await page.getByRole("heading", { name: title });
   expect(heading).toBeDefined();
+  // check realtime activity in the second browser
+  const link = await b2.getByRole("link", { name: title });
+  expect(link).toBeDefined();
 });
 
 test("delete post", async ({ page }) => {
