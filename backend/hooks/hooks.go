@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
@@ -17,12 +18,12 @@ import (
 )
 
 func PocketBaseInit(app *pocketbase.PocketBase) error {
-	createHandler := func(event string) func(e *core.ModelEvent) error {
+	modelHandler := func(event string) func(e *core.ModelEvent) error {
 		return func(e *core.ModelEvent) error {
 			table := e.Model.TableName()
 			// we don't want to executeEventActions if the event is a system event (e.g. "_collections" changes)
 			if record, ok := e.Model.(*models.Record); ok {
-				executeEventActions(app.DB(), event, table, record)
+				executeEventActions(app, event, table, record)
 			} else {
 				log.Println("Skipping executeEventActions for table:", table)
 			}
@@ -30,24 +31,29 @@ func PocketBaseInit(app *pocketbase.PocketBase) error {
 		}
 	}
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		app.OnModelAfterCreate().Add(createHandler("insert"))
-		app.OnModelAfterUpdate().Add(createHandler("update"))
-		app.OnModelAfterDelete().Add(createHandler("delete"))
+		app.OnModelAfterCreate().Add(modelHandler("insert"))
+		app.OnModelAfterUpdate().Add(modelHandler("update"))
+		app.OnModelAfterDelete().Add(modelHandler("delete"))
 		return nil
 	})
 	return nil
 }
 
-func executeEventActions(db *dbx.DB, event string, table string, record *models.Record) {
+func executeEventActions(app *pocketbase.PocketBase, event string, table string, record *models.Record) {
+	// TODO: Load and cache this. Reload only on changes to "hooks" table
 	rows := []dbx.NullStringMap{}
-	db.Select("action_type", "action", "action_params").
+	app.DB().Select("action_type", "action", "action_params", "expands").
 		From("hooks").
-		Where(dbx.HashExp{"collection": table, "event": event}).
+		Where(dbx.HashExp{"collection": table, "event": event, "disabled": false}).
 		All(&rows)
 	for _, row := range rows {
 		action_type := row["action_type"].String
 		action := row["action"].String
 		action_params := row["action_params"].String
+		expands := strings.Split(row["expands"].String, ",")
+		app.Dao().ExpandRecord(record, expands, func(c *models.Collection, ids []string) ([]*models.Record, error) {
+			return app.Dao().FindRecordsByIds(c.Name, ids, nil)
+		})
 		if err := executeEventAction(event, table, action_type, action, action_params, record); err != nil {
 			log.Println("ERROR", err)
 		}
