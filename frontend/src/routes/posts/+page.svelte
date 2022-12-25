@@ -2,8 +2,9 @@
   import { metadata } from "$lib/app/stores";
   import Image from "$lib/components/Image.svelte";
   import { currentUser, watch } from "$lib/pocketbase";
+  import type { PostsResponse } from "$lib/pocketbase/generated-types";
   $metadata.title = "Recent Posts";
-  const posts = watch("posts", {
+  const posts = watch<PostsResponse>("posts", {
     sort: "-updated",
   });
 </script>

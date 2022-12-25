@@ -62,6 +62,10 @@ With the 0.9 version of PocketBase, JavaScript auto-migrations as implemented. S
 
 Not only that, they are also generated automatically whenever you change the schema! So go ahead and make changes to the schema and watch new JS files generated in the `pb_migrations` folder. Just remember to commit them to version control.
 
+## Generated Types
+
+The file `generated-types.ts` contains TypeScript definitions of `Record` types mirroring the fields in your database collections. But it needs to be regenerated every time you modify the schema. This can be done by simply running the `typegen` script in the frontend's `package.json`. So remember to do that.
+
 # Hooks
 
 PocketBase provides API's like .OnModelBefore* and .OnModelAfter* to run

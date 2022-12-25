@@ -6,6 +6,7 @@ import {
   type Readable,
   type Subscriber,
 } from "svelte/store";
+import type { BaseSystemFields } from "./generated-types";
 
 /*
  * A separate URL for the backend is not needed if ...
@@ -74,19 +75,20 @@ function object2formdata(obj: {}) {
   return fd;
 }
 
-export interface PageStore extends Readable<ListResult<Record<any, any>>> {
+export interface PageStore<T extends Record<any, any>>
+  extends Readable<ListResult<T>> {
   setPage(newpage: number): Promise<void>;
   next(): Promise<void>;
   prev(): Promise<void>;
 }
 
 // realtime subscription on a collection, with pagination
-export function watch(
+export function watch<T extends Record<any, any> & BaseSystemFields>(
   idOrName: string,
   queryParams = {} as any,
   page = 1,
   perPage = 20
-): PageStore {
+): PageStore<T> {
   const collection = client.collection(idOrName);
   let result = new ListResult(page, perPage, 0, 0, [] as Record<any, any>[]);
   let set: Subscriber<ListResult<Record<any, any>>>;

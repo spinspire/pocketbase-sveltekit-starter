@@ -16,6 +16,10 @@ npm run dev:backend
 npm run dev
 ```
 
+## Generated Types
+
+The file `generated-types.ts` contains TypeScript definitions of `Record` types mirroring the fields in your database collections. But it needs to be regenerated every time you modify the schema. This can be done by simply running the `typegen` script in the frontend's `package.json`. So remember to do that.
+
 ## Building
 
 To create a production version of your app (static HTML/JS app):
