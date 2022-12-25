@@ -39,6 +39,41 @@ export function logout() {
   client.authStore.clear();
 }
 
+/*
+ * Save (create/update) a record (a plain object). Automatically converts to
+ * FormData if needed.
+ */
+export async function save(collection: string, record: any) {
+  // convert obj to FormData in case one of the fields is instanceof FileList
+  const data = object2formdata(record);
+  if (record.id) {
+    return await client.collection(collection).update(record.id, data);
+  } else {
+    return await client.collection(collection).create(data);
+  }
+}
+
+// convert obj to FormData in case one of the fields is instanceof FileList
+function object2formdata(obj: {}) {
+  // check if any field's value is an instanceof FileList
+  if (!Object.values(obj).some((val) => val instanceof FileList)) {
+    // if not, just return the original object
+    return obj;
+  }
+  // otherwise, build FormData from obj
+  const fd = new FormData();
+  for (const [key, val] of Object.entries(obj)) {
+    if (val instanceof FileList) {
+      for (const file of val) {
+        fd.append(key, file);
+      }
+    } else {
+      fd.append(key, val as any);
+    }
+  }
+  return fd;
+}
+
 export interface PageStore extends Readable<ListResult<Record<any, any>>> {
   setPage(newpage: number): Promise<void>;
   next(): Promise<void>;

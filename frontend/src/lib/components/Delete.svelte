@@ -1,12 +1,15 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { client } from "$lib/pocketbase";
+  import { alertOnFailure } from "$lib/pocketbase/ui";
 
   export let id: string;
   export let table: string;
   async function submit() {
-    await client.collection(table).delete(id);
-    goto("..");
+    alertOnFailure(async () => {
+      await client.collection(table).delete(id);
+      goto("..");
+    });
   }
 </script>
 

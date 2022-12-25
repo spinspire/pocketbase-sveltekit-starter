@@ -1,22 +1,17 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { client, currentUser } from "$lib/pocketbase";
+  import { currentUser, save } from "$lib/pocketbase";
+  import { alertOnFailure } from "$lib/pocketbase/ui";
   import type { PageData } from "./$types";
   export let data: PageData;
   let files: FileList;
   $: ({ post } = data);
   async function submit(e: SubmitEvent) {
-    const formData = new FormData(e.target as HTMLFormElement);
-    for (const file of files ?? []) {
-      formData.append("files", file);
-    }
-    if (post.id) {
-      await client.collection("posts").update(post.id, formData);
-    } else {
-      formData.set("user", $currentUser?.id ?? "");
-      await client.collection("posts").create(formData);
-    }
-    goto("../..");
+    post.user = $currentUser?.id;
+    alertOnFailure(async () => {
+      await save("posts", post);
+      goto("../..");
+    });
   }
 </script>
 
