@@ -4,7 +4,6 @@
   import { alertOnFailure } from "$lib/pocketbase/ui";
   import type { PageData } from "./$types";
   export let data: PageData;
-  let files: FileList;
   $: ({ post } = data);
   async function submit(e: SubmitEvent) {
     post.user = $currentUser?.id;
@@ -19,6 +18,6 @@
   <input name="title" bind:value={post.title} placeholder="title" />
   <input name="slug" bind:value={post.slug} placeholder="slug" />
   <textarea name="body" bind:value={post.body} placeholder="body" rows="10" />
-  <input type="file" bind:files multiple />
+  <input type="file" bind:files={post.files} multiple />
   <button type="submit">Submit</button>
 </form>

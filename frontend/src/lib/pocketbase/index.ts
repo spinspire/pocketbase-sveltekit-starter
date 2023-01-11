@@ -1,4 +1,5 @@
 import { browser } from "$app/environment";
+import { PUBLIC_BACKEND } from "$env/static/public";
 import PocketBase, { ListResult } from "pocketbase";
 import {
   readable,
@@ -14,7 +15,7 @@ import type { BaseSystemFields } from "./generated-types";
  * - the frontend itself is served by the backend as static files
  * ... hence the backend url of ''
  */
-const url = browser ? "" : "http://127.0.0.1:8090";
+const url = browser ? "" : PUBLIC_BACKEND;
 export const client = new PocketBase(url);
 
 client.authStore.onChange(function () {
