@@ -8,15 +8,6 @@ services:
     image: cosmtrek/air
     entrypoint: "/go/bin/air"
     command: "serve --http 0.0.0.0:8090 --dir /app/pb_data --publicDir /frontend/build"
-    # use the following if you want to reverse proxy through traefik
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pb.rule=Host(`${HTTP_HOSTNAME}`)
-      - traefik.docker.network=traefik_default
-    networks:
-      - traefik_default
-      - default
-
-networks:
-  traefik_default:
-    external: true
+  app:
+    # sveltekit dev
+    command: sh -c "npx pnpm install && npm run dev -- --host 0.0.0.0"

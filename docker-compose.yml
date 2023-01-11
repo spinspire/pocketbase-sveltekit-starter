@@ -16,3 +16,13 @@ services:
       - ${PWD}/backend:/app
       - ${PWD}/frontend:/frontend
       - ${PWD}/backend/.go:/go/pkg
+  app:
+    image: node:alpine
+    user: ${UID}:${GID}
+    # sveltekit build
+    command: sh -c "npx pnpm install && npm run build"
+    volumes:
+      - ${PWD}:/app
+    environment:
+      - HOME=/app
+    working_dir: /app/frontend
