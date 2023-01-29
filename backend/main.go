@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
 	hooks "pocketbase/hooks"
 
@@ -19,12 +18,20 @@ import (
 )
 
 func defaultPublicDir() string {
-	if strings.HasPrefix(os.Args[0], os.TempDir()) {
-		// most likely ran with go run
-		return "./pb_public"
+	// if strings.HasPrefix(os.Args[0], os.TempDir()) {
+	// 	// most likely ran with go run
+	// 	return "./pb_public"
+	// }
+	// return filepath.Join(os.Args[0], "../pb_public")
+
+	path, err := os.Executable()
+	if err != nil {
+		panic("Could not call os.Executable")
 	}
 
-	return filepath.Join(os.Args[0], "../pb_public")
+	path = filepath.Dir(path)
+
+	return path + "/build"
 }
 
 func main() {
@@ -54,7 +61,10 @@ func main() {
 	})
 
 	// call this only if you want to use the configurable "hooks" functionality
-	hooks.PocketBaseInit(app)
+	err := hooks.PocketBaseInit(app)
+	if err != nil {
+		panic("PocketBaseInit Failed")
+	}
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		// serves static files from the provided public dir (if exists)
@@ -63,11 +73,11 @@ func main() {
 		fmt.Println("Static assests folder: ", publicDirFlag)
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDirFlag), true))
 
-		e.Router.AddRoute(echo.Route{
+		_, err = e.Router.AddRoute(echo.Route{
 			Method: http.MethodGet,
 			Path:   "/api/hello",
 			Handler: func(c echo.Context) error {
-				obj := map[string]interface{}{"message": "Hello world!"}
+				obj := map[string]interface{}{"message": "Welcome To Pollamin! Come back soon ..."}
 				return c.JSON(http.StatusOK, obj)
 			},
 			// Middlewares: []echo.MiddlewareFunc{
