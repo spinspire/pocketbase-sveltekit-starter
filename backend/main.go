@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -57,6 +58,9 @@ func main() {
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		// serves static files from the provided public dir (if exists)
+		cwd, _ := os.Getwd()
+		fmt.Println("Current folder:", cwd)
+		fmt.Println("Static assests folder: ", publicDirFlag)
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDirFlag), true))
 
 		e.Router.AddRoute(echo.Route{
