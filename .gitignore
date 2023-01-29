@@ -5,3 +5,4 @@ tags
 /.env
 /.ash_history
 /docker-compose.override.yml
+tmp/
