@@ -1,1 +1,2 @@
-./backend/pocketbase serve --publicDir frontend/build
+cd frontend
+./serve.sh
