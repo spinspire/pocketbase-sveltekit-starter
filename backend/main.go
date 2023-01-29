@@ -9,6 +9,7 @@ import (
 
 	hooks "pocketbase/hooks"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
@@ -35,6 +36,11 @@ func defaultPublicDir() string {
 }
 
 func main() {
+	e := godotenv.Load()
+	if e != nil {
+		fmt.Println("WARNING: Could not load .env file")
+	}
+
 	app := pocketbase.New()
 
 	var publicDirFlag string

@@ -2,7 +2,7 @@ tags
 /.cache
 /.local
 /.npm
-/.env
+.env
 /.ash_history
 /docker-compose.override.yml
 tmp/
