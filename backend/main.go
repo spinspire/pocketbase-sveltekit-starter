@@ -18,6 +18,17 @@ import (
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
 
+func getEnvFilePath() string {
+	path, err := os.Executable()
+	if err != nil {
+		panic("Could not call os.Executable")
+	}
+
+	path = filepath.Dir(path)
+
+	return path + "/.env"
+}
+
 func defaultPublicDir() string {
 	// if strings.HasPrefix(os.Args[0], os.TempDir()) {
 	// 	// most likely ran with go run
@@ -36,7 +47,7 @@ func defaultPublicDir() string {
 }
 
 func main() {
-	e := godotenv.Load()
+	e := godotenv.Load(getEnvFilePath())
 	if e != nil {
 		fmt.Println("WARNING: Could not load .env file")
 	}
