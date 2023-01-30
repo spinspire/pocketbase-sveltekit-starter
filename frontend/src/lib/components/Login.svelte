@@ -26,38 +26,8 @@
   </ul>
 {:else}
   <details>
-    <summary>Login</summary>
-    <div class="wrapper">
-      <form on:submit|preventDefault={submit}>
-        <input
-          bind:value={user.email}
-          required
-          type="email"
-          placeholder="email"
-        />
-        <input
-          bind:value={user.password}
-          required
-          type="password"
-          placeholder="password"
-        />
-        {#if user.register}
-          <input
-            bind:value={user.passwordConfirm}
-            required
-            type="password"
-            placeholder="confirm password"
-          />
-        {/if}
-        <div class="inline">
-          <label
-            ><span>Register</span>
-            <input type="checkbox" bind:checked={user.register} />
-          </label>
-          <button type="submit">Login</button>
-        </div>
-      </form>
-    </div>
+    <summary>Login with Google</summary>
+    <div class="wrapper">Coming Soon</div>
   </details>
 {/if}
 
@@ -65,18 +35,18 @@
   .wrapper {
     position: relative;
   }
-  form {
+  /* form {
     position: absolute;
     top: 1rem;
     right: 0;
     background-color: var(--color-bg-secondary);
-  }
+  } */
   button {
     padding: 0 1rem;
   }
-  div.inline > * {
+  /* div.inline > * {
     display: inline-block;
-  }
+  } */
   details {
     margin: 0 0;
   }

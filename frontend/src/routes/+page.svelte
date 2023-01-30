@@ -1,6 +1,9 @@
 <script lang="ts">
   import { metadata } from "$lib/app/stores";
-  $metadata.title = "Home";
+  $metadata.title = "Pollamin - AI made Simple";
 </script>
 
-<a href="/hello">hello</a>
+<ul>
+  <li><a href="/hello">Hello</a></li>
+  <li><a href="/davinci">GPT3 - DaVinci</a></li>
+</ul>

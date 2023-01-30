@@ -2,11 +2,7 @@
   import { base } from "$app/paths";
   import { page } from "$app/stores";
   import Login from "./Login.svelte";
-  const links = [
-    ["Home", "/"],
-    ["Posts", "/posts"],
-    ["Hello", "/hello"],
-  ].map(([text, href]) => [
+  const links = [["Home", "/"]].map(([text, href]) => [
     text,
     base + href.replace(/\/?$/, "/"), // prefix=base, suffix=a trailing slash if not present
   ]);

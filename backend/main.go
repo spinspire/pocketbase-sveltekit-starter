@@ -19,6 +19,10 @@ import (
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
 
+var welcomeText string = `Pollamin is a highly experimental site that attempts to aggregate and simplify API access
+to AI services like OpenAI, DallE, etc.<br/>
+It is free for now, but please use the API responsibly! It costs us money every time you make a single request.`
+
 func getEnvFilePath() string {
 	path, err := os.Executable()
 	if err != nil {
@@ -102,7 +106,7 @@ func main() {
 			Method: http.MethodGet,
 			Path:   "/api/hello",
 			Handler: func(c echo.Context) error {
-				obj := map[string]interface{}{"message": "Welcome To Pollamin! Come back soon ..."}
+				obj := map[string]interface{}{"output": welcomeText}
 				return c.JSON(http.StatusOK, obj)
 			},
 			// Middlewares: []echo.MiddlewareFunc{

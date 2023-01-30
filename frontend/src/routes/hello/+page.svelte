@@ -3,6 +3,5 @@
   export let data: PageData;
 </script>
 
-<h1>Hello!</h1>
-<p>Got the following data from the backend server</p>
-<pre>{JSON.stringify(data)}</pre>
+<h1>Welcome to Pollamin!</h1>
+<p>{@html data.output}</p>
