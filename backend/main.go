@@ -50,6 +50,8 @@ func main() {
 	e := godotenv.Load(getEnvFilePath())
 	if e != nil {
 		fmt.Println("WARNING: Could not load .env file")
+	} else {
+		fmt.Println("Loaded env file: " + getEnvFilePath())
 	}
 
 	app := pocketbase.New()
