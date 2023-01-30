@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	hooks "pocketbase/hooks"
+	"pocketbase/openai"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v5"
@@ -107,6 +108,14 @@ func main() {
 			// Middlewares: []echo.MiddlewareFunc{
 			// 	apis.RequireAdminOrUserAuth(),
 			// },
+		})
+
+		_, err = e.Router.AddRoute(echo.Route{
+			Method: http.MethodGet,
+			Path:   "/api/davinci",
+			Handler: func(ctx echo.Context) error {
+				return openai.Prompt(ctx)
+			},
 		})
 
 		return nil
