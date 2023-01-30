@@ -12,9 +12,11 @@ func Prompt(inputString string) string {
 	c := gpt3.NewClient(os.Getenv("OPENAI_KEY"))
 	ctx := context.Background()
 
+	maxTokens := 4096 - len(inputString)
+
 	req := gpt3.CompletionRequest{
 		Model:     gpt3.GPT3TextDavinci003,
-		MaxTokens: 70,
+		MaxTokens: maxTokens,
 		Prompt:    inputString,
 	}
 
