@@ -16,7 +16,7 @@ func Prompt(httpContext echo.Context) error {
 	inputString = strings.TrimSpace(inputString)
 	if len(inputString) < 3 || len(inputString) > 500 {
 		return httpContext.JSON(http.StatusBadRequest,
-			map[string]string{"error": "Input must be between 3 and 500 characters"})
+			map[string]string{"error": "Param 'input' must be between 3 and 500 characters"})
 	}
 
 	c := gpt3.NewClient(os.Getenv("OPENAI_KEY"))
