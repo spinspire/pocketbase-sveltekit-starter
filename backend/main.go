@@ -47,12 +47,17 @@ func defaultPublicDir() string {
 }
 
 func main() {
+	fmt.Println("---------------------------------")
+	fmt.Println("----------- POLLAMIN ------------")
+	fmt.Println("---------------------------------")
+
 	e := godotenv.Load(getEnvFilePath())
 	if e != nil {
 		fmt.Println("WARNING: Could not load .env file")
 	} else {
 		fmt.Println("Loaded env file: " + getEnvFilePath())
 	}
+	////////////////////////////////////////////////////////
 
 	app := pocketbase.New()
 
