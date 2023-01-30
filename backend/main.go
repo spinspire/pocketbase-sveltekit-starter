@@ -20,7 +20,7 @@ import (
 )
 
 var welcomeText string = `Pollamin is a highly experimental site that attempts to aggregate and simplify API access
-to AI services like OpenAI, DallE, etc.<br/>
+to AI services like OpenAI, Dal-E, etc.<br/>
 It is free for now, but please use the API responsibly! It costs us money every time you make a single request.`
 
 func getEnvFilePath() string {
