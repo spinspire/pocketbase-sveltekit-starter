@@ -4,6 +4,6 @@
 </script>
 
 <ul>
-  <li><a href="/hello">Hello</a></li>
+  <li><a href="/hello">Hello - read this first!</a></li>
   <li><a href="/davinci">GPT3 - DaVinci</a></li>
 </ul>
