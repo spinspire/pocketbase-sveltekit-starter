@@ -8,7 +8,7 @@ specifiers:
   '@types/node': ^18.11.17
   env-cmd: ^10.1.0
   playwright: ^1.29.1
-  pocketbase: ^0.9.0
+  pocketbase: ^0.10.1
   pocketbase-typegen: ^1.1.2
   prettier: ^2.8.1
   prettier-plugin-svelte: ^2.9.0
@@ -21,7 +21,7 @@ specifiers:
   vite: ^4.0.3
 
 dependencies:
-  pocketbase: 0.9.0
+  pocketbase: 0.10.1
 
 devDependencies:
   '@playwright/test': 1.29.1
@@ -1374,8 +1374,8 @@ packages:
       - supports-color
     dev: true
 
-  /pocketbase/0.9.0:
-    resolution: {integrity: sha512-wLH8JNqtilgVgXMcO9kWcydryxemf8rZgTyn+DTHWtkwOe1ya6MuAOpVHtljIUxxtukZ82LSB2K7h12FZHwGMA==}
+  /pocketbase/0.10.1:
+    resolution: {integrity: sha512-FMBhF+9o2AmdKJYbfz2qunnk4Q5/efYMRcukdQF49UfhsIuaSYl39fSPN1l880bYI4XAvDDeySAjK1MlxrK37A==}
     dev: false
 
   /postcss/8.4.20:
