@@ -1,5 +1,4 @@
 import { browser } from "$app/environment";
-import { PUBLIC_BACKEND } from "$env/static/public";
 import PocketBase, { ListResult } from "pocketbase";
 import {
   readable,
@@ -15,14 +14,13 @@ import type { BaseSystemFields } from "./generated-types";
  * - the frontend itself is served by the backend as static files
  * ... hence the backend url of ''
  */
-const url = browser ? "" : PUBLIC_BACKEND;
-export const client = new PocketBase(url);
+export const pbClient = new PocketBase("");
 
-client.authStore.onChange(function () {
-  currentUser.set(client.authStore.model);
+pbClient.authStore.onChange(function () {
+  currentUser.set(pbClient.authStore.model);
 });
 
-export const currentUser = writable(client.authStore.model);
+export const currentUser = writable(pbClient.authStore.model);
 
 export async function login(
   email: string,
@@ -32,13 +30,13 @@ export async function login(
 ) {
   if (register) {
     const user = { ...rest, email, password, confirmPassword: password };
-    await client.collection("users").create(user);
+    await pbClient.collection("users").create(user);
   }
-  await client.collection("users").authWithPassword(email, password);
+  await pbClient.collection("users").authWithPassword(email, password);
 }
 
 export function logout() {
-  client.authStore.clear();
+  pbClient.authStore.clear();
 }
 
 /*
@@ -49,9 +47,9 @@ export async function save(collection: string, record: any) {
   // convert obj to FormData in case one of the fields is instanceof FileList
   const data = object2formdata(record);
   if (record.id) {
-    return await client.collection(collection).update(record.id, data);
+    return await pbClient.collection(collection).update(record.id, data);
   } else {
-    return await client.collection(collection).create(data);
+    return await pbClient.collection(collection).create(data);
   }
 }
 
@@ -90,7 +88,7 @@ export function watch<T extends Record<any, any> & BaseSystemFields>(
   page = 1,
   perPage = 20
 ): PageStore<T> {
-  const collection = client.collection(idOrName);
+  const collection = pbClient.collection(idOrName);
   let result = new ListResult(page, perPage, 0, 0, [] as Record<any, any>[]);
   let set: Subscriber<ListResult<Record<any, any>>>;
   const store = readable(result, (_set) => {

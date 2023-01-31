@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { client, currentUser, login, logout } from "$lib/pocketbase";
+  import { pbClient, currentUser, login, logout } from "$lib/pocketbase";
   import { alertOnFailure } from "$lib/pocketbase/ui";
   const DEFAULTS = {
     email: "",

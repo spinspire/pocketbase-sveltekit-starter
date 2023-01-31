@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { client } from "$lib/pocketbase";
+  import { pbClient } from "$lib/pocketbase";
   import type { Record } from "pocketbase";
 
   export let record: Record;
@@ -9,7 +9,7 @@
   let props: any;
   $: ({ record, file, thumb, ...props } = $$props);
   $: src = file
-    ? client.getFileUrl(record, file, { thumb })
+    ? pbClient.getFileUrl(record, file, { thumb })
     : `https://via.placeholder.com/${thumb ?? "100x100"}`;
 </script>
 
