@@ -6,7 +6,7 @@
     "dev": "env-cmd vite dev",
     "dev:backend": "cd ../backend && air serve --publicDir=../frontend/build",
     "backend": "cd ../backend && ./pocketbase serve --publicDir=../frontend/build",
-    "build": "env-cmd vite build",
+    "build": "env-cmd -f .env.production vite build",
     "build:backend": "cd ../backend && go build",
     "typegen": "pocketbase-typegen --db ../backend/pb_data/data.db --out ./src/lib/pocketbase/generated-types.ts",
     "test": "env-cmd playwright test",

@@ -5,7 +5,7 @@ const config: UserConfig = {
   plugins: [sveltekit()],
   server: {
     proxy: {
-      "/api": process.env.PUBLIC_BACKEND ?? "",
+      "/api": process.env.PUBLIC_POCKETBASE_URL ?? "",
     },
   },
 };
