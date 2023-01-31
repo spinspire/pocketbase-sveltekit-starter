@@ -7,6 +7,7 @@ import {
   type Subscriber,
 } from "svelte/store";
 import type { BaseSystemFields } from "./generated-types";
+import { PUBLIC_POCKETBASE_URL } from "$env/static/public";
 
 /*
  * A separate URL for the backend is not needed if ...
@@ -14,7 +15,7 @@ import type { BaseSystemFields } from "./generated-types";
  * - the frontend itself is served by the backend as static files
  * ... hence the backend url of ''
  */
-export const pbClient = new PocketBase("");
+export const pbClient = new PocketBase(PUBLIC_POCKETBASE_URL);
 
 pbClient.authStore.onChange(function () {
   currentUser.set(pbClient.authStore.model);

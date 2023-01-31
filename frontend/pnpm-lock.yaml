@@ -10,7 +10,7 @@ specifiers:
   playwright: ^1.29.1
   pocketbase: ^0.10.1
   pocketbase-typegen: ^1.1.2
-  prettier: ^2.8.1
+  prettier: ^2.8.3
   prettier-plugin-svelte: ^2.9.0
   sass: ^1.57.1
   svelte: ^3.55.0
@@ -32,8 +32,8 @@ devDependencies:
   env-cmd: 10.1.0
   playwright: 1.29.1
   pocketbase-typegen: 1.1.2
-  prettier: 2.8.1
-  prettier-plugin-svelte: 2.9.0_ajxj753sv7dbwexjherrch25ta
+  prettier: 2.8.3
+  prettier-plugin-svelte: 2.9.0_32rvz4smotdecgbwkzbvnqo5iy
   sass: 1.57.1
   svelte: 3.55.0
   svelte-check: 2.10.3_sass@1.57.1+svelte@3.55.0
@@ -1387,18 +1387,18 @@ packages:
       source-map-js: 1.0.2
     dev: true
 
-  /prettier-plugin-svelte/2.9.0_ajxj753sv7dbwexjherrch25ta:
+  /prettier-plugin-svelte/2.9.0_32rvz4smotdecgbwkzbvnqo5iy:
     resolution: {integrity: sha512-3doBi5NO4IVgaNPtwewvrgPpqAcvNv0NwJNflr76PIGgi9nf1oguQV1Hpdm9TI2ALIQVn/9iIwLpBO5UcD2Jiw==}
     peerDependencies:
       prettier: ^1.16.4 || ^2.0.0
       svelte: ^3.2.0
     dependencies:
-      prettier: 2.8.1
+      prettier: 2.8.3
       svelte: 3.55.0
     dev: true
 
-  /prettier/2.8.1:
-    resolution: {integrity: sha512-lqGoSJBQNJidqCHE80vqZJHWHRFoNYsSpP9AjFhlhi9ODCJA541svILes/+/1GM3VaL/abZi7cpFzOpdR9UPKg==}
+  /prettier/2.8.3:
+    resolution: {integrity: sha512-tJ/oJ4amDihPoufT5sM0Z1SKEuKay8LfVAMlbbhnnkvt6BUserZylqo2PN+p9KeljLr0OHa2rXHU1T8reeoTrw==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     dev: true

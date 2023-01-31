@@ -25,7 +25,7 @@
     "env-cmd": "^10.1.0",
     "playwright": "^1.29.1",
     "pocketbase-typegen": "^1.1.2",
-    "prettier": "^2.8.1",
+    "prettier": "^2.8.3",
     "prettier-plugin-svelte": "^2.9.0",
     "sass": "^1.57.1",
     "svelte": "^3.55.0",

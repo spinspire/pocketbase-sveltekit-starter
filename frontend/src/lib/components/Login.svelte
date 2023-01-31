@@ -1,20 +1,16 @@
 <script lang="ts">
   import { pbClient, currentUser, login, logout } from "$lib/pocketbase";
   import { alertOnFailure } from "$lib/pocketbase/ui";
-  const DEFAULTS = {
-    email: "",
-    password: "",
-    passwordConfirm: "",
-    register: false,
-  };
-  let user = { ...DEFAULTS };
 
-  async function submit() {
-    await alertOnFailure(async function () {
-      await login(user.email, user.password, user.register, user);
-      user = { ...DEFAULTS };
-    });
+  async function setupGoogleAuth() {
+    const authList = await pbClient.collection("users").listAuthMethods();
+    // Assume we only use Google for Oauth2!
+    const googleAuth = authList.authProviders[0];
+
+    console.log(googleAuth);
   }
+
+  setupGoogleAuth();
 </script>
 
 {#if $currentUser}
