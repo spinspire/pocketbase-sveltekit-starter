@@ -9,7 +9,6 @@
   function redirectToGoogle() {
     const redirectUrl = window.location.href + "/redirect";
     const params = new URL(window.location as any).searchParams;
-    console.log("SEARCH PARAMS:", params);
 
     pbClient
       .collection("users")

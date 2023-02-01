@@ -8,7 +8,7 @@
   }
 
   function getRedirectUrl() {
-    return window.location.href + "/redirect";
+    return window.location.href + "redirect";
   }
 </script>
 
