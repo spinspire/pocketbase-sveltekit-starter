@@ -1,22 +1,22 @@
 <script lang="ts">
-  import { pbClient, currentUser, login, logout } from "$lib/pocketbase";
+  import { pbClient, googleAuth } from "$lib/pocketbase";
   import { PUBLIC_POCKETBASE_URL } from "$env/static/public";
 
-  async function setupGoogleAuth() {
-    const authList = await pbClient.collection("users").listAuthMethods();
-    // Assume we only use Google for Oauth2!
-    const googleAuth = authList.authProviders[0];
-    console.log(googleAuth);
+  // Svelte Magic: only call redirectToGoogle
+  // when googleAuth becomes truthy
+  $: $googleAuth && redirectToGoogle();
 
-    const redirectUrl = PUBLIC_POCKETBASE_URL + "/hello";
+  function redirectToGoogle() {
+    const redirectUrl = window.location.href + "/redirect";
     const params = new URL(window.location as any).searchParams;
+    console.log("SEARCH PARAMS:", params);
 
     pbClient
       .collection("users")
       .authWithOAuth2(
-        googleAuth.name,
+        $googleAuth.name,
         params.get("code") || "",
-        googleAuth.codeVerifier,
+        $googleAuth.codeVerifier,
         redirectUrl
       )
       .then((authData) => {
@@ -26,8 +26,6 @@
         console.log("AUTH FAILURE:", err);
       });
   }
-
-  setupGoogleAuth();
 </script>
 
 <h1>REDIRECT PAGE</h1>

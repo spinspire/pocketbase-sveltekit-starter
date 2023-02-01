@@ -1,5 +1,5 @@
 import { browser } from "$app/environment";
-import PocketBase, { ListResult } from "pocketbase";
+import PocketBase, { ListResult, type AuthProviderInfo } from "pocketbase";
 import {
   readable,
   writable,
@@ -16,6 +16,11 @@ import { PUBLIC_POCKETBASE_URL } from "$env/static/public";
  * ... hence the backend url of ''
  */
 export const pbClient = new PocketBase(PUBLIC_POCKETBASE_URL);
+export const googleAuth: Readable<AuthProviderInfo> = readable(null as any, function start(set)
+  {
+    setupGoogleAuth().then((val) => { set(val); });
+  });
+
 
 pbClient.authStore.onChange(function () {
   currentUser.set(pbClient.authStore.model);
@@ -140,4 +145,11 @@ export function watch<T extends Record<any, any> & BaseSystemFields>(
       setPage(result.page - 1);
     },
   };
+}
+
+async function setupGoogleAuth() {
+  const authList = await pbClient.collection("users").listAuthMethods();
+  // Assume we only use Google for Oauth2!
+  const googleAuth = authList.authProviders[0];
+  return googleAuth;
 }

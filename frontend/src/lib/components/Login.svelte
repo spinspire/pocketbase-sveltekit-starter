@@ -1,19 +1,15 @@
 <script lang="ts">
-  import { pbClient, currentUser, login, logout } from "$lib/pocketbase";
+  import { pbClient, currentUser, googleAuth, logout } from "$lib/pocketbase";
   import { alertOnFailure } from "$lib/pocketbase/ui";
-  import { PUBLIC_POCKETBASE_URL } from "$env/static/public";
 
-  async function setupGoogleAuth() {
-    const authList = await pbClient.collection("users").listAuthMethods();
-    // Assume we only use Google for Oauth2!
-    const googleAuth = authList.authProviders[0];
-    console.log(googleAuth);
-
-    const redirectUrl = PUBLIC_POCKETBASE_URL + "/redirect";
-    const params = new URL(window.location as any).searchParams;
+  function loginWithGoogle() {
+    console.log("Logging in with " + $googleAuth.name);
+    window.location.href = $googleAuth.authUrl + getRedirectUrl();
   }
 
-  setupGoogleAuth();
+  function getRedirectUrl() {
+    return window.location.href + "/redirect";
+  }
 </script>
 
 {#if $currentUser}
@@ -26,20 +22,13 @@
 {:else}
   <details>
     <summary>Login with Google</summary>
-    <div class="wrapper">Coming Soon</div>
+    {#if googleAuth}
+      <button on:click={loginWithGoogle}>Login</button>
+    {/if}
   </details>
 {/if}
 
 <style>
-  .wrapper {
-    position: relative;
-  }
-  /* form {
-    position: absolute;
-    top: 1rem;
-    right: 0;
-    background-color: var(--color-bg-secondary);
-  } */
   button {
     padding: 0 1rem;
   }
