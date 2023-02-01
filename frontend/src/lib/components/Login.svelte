@@ -1,14 +1,16 @@
 <script lang="ts">
-  import { pbClient, currentUser, googleAuth, logout } from "$lib/pocketbase";
+  import {
+    pbClient,
+    currentUser,
+    googleAuth,
+    logout,
+    getRedirectUrl,
+  } from "$lib/pocketbase";
   import { alertOnFailure } from "$lib/pocketbase/ui";
 
   function loginWithGoogle() {
     console.log("Logging in with " + $googleAuth.name);
     window.location.href = $googleAuth.authUrl + getRedirectUrl();
-  }
-
-  function getRedirectUrl() {
-    return window.location.href + "redirect";
   }
 </script>
 

@@ -153,3 +153,7 @@ async function setupGoogleAuth() {
   const googleAuth = authList.authProviders[0];
   return googleAuth;
 }
+
+export function getRedirectUrl() {
+  return window.location.href + "redirect";
+}

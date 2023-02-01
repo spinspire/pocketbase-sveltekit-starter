@@ -1,14 +1,15 @@
 <script lang="ts">
-  import { pbClient, googleAuth } from "$lib/pocketbase";
-  import { PUBLIC_POCKETBASE_URL } from "$env/static/public";
+  import { getRedirectUrl, pbClient, googleAuth } from "$lib/pocketbase";
 
   // Svelte Magic: only call redirectToGoogle
   // when googleAuth becomes truthy
-  $: $googleAuth && redirectToGoogle();
+  $: $googleAuth && authWithGoogle();
 
-  function redirectToGoogle() {
-    const redirectUrl = window.location.href + "/redirect";
+  function authWithGoogle() {
+    const redirectUrl = getRedirectUrl();
     const params = new URL(window.location as any).searchParams;
+
+    console.log("Calling authWithOAuth2");
 
     pbClient
       .collection("users")
@@ -16,7 +17,10 @@
         $googleAuth.name,
         params.get("code") || "",
         $googleAuth.codeVerifier,
-        redirectUrl
+        redirectUrl,
+        {
+          emailVisibility: true,
+        }
       )
       .then((authData) => {
         console.log("AUTH SUCCESS:", authData);
