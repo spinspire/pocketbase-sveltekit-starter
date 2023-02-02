@@ -23,8 +23,8 @@
 {#if $currentUser}
   <button>
     <!-- <div><samp>{$currentUser?.email}</samp></div> -->
-    {#if $currentUser?.avatarUrl}
-      <div><samp>{$currentUser?.name}</samp></div>
+    {#if $currentUser?.avatarurl}
+      <div><img alt="User Avatar" src={$currentUser?.avatarurl} /></div>
     {/if}
 
     <div><samp>{$currentUser?.name}</samp></div>

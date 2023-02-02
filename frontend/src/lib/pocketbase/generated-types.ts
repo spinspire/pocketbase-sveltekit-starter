@@ -58,6 +58,8 @@ export type HooksRecord = {
 export type UsersRecord = {
 	name?: string
 	avatar?: string
+	apikey?: string
+	avatarurl?: string
 }
 
 // Response types include system fields and match responses from the PocketBase API

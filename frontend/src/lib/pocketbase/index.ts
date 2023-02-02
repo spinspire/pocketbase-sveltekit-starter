@@ -161,9 +161,8 @@ export async function updateUserFromGoogleAuth(authData: RecordAuthResponse<Reco
   if (pbClient.authStore.model?.id) {
     const updatedUser = await pbClient.collection("users").update(pbClient.authStore.model?.id, {
       name: authData.meta?.name,
+      avatarurl: authData.meta?.avatarUrl,
     });
-
-    console.log('Updated User:', updatedUser);
 
     pbClient.authStore.save(pbClient.authStore.token, updatedUser);
   }

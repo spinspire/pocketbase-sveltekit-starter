@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "env-cmd vite dev",
+    "dev": "npm run typegen && env-cmd vite dev",
     "dev:backend": "cd ../backend && air serve --publicDir=../frontend/build",
     "backend": "cd ../backend && ./pocketbase serve --publicDir=../frontend/build",
     "build": "env-cmd -f .env.production vite build",
