@@ -5,6 +5,7 @@
     pbClient,
     updateUserFromGoogleAuth,
   } from "$lib/pocketbase";
+  import { tick } from "svelte";
 
   function authWithGoogle() {
     const redirectUrl = getRedirectUrl();
@@ -35,8 +36,10 @@
         console.log("AUTH SUCCESS:", authData);
         console.log("AUTH META:", authData?.meta);
 
-        updateUserFromGoogleAuth(authData);
-        goBackHome();
+        tick().then(() => {
+          updateUserFromGoogleAuth(authData);
+          goBackHome();
+        });
       })
       .catch((err) => {
         console.log("AUTH FAILURE:", err);
