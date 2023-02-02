@@ -1,16 +1,22 @@
 <script lang="ts">
   import {
-    pbClient,
     currentUser,
-    googleAuth,
     logout,
     getRedirectUrl,
+    getGoogleAuthProviderInstance,
   } from "$lib/pocketbase";
   import { alertOnFailure } from "$lib/pocketbase/ui";
 
-  function loginWithGoogle() {
-    console.log("Logging in with " + $googleAuth.name);
-    window.location.href = $googleAuth.authUrl + getRedirectUrl();
+  async function loginWithGoogle() {
+    const googleProvider = await getGoogleAuthProviderInstance();
+    console.log("Logging in with " + googleProvider.name);
+
+    // Must save googleProvider instance in localStorage!
+    console.log("Setting GoogleProvider into localStorage");
+    localStorage.setItem("googleProvider", JSON.stringify(googleProvider));
+
+    // Initiate the login by browsing to Oauth2 endpoint at Google
+    window.location.href = googleProvider.authUrl + getRedirectUrl();
   }
 </script>
 
@@ -24,9 +30,7 @@
 {:else}
   <details>
     <summary>Login with Google</summary>
-    {#if googleAuth}
-      <button on:click={loginWithGoogle}>Login</button>
-    {/if}
+    <button on:click={loginWithGoogle}>Login</button>
   </details>
 {/if}
 

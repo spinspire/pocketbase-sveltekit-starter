@@ -1,22 +1,26 @@
 <script lang="ts">
-  import { getRedirectUrl, pbClient, googleAuth } from "$lib/pocketbase";
-
-  // Svelte Magic: only call redirectToGoogle
-  // when googleAuth becomes truthy
-  $: $googleAuth && authWithGoogle();
+  import { getRedirectUrl, pbClient } from "$lib/pocketbase";
 
   function authWithGoogle() {
     const redirectUrl = getRedirectUrl();
     const params = new URL(window.location as any).searchParams;
 
-    console.log("Calling authWithOAuth2");
+    // Retreive googleProvider instance in localStorage!
+    const googleProvider = JSON.parse(
+      localStorage.getItem("googleProvider") as any
+    );
+
+    // compare the redirect's state param and the stored provider's one
+    if (googleProvider.state !== params.get("state")) {
+      throw "Error: Google Auth Provider: State does not match!";
+    }
 
     pbClient
       .collection("users")
       .authWithOAuth2(
-        $googleAuth.name,
+        googleProvider.name,
         params.get("code") || "",
-        $googleAuth.codeVerifier,
+        googleProvider.codeVerifier,
         redirectUrl,
         {
           emailVisibility: true,
@@ -29,6 +33,8 @@
         console.log("AUTH FAILURE:", err);
       });
   }
+
+  authWithGoogle();
 </script>
 
 <h1>REDIRECT PAGE</h1>

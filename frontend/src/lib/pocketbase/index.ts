@@ -16,11 +16,6 @@ import { PUBLIC_POCKETBASE_URL } from "$env/static/public";
  * ... hence the backend url of ''
  */
 export const pbClient = new PocketBase(PUBLIC_POCKETBASE_URL);
-export const googleAuth: Readable<AuthProviderInfo> = readable(null as any, function start(set)
-  {
-    setupGoogleAuth().then((val) => { set(val); });
-  });
-
 
 pbClient.authStore.onChange(function () {
   currentUser.set(pbClient.authStore.model);
@@ -147,13 +142,13 @@ export function watch<T extends Record<any, any> & BaseSystemFields>(
   };
 }
 
-async function setupGoogleAuth() {
+export async function getGoogleAuthProviderInstance() {
   const authList = await pbClient.collection("users").listAuthMethods();
   // Assume we only use Google for Oauth2!
-  const googleAuth = authList.authProviders[0];
-  return googleAuth;
+  const provider = authList.authProviders[0];
+  return provider;
 }
 
 export function getRedirectUrl() {
-  return window.location.href + "redirect";
+  return window.location.origin + "/redirect";
 }
