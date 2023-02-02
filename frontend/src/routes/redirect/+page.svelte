@@ -33,6 +33,8 @@
       )
       .then((authData) => {
         console.log("AUTH SUCCESS:", authData);
+        console.log("AUTH META:", authData?.meta);
+
         updateUserFromGoogleAuth(authData);
         goBackHome();
       })
