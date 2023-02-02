@@ -21,9 +21,7 @@ pbClient.authStore.onChange(function () {
   currentUser.set(pbClient.authStore.model);
 });
 
-let currentUserValue: Record;
 export const currentUser = writable(pbClient.authStore.model);
-currentUser.subscribe(val => currentUserValue = val as Record);
 
 export async function login(
   email: string,
@@ -160,9 +158,11 @@ export function goBackHome() {
 }
 
 export async function updateUserFromGoogleAuth(authData: RecordAuthResponse<Record>) {
-  const updatedUser = await pbClient.collection("users").update(currentUserValue.id, {
-    name: authData.meta?.name,
-  });
-
+  if (pbClient.authStore.model?.id) {
+    const updatedUser = await pbClient.collection("users").update(pbClient.authStore.model?.id, {
+      name: authData.meta?.name,
+    });
+  console.log("UPDATED USER NAME:", updatedUser.name);
   pbClient.authStore.save(pbClient.authStore.token, updatedUser);
+  }
 }

@@ -21,7 +21,7 @@
 </script>
 
 {#if $currentUser}
-  <button on:click={() => console.log({ $currentUser })}>
+  <button>
     <!-- <div><samp>{$currentUser?.email}</samp></div> -->
     <div><samp>Welcome, {$currentUser?.name}</samp></div>
   </button>
