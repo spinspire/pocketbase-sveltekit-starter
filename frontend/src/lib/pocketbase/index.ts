@@ -164,6 +164,8 @@ export async function updateUserFromGoogleAuth(authData: RecordAuthResponse<Reco
     name: authData.meta?.name,
   });
 
+  pbClient.authStore.save(pbClient.authStore.token, updatedUser);
+
   currentUserValue.name = updatedUser.name;
   currentUser.set(currentUserValue);
 }
