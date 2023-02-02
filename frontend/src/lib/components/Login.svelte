@@ -23,11 +23,11 @@
 {#if $currentUser}
   <button>
     <!-- <div><samp>{$currentUser?.email}</samp></div> -->
-    {#if $currentUser?.avatarurl}
+    <!-- {#if $currentUser?.avatarurl}
       <div><img alt="User Avatar" src={$currentUser?.avatarurl} /></div>
-    {/if}
+    {/if} -->
 
-    <div><samp>{$currentUser?.name}</samp></div>
+    <div><samp>{$currentUser?.name || "NO NAME"}</samp></div>
   </button>
   <ul>
     <li><button on:click={logout}>Logout</button></li>
