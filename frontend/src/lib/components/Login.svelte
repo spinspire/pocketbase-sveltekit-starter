@@ -22,12 +22,12 @@
 
 {#if $currentUser}
   <button>
-    <!-- <div><samp>{$currentUser?.email}</samp></div> -->
-    <!-- {#if $currentUser?.avatarurl}
-      <div><img alt="User Avatar" src={$currentUser?.avatarurl} /></div>
-    {/if} -->
-
-    <div><samp>{$currentUser?.name || "NO NAME"}</samp></div>
+    <div>
+      {#if $currentUser?.avatarurl}
+        <img alt="User Avatar" src={$currentUser?.avatarurl} />
+      {/if}
+      <samp>{$currentUser?.name || "NO NAME"}</samp>
+    </div>
   </button>
   <ul>
     <li><button on:click={logout}>Logout</button></li>
@@ -40,17 +40,32 @@
 {/if}
 
 <style>
+  div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   button {
     padding: 0 1rem;
   }
+
   /* div.inline > * {
     display: inline-block;
   } */
+
   details {
     margin: 0 0;
   }
+
   summary {
     color: var(--color-link);
     list-style-type: none;
+  }
+
+  img {
+    padding: 5px;
+    max-width: 15%;
+    max-height: 15%;
   }
 </style>

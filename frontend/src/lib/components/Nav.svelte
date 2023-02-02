@@ -29,4 +29,8 @@
       text-decoration: underline;
     }
   }
+
+  ul {
+    width: 20%;
+  }
 </style>
