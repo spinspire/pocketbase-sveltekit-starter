@@ -23,7 +23,11 @@
 {#if $currentUser}
   <button>
     <!-- <div><samp>{$currentUser?.email}</samp></div> -->
-    <div><samp>Welcome, {$currentUser?.name}</samp></div>
+    {#if $currentUser?.avatarUrl}
+      <div><samp>{$currentUser?.name}</samp></div>
+    {/if}
+
+    <div><samp>{$currentUser?.name}</samp></div>
   </button>
   <ul>
     <li><button on:click={logout}>Logout</button></li>
