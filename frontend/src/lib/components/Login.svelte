@@ -22,7 +22,8 @@
 
 {#if $currentUser}
   <button on:click={() => console.log({ $currentUser })}>
-    <samp>{$currentUser?.email}</samp>
+    <!-- <div><samp>{$currentUser?.email}</samp></div> -->
+    <div><samp>Welcome, {$currentUser?.name}</samp></div>
   </button>
   <ul>
     <li><button on:click={logout}>Logout</button></li>

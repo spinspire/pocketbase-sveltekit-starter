@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { getRedirectUrl, pbClient } from "$lib/pocketbase";
+  import {
+    getRedirectUrl,
+    goBackHome,
+    pbClient,
+    updateUserFromGoogleAuth,
+  } from "$lib/pocketbase";
 
   function authWithGoogle() {
     const redirectUrl = getRedirectUrl();
@@ -28,6 +33,8 @@
       )
       .then((authData) => {
         console.log("AUTH SUCCESS:", authData);
+        updateUserFromGoogleAuth(authData);
+        goBackHome();
       })
       .catch((err) => {
         console.log("AUTH FAILURE:", err);
@@ -37,4 +44,6 @@
   authWithGoogle();
 </script>
 
-<h1>REDIRECT PAGE</h1>
+<h1>Google Login</h1>
+<h2>If you stay on this page, then something went wrong.</h2>
+<h2>Check your browser console.</h2>

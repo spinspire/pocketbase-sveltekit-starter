@@ -1,5 +1,5 @@
 import { browser } from "$app/environment";
-import PocketBase, { ListResult, type AuthProviderInfo } from "pocketbase";
+import PocketBase, { ListResult, type Record, type RecordAuthResponse } from "pocketbase";
 import {
   readable,
   writable,
@@ -21,7 +21,9 @@ pbClient.authStore.onChange(function () {
   currentUser.set(pbClient.authStore.model);
 });
 
+let currentUserValue: Record;
 export const currentUser = writable(pbClient.authStore.model);
+currentUser.subscribe(val => currentUserValue = val as Record);
 
 export async function login(
   email: string,
@@ -75,7 +77,7 @@ function object2formdata(obj: {}) {
   return fd;
 }
 
-export interface PageStore<T extends Record<any, any>>
+export interface PageStore<T extends Record>
   extends Readable<ListResult<T>> {
   setPage(newpage: number): Promise<void>;
   next(): Promise<void>;
@@ -83,15 +85,15 @@ export interface PageStore<T extends Record<any, any>>
 }
 
 // realtime subscription on a collection, with pagination
-export function watch<T extends Record<any, any> & BaseSystemFields>(
+export function watch<T extends Record & BaseSystemFields>(
   idOrName: string,
   queryParams = {} as any,
   page = 1,
   perPage = 20
 ): PageStore<T> {
   const collection = pbClient.collection(idOrName);
-  let result = new ListResult(page, perPage, 0, 0, [] as Record<any, any>[]);
-  let set: Subscriber<ListResult<Record<any, any>>>;
+  let result = new ListResult(page, perPage, 0, 0, [] as Record[]);
+  let set: Subscriber<ListResult<Record>>;
   const store = readable(result, (_set) => {
     set = _set;
     // fetch first page
@@ -139,7 +141,7 @@ export function watch<T extends Record<any, any> & BaseSystemFields>(
     async prev() {
       setPage(result.page - 1);
     },
-  };
+  } as any;
 }
 
 export async function getGoogleAuthProviderInstance() {
@@ -151,4 +153,17 @@ export async function getGoogleAuthProviderInstance() {
 
 export function getRedirectUrl() {
   return window.location.origin + "/redirect";
+}
+
+export function goBackHome() {
+  window.location = window.location.origin as any;
+}
+
+export async function updateUserFromGoogleAuth(authData: RecordAuthResponse<Record>) {
+  const updatedUser = await pbClient.collection("users").update(currentUserValue.id, {
+    name: authData.meta?.name,
+  });
+
+  currentUserValue.name = updatedUser.name;
+  currentUser.set(currentUserValue);
 }
