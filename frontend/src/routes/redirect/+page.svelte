@@ -35,8 +35,8 @@
       .then((authData) => {
         console.log("AUTH SUCCESS:", authData);
 
-        tick().then(() => {
-          updateUserFromGoogleAuth(authData);
+        tick().then(async () => {
+          await updateUserFromGoogleAuth(authData);
           goBackHome();
         });
       })
