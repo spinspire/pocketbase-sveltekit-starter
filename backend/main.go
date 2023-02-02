@@ -51,6 +51,17 @@ func defaultPublicDir() string {
 	return path + "/build"
 }
 
+func getDefaultMigrationsDir() string {
+	path, err := os.Executable()
+	if err != nil {
+		panic("Could not call os.Executable")
+	}
+
+	path = filepath.Dir(path)
+
+	return path + "/pb_migrations"
+}
+
 func main() {
 	fmt.Println("---------------------------------")
 	fmt.Println("----------- POLLAMIN ------------")
@@ -75,7 +86,8 @@ func main() {
 		defaultPublicDir(),
 		"the directory to serve static files",
 	)
-	migrationsDir := "" // default to "pb_migrations" (for js) and "migrations" (for go)
+
+	migrationsDir := getDefaultMigrationsDir()
 
 	// load js files to allow loading external JavaScript migrations
 	jsvm.MustRegisterMigrations(app, &jsvm.MigrationsOptions{
