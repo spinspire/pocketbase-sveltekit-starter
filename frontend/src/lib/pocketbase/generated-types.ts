@@ -3,8 +3,8 @@
 */
 
 export enum Collections {
+	Billings = "billings",
 	Hooks = "hooks",
-	Posts = "posts",
 	Users = "users",
 }
 
@@ -31,6 +31,10 @@ export type AuthSystemFields = {
 
 // Record types for each collection
 
+export type BillingsRecord = {
+	user: RecordIdString
+}
+
 export enum HooksEventOptions {
 	"insert" = "insert",
 	"update" = "update",
@@ -51,26 +55,18 @@ export type HooksRecord = {
 	disabled?: boolean
 }
 
-export type PostsRecord = {
-	title: string
-	body: string
-	slug: string
-	files?: string[]
-	user?: RecordIdString
-}
-
 export type UsersRecord = {
 	name?: string
 	avatar?: string
 }
 
 // Response types include system fields and match responses from the PocketBase API
+export type BillingsResponse = BillingsRecord & BaseSystemFields
 export type HooksResponse = HooksRecord & BaseSystemFields
-export type PostsResponse = PostsRecord & BaseSystemFields
 export type UsersResponse = UsersRecord & AuthSystemFields
 
 export type CollectionRecords = {
+	billings: BillingsRecord
 	hooks: HooksRecord
-	posts: PostsRecord
 	users: UsersRecord
 }
