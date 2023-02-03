@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"pocketbase/util"
 	"strings"
 
 	"github.com/pocketbase/dbx"
@@ -30,6 +31,15 @@ func PocketBaseInit(app *pocketbase.PocketBase) error {
 			return nil
 		}
 	}
+
+	app.OnRecordBeforeCreateRequest("users").PreAdd(func(event *core.RecordCreateEvent) error {
+		apiKey := event.Record.SchemaData()["apikey"]
+		if len(apiKey.(string)) <= 64 {
+			event.Record.Set("apikey", util.RandomString(64))
+		}
+		return nil
+	})
+
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		app.OnModelAfterCreate().Add(modelHandler("insert"))
 		app.OnModelAfterUpdate().Add(modelHandler("update"))
