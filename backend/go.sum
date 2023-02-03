@@ -1672,6 +1672,8 @@ github.com/pocketbase/pocketbase v0.12.0 h1:9u7t4paIQE0JvtX9p7cgktQgaSVyO5jm85UL
 github.com/pocketbase/pocketbase v0.12.0/go.mod h1:pKq7Zp2jwzMbyK8qbi59RPvscgjXRsOfb389YgGeMtE=
 github.com/pocketbase/pocketbase v0.12.1 h1:1KZFslgZ7nECllbU6+G+dWvIcGZTEpan2gTVOcdnZAQ=
 github.com/pocketbase/pocketbase v0.12.1/go.mod h1:pKq7Zp2jwzMbyK8qbi59RPvscgjXRsOfb389YgGeMtE=
+github.com/pocketbase/pocketbase v0.12.2 h1:8PM4oHt2zEBh4NMemSwE4zvp2fnVXC0/9L+oY5nSzu4=
+github.com/pocketbase/pocketbase v0.12.2/go.mod h1:pKq7Zp2jwzMbyK8qbi59RPvscgjXRsOfb389YgGeMtE=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/posener/complete v1.2.3/go.mod h1:WZIdtGGp+qx0sLrYKtIRAruyNpv6hFCicSgv7Sy7s/s=
 github.com/pquerna/cachecontrol v0.0.0-20171018203845-0dec1b30a021/go.mod h1:prYjPmNq4d1NPVmpShWobRqXY3q7Vp+80DqgxxUrUIA=

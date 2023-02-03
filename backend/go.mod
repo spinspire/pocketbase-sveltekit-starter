@@ -1,12 +1,12 @@
 module pocketbase
 
-go 1.19
+go 1.20
 
 require (
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo/v5 v5.0.0-20220201181537-ed2888cfa198
 	github.com/pocketbase/dbx v1.9.0
-	github.com/pocketbase/pocketbase v0.12.1
+	github.com/pocketbase/pocketbase v0.12.2
 	github.com/sashabaranov/go-gpt3 v0.0.0-20230128191859-3695eb3ade92
 )
 

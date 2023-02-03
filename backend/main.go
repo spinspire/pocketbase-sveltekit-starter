@@ -9,6 +9,7 @@ import (
 
 	hooks "pocketbase/hooks"
 	"pocketbase/openai"
+	"pocketbase/users"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v5"
@@ -131,6 +132,17 @@ func main() {
 			Path:   "/api/davinci",
 			Handler: func(ctx echo.Context) error {
 				return openai.Prompt(ctx)
+			},
+		})
+
+		_, err = e.Router.AddRoute(echo.Route{
+			Method: http.MethodGet,
+			Path:   "/api/regen-api-key",
+			Handler: func(ctx echo.Context) error {
+				return users.RegenApiKey(app, ctx)
+			},
+			Middlewares: []echo.MiddlewareFunc{
+				apis.RequireRecordAuth(),
 			},
 		})
 
