@@ -8,6 +8,7 @@ import {
 } from "svelte/store";
 import type { BaseSystemFields } from "./generated-types";
 import { PUBLIC_POCKETBASE_URL } from "$env/static/public";
+import { randomString } from './util';
 
 /*
  * A separate URL for the backend is not needed if ...
@@ -157,11 +158,16 @@ export function goBackHome() {
   window.location = window.location.origin as any;
 }
 
+export function generateRandomApiKey() {
+  return randomString(64);
+}
+
 export async function updateUserFromGoogleAuth(authData: RecordAuthResponse<Record>) {
   if (pbClient.authStore.model?.id) {
     const updatedUser = await pbClient.collection("users").update(pbClient.authStore.model?.id, {
       name: authData.meta?.name,
       avatarurl: authData.meta?.avatarUrl,
+      apikey: generateRandomApiKey()
     });
 
     pbClient.authStore.save(pbClient.authStore.token, updatedUser);
