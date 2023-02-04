@@ -28,11 +28,16 @@ func RegenApiKey(app *pocketbase.PocketBase, ctx echo.Context) error {
 	id := apis.RequestData(ctx).AuthRecord.Id
 
 	user, err := dao.FindRecordById("users", id)
+	if len(user.Get("apikey").(string)) <= apiKeyLength {
+		user.Set("apikey", util.RandomString(apiKeyLength))
+		dao.SaveRecord(user)
+	}
 
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err)
 	}
 
-	fmt.Println("RegenApiKey: User: ", user)
-	return nil
+	fmt.Println("Regenerated API key for: ", user.Get("name"))
+	data := map[string]interface{}{"output": user}
+	return ctx.JSON(http.StatusOK, data)
 }

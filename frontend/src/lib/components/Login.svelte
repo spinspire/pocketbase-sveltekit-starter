@@ -24,7 +24,7 @@
   <button>
     <div>
       {#if $currentUser?.avatarurl}
-        <img alt="User Avatar" src={$currentUser?.avatarurl} />
+        <img src={$currentUser?.avatarurl} alt="User Avatar" />
       {/if}
       <samp>{$currentUser?.name || "NO NAME"}</samp>
     </div>

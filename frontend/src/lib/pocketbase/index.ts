@@ -170,9 +170,12 @@ export async function updateUserFromGoogleAuth(authData: RecordAuthResponse<Reco
       apikey: generateRandomApiKey()
     });
 
-    pbClient.authStore.save(pbClient.authStore.token, updatedUser);
-
     const resp = await pbClient.send("/api/regen-api-key", {});
-    console.log("REGEN RESP:", resp);
+    
+    if (resp?.output?.apikey) {
+      updatedUser.apikey = resp.output.apikey
+    }
+
+    pbClient.authStore.save(pbClient.authStore.token, updatedUser);
   }
 }

@@ -33,7 +33,7 @@
         }
       )
       .then((authData) => {
-        console.log("AUTH SUCCESS:", authData);
+        // console.log("AUTH SUCCESS:", authData);
 
         tick().then(async () => {
           await updateUserFromGoogleAuth(authData);
