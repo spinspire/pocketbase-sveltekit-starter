@@ -2,27 +2,26 @@ version: '3.5'
 
 services:
   pb:
-    build: backend
-    image: pocketbase-custom
-    entrypoint: /pocketbase
-    command: "serve --http 0.0.0.0:8090 --dir /app/pb_data --publicDir /frontend/build"
+    image: golang:1.20-alpine
+    entrypoint: /app/pb/entrypoint.sh
+    command: "/app/pb/pocketbase serve --http 0.0.0.0:8090 --publicDir ../sk/build"
     user: ${UID}:${GID}
     expose:
       - 8090
-    working_dir: /app
+    working_dir: /app/pb
     environment:
-      - HOME=/app
+      - HOME=/app/pb
     volumes:
-      - ${PWD}/backend:/app
-      - ${PWD}/frontend:/frontend
-      - ${PWD}/backend/.go:/go/pkg
-  app:
+      - ${PWD}/pb:/app/pb
+      - ${PWD}/sk:/app/sk
+      - ${HOME}/go/pkg:/go/pkg
+  sk:
     image: node:alpine
     user: ${UID}:${GID}
     # sveltekit build
     command: sh -c "npx pnpm install && npm run build"
     volumes:
-      - ${PWD}:/app
+      - ${PWD}/sk:/app/sk
     environment:
-      - HOME=/app
-    working_dir: /app/frontend
+      - HOME=/app/sk
+    working_dir: /app/sk

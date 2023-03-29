@@ -1,6 +1,6 @@
-/.cache
-/.local
-/.npm
-/.env
-/.ash_history
+.cache
+.local
+.npm
+.env
+.ash_history
 /docker-compose.override.yml
