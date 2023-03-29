@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { client, currentUser, login, logout } from "$lib/pocketbase";
+  import { currentUser, login, logout } from "$lib/pocketbase";
   import { alertOnFailure } from "$lib/pocketbase/ui";
   const DEFAULTS = {
     email: "",
@@ -8,24 +8,30 @@
     register: false,
   };
   let user = { ...DEFAULTS };
+  let open: boolean;
 
   async function submit() {
     await alertOnFailure(async function () {
       await login(user.email, user.password, user.register, user);
       user = { ...DEFAULTS };
+      open = false;
     });
+  }
+  function clickLogout() {
+    logout();
+    open = false;
   }
 </script>
 
-{#if $currentUser}
-  <button on:click={() => console.log({ $currentUser })}>
-    <samp>{$currentUser?.email}</samp>
-  </button>
-  <ul>
-    <li><button on:click={logout}>Logout</button></li>
-  </ul>
-{:else}
-  <details>
+<details bind:open>
+  {#if $currentUser}
+    <summary>
+      <samp>{$currentUser?.email}</samp>
+    </summary>
+    <div class="wrapper">
+      <button on:click={clickLogout}>Logout</button>
+    </div>
+  {:else}
     <summary>Login</summary>
     <div class="wrapper">
       <form on:submit|preventDefault={submit}>
@@ -58,30 +64,25 @@
         </div>
       </form>
     </div>
-  </details>
-{/if}
+  {/if}
+</details>
 
-<style>
-  .wrapper {
-    position: relative;
-  }
-  form {
-    position: absolute;
-    top: 1rem;
-    right: 0;
-    background-color: var(--color-bg-secondary);
-  }
-  button {
-    padding: 0 1rem;
-  }
-  div.inline > * {
-    display: inline-block;
-  }
+<style lang="scss">
   details {
-    margin: 0 0;
-  }
-  summary {
-    color: var(--color-link);
-    list-style-type: none;
+    margin: 0;
+    summary {
+      display: flex;
+    }
+    &[open] {
+      padding-bottom: 0;
+      summary {
+        margin-bottom: 0;
+      }
+    }
+    .wrapper {
+      position: absolute;
+      padding: 10px;
+      background-color: var(--background-alt);
+    }
   }
 </style>
