@@ -1,6 +1,6 @@
-// turning off SSR for now, but should look at this again
-// export const ssr = false;
-
+// turn off SSR - we're JAMstack here
+export const ssr = false;
 // Prerendering turned off. Turn it on if you know what you're doing.
-// export const prerender = true;
+export const prerender = false;
+// trailing slashes make relative paths much easier
 export const trailingSlash = "always";

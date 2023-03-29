@@ -1,5 +1,4 @@
 import { browser } from "$app/environment";
-import { PUBLIC_BACKEND } from "$env/static/public";
 import PocketBase, { ListResult } from "pocketbase";
 import {
   readable,
@@ -9,14 +8,7 @@ import {
 } from "svelte/store";
 import type { BaseSystemFields } from "./generated-types";
 
-/*
- * A separate URL for the backend is not needed if ...
- * - we are proxying to the backend via vite proxy
- * - the frontend itself is served by the backend as static files
- * ... hence the backend url of ''
- */
-const url = browser ? "" : PUBLIC_BACKEND;
-export const client = new PocketBase(url);
+export const client = new PocketBase();
 
 client.authStore.onChange(function () {
   currentUser.set(client.authStore.model);
