@@ -1,15 +1,19 @@
 version: "3.5"
 
 services:
-  pb:
+  sk:
+    command: sh -c "npx pnpm install && npm run dev -- --host 0.0.0.0"
+    expose:
+      - 5173
     # labels for traefik reverse proxying. Move to "pb" or "sk" depending where you're doing live development
     labels:
       - traefik.enable=true
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pb.rule=Host(`${HTTP_HOSTNAME}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${HTTP_HOSTNAME}`)
       - traefik.docker.network=traefik_default
     networks:
       - traefik_default
       - default
-  sk:
-    # sveltekit live dev
-    command: sh -c "npx pnpm install && npm run dev -- --host 0.0.0.0"
+
+networks:
+  traefik_default:
+    external: true
