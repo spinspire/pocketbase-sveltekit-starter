@@ -4,10 +4,10 @@ Use this app as a starting point for your own _customized_
 [PocketBase](https://pocketbase.io/) backend
 with [SvelteKit](https://kit.svelte.dev) frontend.
 This is a high-performance frontend+backend combination since frontend
-is static and backend is a single compiled Golang binary (JAMstack).
+is static and backend is a single compiled Golang binary (JAMstack baby!).
 
 - SvelteKit frontend is fully static, client-side only so that here is no need
-  for NodeJS at runtime. It is generated using [`adapter-static`](https://github.com/sveltejs/kit/tree/master/packages/adapter-static)
+  for NodeJS at runtime. It is generated using [`adapter-static`](https://github.com/sveltejs/kit/tree/master/packages/adapter-static) and `ssr` is OFF.
 - PocketBase provides complete (and _fast_) backend including:
   - databse (SQLite)
   - CRUD API for database
@@ -18,23 +18,36 @@ is static and backend is a single compiled Golang binary (JAMstack).
   custom Golang code then code is included to compile it locally with
   extensions such as custom endpoints (e.g. `/api/hello`) and database event
   hooks (e.g. executing Go handler functions when a database row is created)
+- A full live development setup is included
+  - Hot Module Reloading (HMR) of your frontend app when you edit Svelte code (including proxying requests to the PocketBase backend via `vite`)
+  - Hot reloading (restarting) of the PocketBase server using `modd` when you edit Go code
+
+To understand the backend, see [./pb/README.md](./pb/README.md) ("pb" == PocketBase)
+To understand the frontend, see [./sk/README.md](./sk/README.md) ("sk" == SvelteKit)
+
+Read those README files before proceeding.
 
 # Setup
 
-Follow these step EXACTLY, or else it won't work.
+Follow these steps CAREFULLY, or else it won't work. Also read the README files referred above before proceeding.
 
-1. Follow [./backend/README.md](./backend/README.md)
-2. Follow [./frontend/README.md](./frontend/README.md)
+1. If using Docker then copy `.env.example` to `.env` and then edit it to match your environment. And then just run `docker compose up -d`. Without Docker, see below ...
+2. Setup the backend in accordance with [./pb/README.md](./pb/README.md)
+3. Setup the frontend in accordance with [./sk/README.md](./sk/README.md)
 
 # Developing
 
 After you've done the setup in the above two README files, run
-the backend and the frontend in dev mode.
+the backend and the frontend in dev mode (from `sk` directory).
 
 ```bash
-npm run backend:dev
+# start the backend
+npm run dev:backend
+# and then start the frontend ...
 npm run dev
 ```
+
+Now visit http://localhost:5173 (sk) or http://localhost:8090 (pb)
 
 Now making changes in the Svelte code (frontend) or Go code (backend) will show
 results (almost) immediately.

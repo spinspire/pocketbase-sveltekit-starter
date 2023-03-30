@@ -2,18 +2,18 @@
 
 There are two flavors of the backend:
 
-1. standard release ([downloaded](https://ms-cp.office2.spinspire.com))
-2. custom compiled (`go build`), possibly with your customizations
+1. standard release downloaded from https://github.com/pocketbase/pocketbase/releases. This one is a good start, but most real-world applications would require more (see next).
+2. custom compiled (`go build`), possibly with my customizations and perhaps yours too.
 
-Out of the box, the project assumes #2 (custom compiled).
+Out of the box, the project assumes #2 (custom compiled with my customizations).
 
 ## standard (official) release of pocketbase
 
-Download from release archive from https://github.com/pocketbase/pocketbase/releases/latest, unzip it and place the `pocketbase` binary in this folder.
+Download from release archive from https://github.com/pocketbase/pocketbase/releases/latest, unzip it and place the `pocketbase` binary in this folder, and you're done.
 
 ## custom build
 
-If you would like to extend PocketBase and use it as a framework then there is a `main.go` in this folder that you can customize and build using `go build` or do live development using `air`.
+If you would like to extend PocketBase and use it as a framework then there is a `main.go` in this folder that you can customize and build using `go build` or do live development using `modd`.
 
 See https://pocketbase.io/docs/use-as-framework/ for details.
 
@@ -46,19 +46,19 @@ Before you can run the actual backend, you must run the migrations using `./pock
 
 ## Run the backend
 
-You can run the PocketBase backend direct with `./pocketbase serve` or using `npm run backend` in the `app` directory. Note that if you want the backend to also serve the frontend assets, then you must add the `--publicDir ../frontend/build` option.
+You can run the PocketBase backend direct with `./pocketbase serve` or using `npm run backend` in the `sk` directory. Note that if you want the backend to also serve the frontend assets, then you must add the `--publicDir ../frontend/build` option.
 
 ## Docker
 
-A highly recommended option is to run it inside a Docker container. A `Dockerfile` is included that builds the binary from your `main.go` sources and builds a minimial container with nothing other than that statically compiled binary. Also, a `docker-compose.yml` along with an _override_ file example are included.
+A highly recommended option is to run it inside a Docker container. A `Dockerfile` is included that builds a production Docker image. Also, a `docker-compose.yml` along with an _override_ file example are included, which should be used during development.
 
-## Active development with `air`
+## Active development with `modd`
 
-Finally, if you are going to actively develop using Go using PocketBase as a framework, then you probably want to use [air](https://github.com/cosmtrek/air), a development tool that rebuilds and restarts your Go binary everytime a source file changes (live reload on change). An basic `.air.toml` config file is included in this setup. You can run it by installing `air` (`go install github.com/cosmtrek/air@latest`) and then running `air serve`. Also the docker compose override file shows how to use `air` inside Docker.
+Finally, if you are going to actively develop using Go using PocketBase as a framework, then you probably want to use [modd](https://github.com/cortesi/modd), a development tool that rebuilds and restarts your Go binary everytime a source file changes (live reload on change). An basic `modd.conf` config file is included in this setup. You can run it by installing `modd` (`go install github.com/cortesi/modd/cmd/modd@latest`) and then running `modd`. All this is done automatically for you if you are using Docker.
 
 # Schema (Collections)
 
-With the 0.9 version of PocketBase, JavaScript auto-migrations as implemented. So we don't have to manually import pb_schema.json to create collections. The JS files in `pb_migrations` can create/drop/modify collections and data. These are executed automatically by PocketBase on startup.
+With the 0.9 version of PocketBase, JavaScript auto-migrations as implemented. The JS files in `pb_migrations` can create/drop/modify collections and data. These are executed automatically by PocketBase on startup.
 
 Not only that, they are also generated automatically whenever you change the schema! So go ahead and make changes to the schema and watch new JS files generated in the `pb_migrations` folder. Just remember to commit them to version control.
 
