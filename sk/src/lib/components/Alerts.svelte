@@ -43,24 +43,24 @@
 
 <article>
   {#each $alerts as alert}
-    <aside class={alert.type}>
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <span role="button" on:click={() => dismiss(alert)} class="dismiss"
-        >&times;</span
-      >
+    <blockquote class={alert.type}>
+      <button on:click={() => dismiss(alert)} class="dismiss">&times;</button>
       {alert.message}
-    </aside>
+    </blockquote>
   {/each}
 </article>
 
-<style>
+<style lang="scss">
   .dismiss {
-    cursor: pointer;
+    padding: 0;
+    border-radius: 50%;
+    height: 2em;
+    width: 2em;
   }
-  aside.error {
+  blockquote.error {
     color: red;
   }
-  aside.warning {
+  blockquote.warning {
     color: yellowgreen;
   }
 </style>

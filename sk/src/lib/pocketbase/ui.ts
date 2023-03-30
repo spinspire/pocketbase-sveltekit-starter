@@ -9,7 +9,7 @@ export async function alertOnFailure(request: () => void) {
       message,
       data: { data = {} },
     } = e;
-    if (message) alerts.error(message, 5000);
+    if (message) alerts.error(message);
     for (const key in data) {
       const { message } = data[key];
       if (message) alerts.error(`${key}: ${message}`);

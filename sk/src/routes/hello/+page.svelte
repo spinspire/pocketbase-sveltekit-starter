@@ -4,5 +4,5 @@
 </script>
 
 <h1>Hello!</h1>
-<p>Got the following data from the backend server</p>
+<p>Got the following API response from the backend server</p>
 <pre>{JSON.stringify(data)}</pre>
