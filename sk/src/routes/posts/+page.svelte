@@ -18,6 +18,7 @@
 <table>
   <tbody>
     {#each $posts.items as post}
+       {#if $currentUser.id == post.user}
       <tr>
         <td>
           <Image
@@ -32,6 +33,20 @@
         <td><a href={`${post.id}/edit`}>Edit</a></td>
         <td><a href={`${post.slug}#delete`}>Delete</a></td>
       </tr>
+      {:else}
+      <tr>
+        <td>
+          <Image
+            record={post}
+            file={post.files[0]}
+            thumb="100x100"
+            alt={post.title}
+          />
+        </td>
+        <td><a href={post.slug}>{post.title}</a></td>
+        <td>{post.updated}</td>
+      </tr>
+      {/if}
     {:else}
       <tr>
         <td>No posts found.</td>
