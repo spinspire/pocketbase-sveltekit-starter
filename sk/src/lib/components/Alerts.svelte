@@ -5,12 +5,13 @@
     message: string;
     type: string;
     timeout?: number;
+    html?: boolean;
   }
 
   export const alerts = {
     ...writable<Alert[]>([]),
-    add({ message, type = "info", timeout = 0 }: Alert) {
-      const alert = { message, type };
+    add({ message, type = "info", timeout = 0, html = false }: Alert) {
+      const alert = { message, type, html };
       this.update((v) => [...v, alert]);
       if (timeout) {
         setTimeout(() => {
@@ -39,28 +40,49 @@
   function dismiss(alert: Alert) {
     alerts.update((val) => val.filter((a) => a !== alert));
   }
+
+  function dismissAll() {
+    alerts.set([]);
+  }
 </script>
 
+<svelte:window on:unhandledrejection={(e) => alerts.error(e.reason.toString())} />
+
 <article>
+  {#if $alerts.length > 1}
+    <button on:click={dismissAll} class="tight">Dismiss All</button>
+  {/if}
   {#each $alerts as alert}
     <blockquote class={alert.type}>
       <button on:click={() => dismiss(alert)} class="dismiss">&times;</button>
-      {alert.message}
+      {#if alert.html}
+        {@html alert.message}
+      {:else}
+        {alert.message}
+      {/if}
     </blockquote>
   {/each}
 </article>
 
-<style lang="scss">
+<style>
   .dismiss {
-    padding: 0;
+    cursor: pointer;
+    padding: 0px 5px;
     border-radius: 50%;
-    height: 2em;
-    width: 2em;
   }
-  blockquote.error {
-    color: red;
+  blockquote {
+    margin: 0 0;
   }
-  blockquote.warning {
-    color: yellowgreen;
+  .success {
+    color: var(--links);
+    border-left-color: var(--links);
+  }
+  .warning {
+    color: var(--variable);
+    border-left-color: var(--variable);
+  }
+  .error {
+    color: var(--danger);
+    border-left-color: var(--danger);
   }
 </style>
