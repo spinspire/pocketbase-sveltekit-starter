@@ -73,7 +73,7 @@ See the build process details in the README files for backend and frontend.
 
 # Configurable Hooks
 
-Please read about the "hooks" system in [./backend/README.md](./backend/README.md)
+Please read about the "hooks" system in [./pb/README.md](./pb/README.md)
 It is a very easy and powerful way to extend your application with minimal
 configuration and perhaps no code.
 
