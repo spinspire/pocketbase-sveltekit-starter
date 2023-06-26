@@ -1,20 +1,25 @@
+import PocketBase, {
+  ListResult,
+  Record as PBRecord,
+  type AuthProviderInfo,
+} from "pocketbase";
+import type { Admin } from "pocketbase";
+import { readable, type Readable, type Subscriber } from "svelte/store";
 import { browser } from "$app/environment";
-import PocketBase, { ListResult } from "pocketbase";
-import {
-  readable,
-  writable,
-  type Readable,
-  type Subscriber,
-} from "svelte/store";
-import type { BaseSystemFields } from "./generated-types";
+import { base } from "$app/paths";
 
-export const client = new PocketBase();
+export const client = new PocketBase(
+  browser ? window.location.origin + "/" + base : undefined
+);
 
-client.authStore.onChange(function () {
-  currentUser.set(client.authStore.model);
-});
-
-export const currentUser = writable(client.authStore.model);
+export const authModel = readable<PBRecord | Admin | null>(
+  null,
+  function (set) {
+    client.authStore.onChange((token, model) => {
+      set(model);
+    }, true);
+  }
+);
 
 export async function login(
   email: string,
@@ -37,10 +42,11 @@ export function logout() {
  * Save (create/update) a record (a plain object). Automatically converts to
  * FormData if needed.
  */
-export async function save(collection: string, record: any) {
+export async function save(collection: string, record: any, create = false) {
   // convert obj to FormData in case one of the fields is instanceof FileList
   const data = object2formdata(record);
-  if (record.id) {
+  if (record.id && !create) {
+    // "create" flag overrides update
     return await client.collection(collection).update(record.id, data);
   } else {
     return await client.collection(collection).create(data);
@@ -50,7 +56,11 @@ export async function save(collection: string, record: any) {
 // convert obj to FormData in case one of the fields is instanceof FileList
 function object2formdata(obj: {}) {
   // check if any field's value is an instanceof FileList
-  if (!Object.values(obj).some((val) => val instanceof FileList)) {
+  if (
+    !Object.values(obj).some(
+      (val) => val instanceof FileList || val instanceof File
+    )
+  ) {
     // if not, just return the original object
     return obj;
   }
@@ -61,6 +71,11 @@ function object2formdata(obj: {}) {
       for (const file of val) {
         fd.append(key, file);
       }
+    } else if (val instanceof File) {
+      // handle File before "object" so that it doesn't get serialized as JSON
+      fd.append(key, val);
+    } else if (typeof val === "object") {
+      fd.append(key, JSON.stringify(val));
     } else {
       fd.append(key, val as any);
     }
@@ -68,24 +83,22 @@ function object2formdata(obj: {}) {
   return fd;
 }
 
-export interface PageStore<T extends Record<any, any>>
-  extends Readable<ListResult<T>> {
+export interface PageStore<T = any> extends Readable<ListResult<T>> {
   setPage(newpage: number): Promise<void>;
   next(): Promise<void>;
   prev(): Promise<void>;
 }
 
-// realtime subscription on a collection, with pagination
-export function watch<T extends Record<any, any> & BaseSystemFields>(
+export function watch<T>(
   idOrName: string,
   queryParams = {} as any,
   page = 1,
   perPage = 20
 ): PageStore<T> {
   const collection = client.collection(idOrName);
-  let result = new ListResult(page, perPage, 0, 0, [] as Record<any, any>[]);
-  let set: Subscriber<ListResult<Record<any, any>>>;
-  const store = readable(result, (_set) => {
+  let result = new ListResult(page, perPage, 0, 0, [] as T[]);
+  let set: Subscriber<ListResult<T>>;
+  const store = readable<ListResult<T>>(result, (_set) => {
     set = _set;
     // fetch first page
     collection
@@ -109,7 +122,14 @@ export function watch<T extends Record<any, any> & BaseSystemFields>(
               );
             case "create":
               record = await expand(queryParams.expand, record);
-              return [...result.items, record];
+              const index = result.items.findIndex((r) => r.id === record.id);
+              // replace existing if found, otherwise append
+              if (index >= 0) {
+                result.items[index] = record;
+                return result.items;
+              } else {
+                return [...result.items, record];
+              }
             case "delete":
               return result.items.filter((item) => item.id !== record.id);
           }
@@ -133,4 +153,36 @@ export function watch<T extends Record<any, any> & BaseSystemFields>(
       setPage(result.page - 1);
     },
   };
+}
+
+export async function providerLogin(
+  provider: AuthProviderInfo,
+  authCollection: any
+) {
+  const authResponse = await authCollection.authWithOAuth2({
+    provider: provider.name,
+    createData: {
+      // emailVisibility: true,
+    },
+  });
+  // update user "record" if "meta" has info it doesn't have
+  const { meta, record } = authResponse;
+  let changes = {} as { [key: string]: any };
+  if (!record.name && meta?.name) {
+    changes.name = meta.name;
+  }
+  if (!record.avatar && meta?.avatarUrl) {
+    const response = await fetch(meta.avatarUrl);
+    if (response.ok) {
+      const type = response.headers.get("content-type") ?? "image/jpeg";
+      changes.avatar = new File([await response.blob()], "avatar", { type });
+    }
+  }
+  if (Object.keys(changes).length) {
+    authResponse.record = await save(authCollection.collectionIdOrName, {
+      ...record,
+      ...changes,
+    });
+  }
+  return authResponse;
 }

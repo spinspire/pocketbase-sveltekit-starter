@@ -8,7 +8,7 @@
 </script>
 
 <script lang="ts">
-  import Login from "$lib/components/Login.svelte";
+  import LoginBadge from "$lib/components/LoginBadge.svelte";
 
   $: title = $metadata.title ? $metadata.title + " | " + site.name : site.name;
   $: description = $metadata.description ?? site.description;
@@ -29,7 +29,7 @@
     ><img src={`${base}/favicon.ico`} alt="application logo" /></a
   >
   <Nav />
-  <Login />
+  <LoginBadge />
 </header>
 <main>
   {#if headline}

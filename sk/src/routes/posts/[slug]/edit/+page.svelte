@@ -1,12 +1,12 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { currentUser, save } from "$lib/pocketbase";
+  import { authModel, save } from "$lib/pocketbase";
   import { alertOnFailure } from "$lib/pocketbase/ui";
   import type { PageData } from "./$types";
   export let data: PageData;
   $: ({ post } = data);
   async function submit(e: SubmitEvent) {
-    post.user = $currentUser?.id;
+    post.user = $authModel?.id;
     alertOnFailure(async () => {
       await save("posts", post);
       goto("../..");
