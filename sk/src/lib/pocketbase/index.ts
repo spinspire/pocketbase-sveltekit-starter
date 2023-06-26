@@ -2,6 +2,7 @@ import PocketBase, {
   ListResult,
   Record as PBRecord,
   type AuthProviderInfo,
+  RecordService,
 } from "pocketbase";
 import type { Admin } from "pocketbase";
 import { readable, type Readable, type Subscriber } from "svelte/store";
@@ -157,7 +158,7 @@ export function watch<T>(
 
 export async function providerLogin(
   provider: AuthProviderInfo,
-  authCollection: any
+  authCollection: RecordService
 ) {
   const authResponse = await authCollection.authWithOAuth2({
     provider: provider.name,

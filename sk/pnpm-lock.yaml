@@ -2,8 +2,8 @@ lockfileVersion: '6.0'
 
 dependencies:
   pocketbase:
-    specifier: ^0.9.0
-    version: 0.9.0
+    specifier: ^0.15.2
+    version: 0.15.2
 
 devDependencies:
   '@playwright/test':
@@ -1360,8 +1360,8 @@ packages:
       - supports-color
     dev: true
 
-  /pocketbase@0.9.0:
-    resolution: {integrity: sha512-wLH8JNqtilgVgXMcO9kWcydryxemf8rZgTyn+DTHWtkwOe1ya6MuAOpVHtljIUxxtukZ82LSB2K7h12FZHwGMA==}
+  /pocketbase@0.15.2:
+    resolution: {integrity: sha512-dGSwO2j3XqtFMANNNEVh/moRw0ItOraKC1p3J+I0y/tPEfgleCAUptMWhqHrFNS+jM5r21eSS1U48N9/OmHFzA==}
     dev: false
 
   /postcss@8.4.20:
