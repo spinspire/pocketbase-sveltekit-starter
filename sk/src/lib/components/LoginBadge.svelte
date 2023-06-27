@@ -4,7 +4,7 @@
   import { alerts } from "./Alerts.svelte";
   import Dialog from "./Dialog.svelte";
   import LoginForm from "./LoginForm.svelte";
-  let register: false;
+  let signup = true;
   async function logout() {
     client.authStore.clear();
   }
@@ -53,9 +53,8 @@
   </Dialog>
 {:else}
   <Dialog>
-    <button slot="trigger">Sign In</button>
-    <h2><center>{register ? "Sign Up" : "Sign In"}</center></h2>
-    <LoginForm bind:register />
+    <button slot="trigger">{signup ? 'Sign In / Sign Up' : 'Sign In'}</button>
+    <LoginForm {signup} />
   </Dialog>
 {/if}
 

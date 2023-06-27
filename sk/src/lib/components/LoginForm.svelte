@@ -1,17 +1,21 @@
 <script lang="ts">
   export let authCollection = "users";
   export let passwordLogin = true;
-  export let register = false;
+  export let signup = true;
   import { client, providerLogin } from "../pocketbase";
+  import Tab from "./Tab.svelte";
+  import TabContent from "./TabContent.svelte";
+  import TabGroup from "./TabGroup.svelte";
   const coll = client.collection(authCollection);
 
   let email: string;
   let name: string;
   let password: string;
   let passwordConfirm: string;
+  let create = false;
 
   async function submit() {
-    if (register) {
+    if (create) {
       await coll.create({ email, name, password, passwordConfirm });
     }
     await coll.authWithPassword(email, password);
@@ -20,34 +24,61 @@
 
 <form on:submit|preventDefault={submit}>
   {#if passwordLogin}
-    <input bind:value={email} required type="text" placeholder="email" />
-    <input
-      bind:value={password}
-      required
-      type="password"
-      placeholder="password"
-    />
-    <div class="inline">
-      <label
-        ><span>Register</span>
-        <input type="checkbox" bind:checked={register} />
-      </label>
-    </div>
-    {#if register}
+    {#if signup}
+      <TabGroup active="SignIn">
+        <div slot="tabs">
+          <Tab key="SignIn">Sign In</Tab>
+          <Tab key="SignUp">Sign Up</Tab>
+        </div>
+        <TabContent key="SignIn">
+          <input bind:value={email} required type="text" placeholder="email" />
+          <input
+            bind:value={password}
+            required
+            type="password"
+            placeholder="password"
+          />
+          <button type="submit" on:click={() => (create = false)}
+            >Sign In</button
+          >
+        </TabContent>
+
+        <TabContent key="SignUp">
+          <input bind:value={email} required type="text" placeholder="email" />
+          <input
+            bind:value={password}
+            required
+            type="password"
+            placeholder="password"
+          />
+          <input
+            bind:value={passwordConfirm}
+            required
+            type="password"
+            placeholder="confirm password"
+          />
+          <input
+            bind:value={name}
+            required
+            type="text"
+            placeholder="name / label"
+          />
+          <input type="hidden" name="register" value={true} />
+          <button type="submit" on:click={() => (create = true)}>Sign Up</button
+          >
+        </TabContent>
+      </TabGroup>
+    {:else}
+      <h2>Sign In</h2>
+      <input bind:value={email} required type="text" placeholder="email" />
       <input
-        bind:value={passwordConfirm}
+        bind:value={password}
         required
         type="password"
-        placeholder="confirm password"
+        placeholder="password"
       />
-      <input
-        bind:value={name}
-        required
-        type="text"
-        placeholder="name / label"
-      />
+      <button type="submit" on:click={() => (create = false)}>Sign In</button>
     {/if}
-    <button type="submit">{register ? "Sign Up" : "Sign In"}</button>
   {/if}
   {#await coll.listAuthMethods({ $autoCancel: false }) then methods}
     {#each methods.authProviders as p}
