@@ -5,13 +5,14 @@
   const store: Writable<string | number> = getContext("activeTab");
 </script>
 
-<div
+<button
+  type="button"
   class="title"
   on:click={() => ($store = key)}
   class:active={$store === key}
 >
   <slot />
-</div>
+</button>
 
 <style>
   .title {
@@ -19,6 +20,8 @@
     border-bottom: none;
     display: inline-block;
     padding: 1em;
+    margin-bottom: 0;
+    border-radius: 6px 6px 0 0;
     color: var(--tab-color-fg, white);
     background-color: var(--tab-color-bg, black);
   }

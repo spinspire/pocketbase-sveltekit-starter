@@ -83,7 +83,7 @@
   {#await coll.listAuthMethods({ $autoCancel: false }) then methods}
     {#each methods.authProviders as p}
       <button type="button" on:click={() => providerLogin(p, coll)}
-        >Login with {p.name}</button
+        >Sign-in with {p.name}</button
       >
     {/each}
   {:catch}

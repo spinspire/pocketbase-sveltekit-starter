@@ -7,15 +7,6 @@
   setContext("activeTab", store);
 </script>
 
-<style>
-  .tabs {
-    border-bottom: solid var(--tab-color-active-bg, black) 2px;
-  }
-  .tab-content {
-    padding: 1em;
-  }
-</style>
-
 <div class="tabs">
   <slot name="tabs" />
 </div>
@@ -23,3 +14,12 @@
 <div class="tab-content">
   <slot />
 </div>
+
+<style lang="scss">
+  .tabs {
+    border-bottom: solid var(--tab-color-active-bg, white) 2px;
+  }
+  .tab-content {
+    padding: 1em 0;
+  }
+</style>
