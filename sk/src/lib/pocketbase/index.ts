@@ -94,7 +94,8 @@ export function watch<T>(
   idOrName: string,
   queryParams = {} as any,
   page = 1,
-  perPage = 20
+  perPage = 20,
+  realtime = browser
 ): PageStore<T> {
   const collection = client.collection(idOrName);
   let result = new ListResult(page, perPage, 0, 0, [] as T[]);
@@ -106,7 +107,7 @@ export function watch<T>(
       .getList(page, perPage, queryParams)
       .then((r) => set((result = r)));
     // watch for changes (only if you're in the browser)
-    if (browser)
+    if (realtime)
       collection.subscribe("*", ({ action, record }) => {
         (async function (action: string) {
           // see https://github.com/pocketbase/pocketbase/discussions/505
