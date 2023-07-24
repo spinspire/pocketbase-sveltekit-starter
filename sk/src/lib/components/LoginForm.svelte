@@ -13,12 +13,17 @@
   let password: string;
   let passwordConfirm: string;
   let create = false;
+  let admin = false;
 
   async function submit() {
     if (create) {
       await coll.create({ email, name, password, passwordConfirm });
     }
-    await coll.authWithPassword(email, password);
+    if (admin) {
+      await client.admins.authWithPassword(email, password);
+    } else {
+      await coll.authWithPassword(email, password);
+    }
   }
 </script>
 
@@ -38,6 +43,9 @@
             type="password"
             placeholder="password"
           />
+          <label title="sign-in as admin"
+            ><input type="checkbox" bind:checked={admin} />Admin</label
+          >
           <button type="submit" on:click={() => (create = false)}
             >Sign In</button
           >
