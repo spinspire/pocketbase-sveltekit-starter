@@ -7,10 +7,16 @@
 
 {#if showIfSinglePage || $store.totalPages > 1}
   <div class="paginator">
-    <button on:click={() => store.prev()} disabled={$store.page <= 1}>&laquo;</button>
+    <button
+      type="button"
+      on:click={() => store.prev()}
+      disabled={$store.page <= 1}>&laquo;</button
+    >
     <div>page {$store.page} of {$store.totalPages}</div>
-    <button on:click={() => store.next()} disabled={$store.page >= $store.totalPages}
-      >&raquo;</button
+    <button
+      type="button"
+      on:click={() => store.next()}
+      disabled={$store.page >= $store.totalPages}>&raquo;</button
     >
   </div>
 {/if}
