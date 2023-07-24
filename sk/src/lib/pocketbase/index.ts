@@ -8,6 +8,7 @@ import type { Admin } from "pocketbase";
 import { readable, type Readable, type Subscriber } from "svelte/store";
 import { browser } from "$app/environment";
 import { base } from "$app/paths";
+import { invalidateAll } from "$app/navigation";
 
 export const client = new PocketBase(
   browser ? window.location.origin + "/" + base : undefined
@@ -18,6 +19,7 @@ export const authModel = readable<PBRecord | Admin | null>(
   function (set) {
     client.authStore.onChange((token, model) => {
       set(model);
+      invalidateAll(); // re-run load functions for current page
     }, true);
   }
 );
