@@ -3,13 +3,28 @@
 
   export let files: FileList;
   export let accept = ".*";
-  let multiple = true;
+  export let multiple = true;
+  export let pasteFile = false;
   const dispatch = createEventDispatcher();
+  function paste(e: ClipboardEvent) {
+    if (pasteFile && e.clipboardData?.files) {
+      files = e.clipboardData.files;
+      dispatch("change", files);
+    }
+  }
 </script>
+
+<svelte:body on:paste={paste} />
 
 <label class="file">
   <div><slot>Drag/drop files here.</slot></div>
-  <input type="file" {multiple} bind:files on:change={(e) => dispatch("change", files)} {accept} />
+  <input
+    type="file"
+    {multiple}
+    bind:files
+    on:change={(e) => dispatch("change", files)}
+    {accept}
+  />
 </label>
 
 <style lang="scss">

@@ -11,7 +11,7 @@
   const unsubscribe = client.authStore.onChange((token, model) => {
     if (model) {
       const { name, username } = model;
-      alerts.success(`Signed in as ${name || username}`, 5000);
+      alerts.success(`Signed in as ${name || username || "Admin"}`, 5000);
     } else {
       alerts.success(`Signed out`, 5000);
     }
@@ -53,7 +53,7 @@
   </Dialog>
 {:else}
   <Dialog>
-    <button slot="trigger">{signup ? 'Sign In / Sign Up' : 'Sign In'}</button>
+    <button slot="trigger">{signup ? "Sign In / Sign Up" : "Sign In"}</button>
     <LoginForm {signup} />
   </Dialog>
 {/if}
@@ -63,12 +63,21 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    padding: 5px;
     gap: 5px;
     > img {
       height: 2em;
       width: 2em;
       border-radius: 50%;
+    }
+    > samp {
+      display: inline-block !important;
+      -moz-border-radius: 20px !important;
+      -webkit-border-radius: 20px !important;
+      -khtml-border-radius: 20px !important;
+      border-radius: 20px !important;
+      padding: 0.5rem !important;
+      text-align: center !important;
+      line-height: 1.5rem !important;
     }
   }
   .wrapper {
