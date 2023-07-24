@@ -15,3 +15,9 @@
 <dialog bind:this={dialog} on:click={close}>
   <slot />
 </dialog>
+
+<style lang="scss">
+  dialog {
+    padding: 6rem 8rem;
+  }
+</style>
