@@ -1,0 +1,118 @@
+:root {
+  /* Light Mode Variables */
+  --background-color-light: #ffffff;
+  --primary-button-light: #007bff;
+  --hover-light: #e8e8e8;
+  --elements-color-light: rgb(100, 104, 110);
+
+  /* Dark Mode Variables */
+  --background-color-dark: #242e42;
+  --primary-button-dark: #ff6600;
+  --hover-dark: #333333;
+  --elements-color-dark: #2f3b52ff;
+  --background-color-dark-level1: #2f3b52ff;
+  --background-color-dark-level2: #20293cff;
+}
+
+html {
+  display: flex;
+  flex-flow: column;
+  min-height: 100vh;
+  body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-flow: column;
+    // override max-width water.css
+    width: 100%;
+    max-width: 1280px;
+    // no horizonal scrollbars
+    overflow-x: hidden;
+    background-color: var(--background-color-dark);
+    /* TODO: Set background color based on mode */
+    background-color: var(--background-color-dark);
+    max-width: 1280px;
+    // override default fonts
+    font-family: Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans,
+      Helvetica Neue, Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji,
+      sans-serif;
+    &.dark-mode {
+      background-color: var(--background-color-dark);
+    }
+    > div {
+      flex: 1 1 auto;
+      display: flex;
+      flex-flow: column;
+      > main {
+        flex: 1 1 auto;
+      }
+    }
+  }
+}
+
+nav,
+header {
+  * {
+    // removing bottom border on nav links for now
+    border: 0px solid !important;
+  }
+  a,
+  button {
+    -moz-border-radius: 0.8rem;
+    -webkit-border-radius: 0.8rem;
+    -khtml-border-radius: 0.8rem;
+    border-radius: 0.8rem;
+  }
+  // handling better ux on all main links
+  a:hover,
+  button:hover,
+  samp:hover {
+    filter: brightness(150%);
+    transition: filter 0.3s;
+    text-decoration: none;
+  }
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+/* Primary button styles */
+.button {
+  background-color: var(--primary-button-light);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Hover styles */
+.button:hover {
+  background-color: var(--hover-light);
+}
+
+/* Dark mode styles */
+.dark-mode .button {
+  background-color: var(--primary-button-dark);
+}
+
+.dark-mode .button:hover {
+  background-color: var(--hover-dark);
+}
+
+.error,
+.success {
+  border: none;
+}
+
+.flex-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+form .actions {
+  padding: 1rem;
+  background-color: var(--background-body);
+}

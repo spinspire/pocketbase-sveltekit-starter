@@ -1,10 +1,11 @@
 <script context="module">
+  import "../app.scss";
   import { beforeNavigate } from "$app/navigation";
   import { base } from "$app/paths";
   import { metadata } from "$lib/app/stores";
   import Alerts from "$lib/components/Alerts.svelte";
   import Nav from "$lib/components/Nav.svelte";
-  import { site } from "$lib/config";
+  import { site, sponsor } from "$lib/config";
 </script>
 
 <script lang="ts">
@@ -39,7 +40,14 @@
   <slot />
 </main>
 <footer>
-  <!-- footer stuff -->
+  <div>
+    <em>{site.name}</em> is an
+    <a href={site.source_url} target="_blank" rel="noreferrer"
+      >Open Source project</a
+    >
+    sponsored by
+    <a href={sponsor.url} target="_blank" rel="noreferrer">{sponsor.name}</a>.
+  </div>
 </footer>
 
 <style lang="scss">
