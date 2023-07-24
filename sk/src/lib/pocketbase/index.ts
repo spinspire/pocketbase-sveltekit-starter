@@ -65,7 +65,7 @@ function object2formdata(obj: {}) {
     // if not, just return the original object
     return obj;
   }
-  // otherwise, build FormData from obj
+  // otherwise, build FormData (multipart/form-data) from obj
   const fd = new FormData();
   for (const [key, val] of Object.entries(obj)) {
     if (val instanceof FileList) {
@@ -75,6 +75,9 @@ function object2formdata(obj: {}) {
     } else if (val instanceof File) {
       // handle File before "object" so that it doesn't get serialized as JSON
       fd.append(key, val);
+    } else if (Array.isArray(val)) {
+      // for some reason, multipart/form-data wants arrays to be comma-separated strings
+      fd.append(key, val.join(","));
     } else if (typeof val === "object") {
       fd.append(key, JSON.stringify(val));
     } else {
