@@ -11,6 +11,7 @@ services:
     working_dir: /app/pb
     environment:
       - HOME=/app/pb
+      - AUDITLOG=${AUDITLOG}
     volumes:
       - ${PWD}/pb:/app/pb
       - ${PWD}/sk:/app/sk

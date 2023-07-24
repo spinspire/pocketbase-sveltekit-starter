@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"pocketbase/auditlog"
 	hooks "pocketbase/hooks"
 
 	"github.com/labstack/echo/v5"
@@ -51,6 +52,9 @@ func main() {
 		Dir:          migrationsDir,
 		Automigrate:  true,
 	})
+
+	// call this only if you want to auditlog tables named in AUDITLOG env var
+	auditlog.Register(app)
 
 	// call this only if you want to use the configurable "hooks" functionality
 	hooks.PocketBaseInit(app)

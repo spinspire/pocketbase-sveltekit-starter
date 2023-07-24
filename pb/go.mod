@@ -6,6 +6,7 @@ require (
 	github.com/labstack/echo/v5 v5.0.0-20220201181537-ed2888cfa198
 	github.com/pocketbase/dbx v1.10.0
 	github.com/pocketbase/pocketbase v0.16.6
+	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 )
 
 require (
