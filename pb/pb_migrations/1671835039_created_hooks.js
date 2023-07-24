@@ -47,6 +47,7 @@ migrate((db) => {
           "maxSelect": 1,
           "values": [
             "command",
+            "email",
             "post"
           ]
         }

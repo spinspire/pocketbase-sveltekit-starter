@@ -54,19 +54,21 @@ func executeEventActions(app *pocketbase.PocketBase, event string, table string,
 		app.Dao().ExpandRecord(record, expands, func(c *models.Collection, ids []string) ([]*models.Record, error) {
 			return app.Dao().FindRecordsByIds(c.Name, ids, nil)
 		})
-		if err := executeEventAction(event, table, action_type, action, action_params, record); err != nil {
+		if err := executeEventAction(app, event, table, action_type, action, action_params, record); err != nil {
 			log.Println("ERROR", err)
 		}
 	}
 }
 
-func executeEventAction(event, table, action_type, action, action_params string, record *models.Record) error {
+func executeEventAction(app *pocketbase.PocketBase, event, table, action_type, action, action_params string, record *models.Record) error {
 	log.Printf("event:%s, table: %s, action: %s\n", event, table, action)
 	switch action_type {
 	case "command":
 		return doCommand(action, action_params, record)
 	case "post":
 		return doPost(action, action_params, record)
+	case "email":
+		return doEmail(app, action, action_params, record)
 	default:
 		return errors.New(fmt.Sprintf("Unknown action_type: %s", action_type))
 	}
