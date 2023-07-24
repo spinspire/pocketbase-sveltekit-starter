@@ -2,6 +2,7 @@ version: "3.5"
 
 services:
   sk:
+    # for live development
     command: sh -c "npx pnpm install && npm run dev -- --host 0.0.0.0"
     expose:
       - 5173
@@ -13,6 +14,9 @@ services:
     networks:
       - traefik_default
       - default
+  pb:
+    # for live development
+    command: modd
 
 networks:
   traefik_default:
