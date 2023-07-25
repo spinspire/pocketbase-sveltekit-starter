@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { base } from "$app/paths";
   import { page } from "$app/stores";
   import { metadata } from "$lib/app/stores";
   import Delete from "$lib/components/Delete.svelte";
@@ -22,6 +23,10 @@
   />
 {/if}
 <pre>{body}</pre>
+
+<a href={`${base}/auditlog/posts/${id}`}>
+  <button type="button">AuditLog</button>
+</a>
 
 <style>
   img {
