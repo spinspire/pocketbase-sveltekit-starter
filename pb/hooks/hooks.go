@@ -23,7 +23,12 @@ func PocketBaseInit(app *pocketbase.PocketBase) error {
 			table := e.Model.TableName()
 			// we don't want to executeEventActions if the event is a system event (e.g. "_collections" changes)
 			if record, ok := e.Model.(*models.Record); ok {
-				executeEventActions(app, event, table, record)
+				if table == "hooks" {
+					log.Println("'hooks' collection changed. Unloading.")
+					hookRowsMap = nil // just set it to nil and it will get re-loaded the next time it is needed
+				} else {
+					executeEventActions(app, event, table, record)
+				}
 			} else {
 				log.Println("Skipping executeEventActions for table:", table)
 			}
@@ -31,6 +36,7 @@ func PocketBaseInit(app *pocketbase.PocketBase) error {
 		}
 	}
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		// watch insert/update/delete of rows of all collections
 		app.OnModelAfterCreate().Add(modelHandler("insert"))
 		app.OnModelAfterUpdate().Add(modelHandler("update"))
 		app.OnModelAfterDelete().Add(modelHandler("delete"))
@@ -39,13 +45,36 @@ func PocketBaseInit(app *pocketbase.PocketBase) error {
 	return nil
 }
 
-func executeEventActions(app *pocketbase.PocketBase, event string, table string, record *models.Record) {
-	// TODO: Load and cache this. Reload only on changes to "hooks" table
-	rows := []dbx.NullStringMap{}
-	app.DB().Select("action_type", "action", "action_params", "expands").
+// cache of "hooks" table rows (all where disabled=false)
+// key=collection:event, value=array-of-rows
+var hookRowsMap map[string][]dbx.NullStringMap
+
+func loadHookRows(db *dbx.DB) {
+	if hookRowsMap != nil {
+		return // already loaded
+	}
+	hookRowsMap = make(map[string][]dbx.NullStringMap)
+	var rows []dbx.NullStringMap
+	db.Select("*").
 		From("hooks").
-		Where(dbx.HashExp{"collection": table, "event": event, "disabled": false}).
+		Where(dbx.HashExp{"disabled": false}). // pick rows not disabled only
 		All(&rows)
+	for _, row := range rows {
+		collection := row["collection"].String
+		event := row["event"].String
+		key := collection + ":" + event
+		hookRowsMap[key] = append(hookRowsMap[key], row)
+	}
+}
+
+func getHookRows(db *dbx.DB, collection, event string) []dbx.NullStringMap {
+	loadHookRows(db)
+	key := collection + ":" + event
+	return hookRowsMap[key]
+}
+
+func executeEventActions(app *pocketbase.PocketBase, event string, table string, record *models.Record) {
+	rows := getHookRows(app.DB(), table, event)
 	for _, row := range rows {
 		action_type := row["action_type"].String
 		action := row["action"].String
