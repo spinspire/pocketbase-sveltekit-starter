@@ -1,6 +1,6 @@
 export const site = {
   name: "PocketBase SvelteKit Starter",
-  source_url: "https://github.com/spinspire/tiktrak",
+  source_url: "https://github.com/spinspire/pocketbase-sveltekit-starter",
   description:
     "A start app showing how to use SvelteKit frontend with PocketBase backend",
 };
