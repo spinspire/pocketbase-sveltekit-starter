@@ -79,7 +79,6 @@ func doAudit(app *pocketbase.PocketBase, event string, record *models.Record, ct
 		original := record.OriginalCopy().PublicExport()
 		recordExport := record.PublicExport()
 		for k, v := range original {
-			log.Printf("%s: %#v\n", k, v)
 			if !diff(v, recordExport[k]) { // unmodified, then remove
 				delete(original, k)
 			}
