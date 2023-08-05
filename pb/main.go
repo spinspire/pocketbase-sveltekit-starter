@@ -39,17 +39,15 @@ func main() {
 		defaultPublicDir(),
 		"the directory to serve static files",
 	)
-	migrationsDir := "" // default to "pb_migrations" (for js) and "migrations" (for go)
 
 	// load js files to allow loading external JavaScript migrations
-	jsvm.MustRegisterMigrations(app, &jsvm.MigrationsOptions{
-		Dir: migrationsDir,
+	jsvm.MustRegister(app, jsvm.Config{
+		HooksWatch: true, // make this false for production
 	})
 
 	// register the `migrate` command
-	migratecmd.MustRegister(app, app.RootCmd, &migratecmd.Options{
+	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
 		TemplateLang: migratecmd.TemplateLangJS, // or migratecmd.TemplateLangGo (default)
-		Dir:          migrationsDir,
 		Automigrate:  true,
 	})
 

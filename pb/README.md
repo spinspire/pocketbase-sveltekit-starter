@@ -2,8 +2,8 @@
 
 There are two flavors of the backend:
 
-1. standard release downloaded from https://github.com/pocketbase/pocketbase/releases. This one is a good start, but most real-world applications would require more (see next).
-2. custom compiled (`go build`), possibly with my customizations and perhaps yours too.
+1. Standard release downloaded from https://github.com/pocketbase/pocketbase/releases. It even allows [extending with JavaScript](https://pocketbase.io/docs/js-overview/). This one is a good start, but if you want full control see next.
+2. Custom compiled (`go build`), possibly with my customizations and perhaps yours too.
 
 Out of the box, the project assumes #2 (custom compiled with my customizations).
 
@@ -21,7 +21,7 @@ See https://pocketbase.io/docs/use-as-framework/ for details.
 
 ## Architecture
 
-> **Note:** For optimal set up, ensure you are using a standard distribution of Linux. For other operating systems, you may run into issues, or need additional configuration.
+> **Note:** For optimal set up, ensure you are using Linux (bare-metal, VM, WSL) or Docker. For other operating systems, you may run into issues, or need additional configuration.
 > A docker-compose setup is included with the project, which can be used on any OS.
 
 ### TBD: For Windows users
@@ -38,7 +38,7 @@ Assuming you have Go language tools installed ...
 
 `go build`
 
-If you don't have Go and don't want to install it, you can use docker-compose setup. Otherwise, your only choice is to download the binary from https://github.com/pocketbase/pocketbase/releases/latest, and placing it in this folder. But then you will not be able to use any of the custom code (such as "config-driven hooks")
+If you don't have Go and don't want to install it, you can use docker-compose setup. Otherwise, your only choice is to download the binary from https://github.com/pocketbase/pocketbase/releases/latest, and placing it in this folder. But then you are limited to using JavaScript or configuration (but not Go-language customizations).
 
 ## Run migrations
 
