@@ -47,7 +47,10 @@ the backend and the frontend in dev mode (from `sk` directory).
 ```bash
 # start the backend
 npm run dev:backend
-# and then start the frontend ...
+```
+Then, in antoher terminal:
+```bash
+# start the frontend ...
 npm run dev
 ```
 
