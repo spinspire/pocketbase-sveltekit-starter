@@ -7,11 +7,11 @@ There are two flavors of the backend:
 
 Out of the box, the project assumes #2 (custom compiled with my customizations).
 
-## standard (official) release of pocketbase
+## Standard (official) release of pocketbase
 
 Download from release archive from https://github.com/pocketbase/pocketbase/releases/latest, unzip it and place the `pocketbase` binary in this folder, and you're done.
 
-## custom build
+## Custom build
 
 If you would like to extend PocketBase and use it as a framework then there is a `main.go` in this folder that you can customize and build using `go build` or do live development using `modd`.
 
@@ -24,9 +24,10 @@ See https://pocketbase.io/docs/use-as-framework/ for details.
 > **Note:** For optimal set up, ensure you are using Linux (bare-metal, VM, WSL) or Docker. For other operating systems, you may run into issues, or need additional configuration.
 > A docker-compose setup is included with the project, which can be used on any OS.
 
-### TBD: For Windows users
+### For Windows users
 
-_please contribute if you are a Windows user_
+> - If you are using Docker, make sure that virtualization is enabled on your CPU. You can easily check this by opening your Task Manager, navigating to the Performance tab, and clicking the CPU button on the Performance UI. If virtualization is disabled and you wish to enable it, you'd typically do so in the BIOS or UEFI firmware settings.
+> - Make sure to update your WSL kernel to the latest version by opening up a separate command line and running `wsl --update`
 
 ### TBD: For MacOS users
 
