@@ -28,6 +28,7 @@ See https://pocketbase.io/docs/use-as-framework/ for details.
 
 > - If you are using Docker, make sure that virtualization is enabled on your CPU. You can easily check this by opening your Task Manager, navigating to the Performance tab, and clicking the CPU button on the Performance UI. If virtualization is disabled and you wish to enable it, you'd typically do so in the BIOS or UEFI firmware settings.
 > - Make sure to update your WSL kernel to the latest version by opening up a separate command line and running `wsl --update`
+> - Also, make sure your Docker daemon is running by keeping Docker Desktop open when running the command `docker compose up -d`
 
 ### TBD: For MacOS users
 
