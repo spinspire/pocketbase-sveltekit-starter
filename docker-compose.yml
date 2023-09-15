@@ -23,6 +23,7 @@ services:
     command: sh -c "npx pnpm install && npm run build"
     volumes:
       - ${PWD}/sk:/app/sk
+      - ${PWD}/pb:/app/pb
     environment:
       - HOME=/app/sk
     working_dir: /app/sk
