@@ -10,6 +10,7 @@
 
 <script lang="ts">
   import LoginBadge from "$lib/components/LoginBadge.svelte";
+  import ThemeToggle from "$lib/components/ThemeToggle.svelte";
 
   $: title = $metadata.title ? $metadata.title + " | " + site.name : site.name;
   $: description = $metadata.description ?? site.description;
@@ -31,6 +32,7 @@
   >
   <Nav />
   <LoginBadge />
+  <ThemeToggle />
 </header>
 <main>
   {#if headline}

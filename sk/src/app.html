@@ -5,9 +5,29 @@
     <link rel="icon" href="%sveltekit.assets%/favicon.ico" />
     <meta name="viewport" content="width=device-width" />
     <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css"
-    />
+    id="theme-light-stylesheet"
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.min.css"
+    media="none" 
+  />
+  <link
+    id="theme-dark-stylesheet"
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.min.css"
+    media="none"
+  />
+  <script>
+    // IIFE to set the theme stylesheet
+    (function() {
+      const theme = localStorage.getItem('theme');
+      if (theme === 'theme-dark') {
+        document.getElementById('theme-dark-stylesheet').media = 'all';
+      } else {
+        document.getElementById('theme-light-stylesheet').media = 'all';
+      }
+    })();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     %sveltekit.head%
   </head>
   <body>
