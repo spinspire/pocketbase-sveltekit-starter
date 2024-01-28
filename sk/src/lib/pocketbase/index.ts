@@ -103,17 +103,17 @@ export function watch(
   realtime = browser
 ): PageStore {
   const collection = client.collection(idOrName);
-  let result : ListResult<RecordModel> = {page, perPage, totalItems:0, totalPages:0, items: []};
-  let set: Subscriber<ListResult<RecordModel>>;
-  const store = readable<ListResult<RecordModel>>(result, (_set) => {
+  let result : ListResult<T> = {page, perPage, totalItems:0, totalPages:0, items: []};
+  let set: Subscriber<ListResult<T>>;
+  const store = readable<ListResult<T>>(result, (_set) => {
     set = _set;
     // fetch first page
     collection
-      .getList(page, perPage, queryParams)
+      .getList<T>(page, perPage, queryParams)
       .then((r) => set((result = r)));
     // watch for changes (only if you're in the browser)
     if (realtime)
-      collection.subscribe("*", ({ action, record }) => {
+      collection.subscribe<T>("*", ({ action, record }) => {
         (async function (action: string) {
           // see https://github.com/pocketbase/pocketbase/discussions/505
           async function expand(expand: any, record: any) {
