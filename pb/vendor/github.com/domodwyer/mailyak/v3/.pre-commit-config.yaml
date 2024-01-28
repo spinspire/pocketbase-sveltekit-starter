@@ -1,0 +1,52 @@
+# When running in CI, the "manual" stage is run.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.5.0
+    hooks:
+      - id: check-executables-have-shebangs
+        stages: [commit, manual]
+        exclude: ^vendor/
+      
+      - id: check-json
+        stages: [commit, manual]
+      
+      - id: check-yaml
+        stages: [commit, manual]
+      
+      - id: check-merge-conflict
+        stages: [commit, manual]
+      
+      - id: mixed-line-ending
+        args: ["--fix=no"]
+        stages: [commit, manual]
+      
+      - id: no-commit-to-branch
+        args: ["--branch", "master", "--branch", "development"]
+        stages: [commit]
+
+  - repo: https://github.com/domodwyer/pre-commit
+    rev: v3.0.1
+    hooks:
+      - id: go-test
+        stages: [commit, manual]
+        types: [go]
+        args: ["-timeout=30s"]
+      
+      - id: go-goimports
+        stages: [commit]
+        types: [go]
+      
+      - id: go-golangci-lint
+        args: [--new-from-rev=origin/master]
+        stages: [commit, push]
+        types: [go]
+      
+      - id: todo-tags
+        stages: [push, manual]
+        types: [go]
+        args: ["--tag=#"]
+
+      - id: todo-branch-tags
+        stages: [post-checkout]
+        args: ["#[0-9]+"]

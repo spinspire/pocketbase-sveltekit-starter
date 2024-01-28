@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine AS builder
+FROM golang:1.21.6-alpine AS builder
 WORKDIR /build
 COPY pb/go.mod pb/go.sum pb/main.go ./
 COPY pb/hooks ./hooks

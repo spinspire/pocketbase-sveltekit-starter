@@ -1,0 +1,64 @@
+# Run on code only in the new commits
+new: true
+
+run:
+  # Max 1 minute
+  timeout: 10m
+
+  # Return an exit code of 1 when a linter fails
+  issues-exit-code: 1
+
+  # Include test files
+  tests: true
+
+  # Use the vendored 3rd party libs
+  #modules-download-mode: release
+
+# output configuration options
+output:
+  # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
+  format: colored-line-number
+
+  # print lines of code with issue, default is true
+  print-issued-lines: true
+
+  # print linter name in the end of issue text, default is true
+  print-linter-name: true
+
+linters:
+  enable:
+    - revive
+    - gosec
+    - unconvert
+    - gocyclo
+    - goimports
+    - nakedret
+    - exportloopref
+    - exhaustive
+    - exportloopref
+
+linters-settings:
+  errcheck:
+    # report about not checking of errors in type assertions: `a := b.(MyStruct)`;
+    # default is false: such cases aren't reported by default.
+    check-type-assertions: true
+  
+  exhaustive:
+    default-signifies-exhaustive: true
+    # A default case in a switch covers all remaining variants
+
+issues:
+  exclude-use-default: false
+
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: (_test\.go)
+      linters:
+        - gocyclo
+        - errcheck
+        - gosec
+    
+    # No need for this - errcheck does it.
+    - linters:
+        - gosec
+      text: "G104: Errors unhandled"

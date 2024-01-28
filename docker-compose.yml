@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   pb:
-    image: golang:1.20-alpine
+    image: golang:1.21.6-alpine
     entrypoint: /app/pb/entrypoint.sh
     command: "/app/pb/pocketbase serve --http 0.0.0.0:8090 --publicDir ../sk/build"
     user: ${UID}:${GID}

@@ -1,10 +1,10 @@
 import PocketBase, {
-  ListResult,
-  Record as PBRecord,
+  type ListResult,
+  type RecordModel,
   type AuthProviderInfo,
+  type AuthModel,
   RecordService,
 } from "pocketbase";
-import type { Admin } from "pocketbase";
 import { readable, type Readable, type Subscriber } from "svelte/store";
 import { browser } from "$app/environment";
 import { base } from "$app/paths";
@@ -14,7 +14,7 @@ export const client = new PocketBase(
   browser ? window.location.origin + "/" + base : undefined
 );
 
-export const authModel = readable<PBRecord | Admin | null>(
+export const authModel = readable<RecordModel | AuthModel | null>(
   null,
   function (set) {
     client.authStore.onChange((token, model) => {
@@ -89,23 +89,23 @@ function object2formdata(obj: {}) {
   return fd;
 }
 
-export interface PageStore<T = any> extends Readable<ListResult<T>> {
+export interface PageStore extends Readable<ListResult<RecordModel>> {
   setPage(newpage: number): Promise<void>;
   next(): Promise<void>;
   prev(): Promise<void>;
 }
 
-export function watch<T>(
+export function watch(
   idOrName: string,
   queryParams = {} as any,
   page = 1,
   perPage = 20,
   realtime = browser
-): PageStore<T> {
+): PageStore {
   const collection = client.collection(idOrName);
-  let result = new ListResult(page, perPage, 0, 0, [] as T[]);
-  let set: Subscriber<ListResult<T>>;
-  const store = readable<ListResult<T>>(result, (_set) => {
+  let result : ListResult<RecordModel> = {page, perPage, totalItems:0, totalPages:0, items: []};
+  let set: Subscriber<ListResult<RecordModel>>;
+  const store = readable<ListResult<RecordModel>>(result, (_set) => {
     set = _set;
     // fetch first page
     collection
