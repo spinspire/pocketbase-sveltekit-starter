@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
@@ -71,6 +72,33 @@ func getHookRows(db *dbx.DB, collection, event string) []dbx.NullStringMap {
 	loadHookRows(db)
 	key := collection + ":" + event
 	return hookRowsMap[key]
+}
+
+func DoChatGPT(apiKey, prompt string) (string, error) {
+	client := resty.New()
+
+	response, err := client.R().
+		SetAuthToken(apiKey).
+		SetHeader("Content-Type", "application/json").
+		SetBody(map[string]interface{}{
+			"model":      "gpt-3.5-turbo",
+			"messages":   []interface{}{map[string]interface{}{"role": "system", "content": prompt}},
+			"max_tokens": 500,
+		}).
+		Post("https://api.openai.com/v1/chat/completions")
+
+	if err != nil {
+		return "", err
+	}
+
+	var data map[string]interface{}
+	err = json.Unmarshal(response.Body(), &data)
+	if err != nil {
+		return "", err
+	}
+
+	content := data["choices"].([]interface{})[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
+	return content, nil
 }
 
 func executeEventActions(app *pocketbase.PocketBase, event string, table string, record *models.Record) {

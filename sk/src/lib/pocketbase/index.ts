@@ -24,6 +24,24 @@ export const authModel = readable<PBRecord | Admin | null>(
   }
 );
 
+// Add this function somewhere in the file
+export async function generateText(prompt: string) {
+  const response = await fetch('http://127.0.0.1:8090/api/chatgpt', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ prompt })
+  }
+  )
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
 export async function login(
   email: string,
   password: string,

@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"github.com/joho/godotenv"
 
 	"pocketbase/auditlog"
 	hooks "pocketbase/hooks"
@@ -25,6 +26,46 @@ func defaultPublicDir() string {
 	}
 
 	return filepath.Join(os.Args[0], "../pb_public")
+}
+
+// use godot package to load/read the .env file and
+// return the value of the key
+func goDotEnvVariable(key string) string {
+
+	// load .env file
+	err := godotenv.Load(".env")
+  
+	if err != nil {
+	  log.Fatalf("Error loading .env file")
+	}
+  
+	return os.Getenv(key)
+  }
+
+func chatGptHandler(c echo.Context) error {
+	var requestBody struct {
+		Prompt string `json:"prompt"`
+	}
+
+	log.Println("Received request to /api/chatgpt")
+
+	if err := c.Bind(&requestBody); err != nil {
+		// Before returning an error response
+		log.Printf("Error in chatGptHandler: %v", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+	}
+
+	chatGPTAPIKey := goDotEnvVariable("CHATGPT_API_KEY")
+
+
+	result, err := hooks.DoChatGPT(chatGPTAPIKey, requestBody.Prompt)
+	if err != nil {
+		// Before returning an error response
+		log.Printf("Error in chatGptHandler: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate text from ChatGPT"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{"result": result})
 }
 
 func main() {
@@ -58,6 +99,10 @@ func main() {
 	hooks.PocketBaseInit(app)
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+
+		// Add this line to register the /api/chatgpt route
+		e.Router.POST("/api/chatgpt", chatGptHandler)
+
 		// serves static files from the provided public dir (if exists)
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDirFlag), true))
 
