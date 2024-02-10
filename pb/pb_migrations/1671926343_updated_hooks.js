@@ -28,6 +28,20 @@ migrate((db) => {
     "options": {}
   }))
 
+  collection.schema.addField(new SchemaField({
+    "system": false,
+    "id": "dkfnslic", // Generate a unique ID
+    "name": "tags",
+    "type": "text", // Assuming tags will be stored as a comma-separated string
+    "required": false,
+    "unique": false,
+    "options": {
+      "min": null,
+      "max": null,
+      "pattern": ""
+    }
+  }));
+
   return dao.saveCollection(collection)
 }, (db) => {
   const dao = new Dao(db)
@@ -38,6 +52,9 @@ migrate((db) => {
 
   // remove
   collection.schema.removeField("emgxgcok")
+
+
+  collection.schema.removeField("dkfnslic")
 
   return dao.saveCollection(collection)
 })

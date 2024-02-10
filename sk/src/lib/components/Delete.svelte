@@ -7,6 +7,7 @@
   export let table: string;
   async function submit() {
     alertOnFailure(async () => {
+      console.log(`Attempting to delete record with ID: ${id} from table: ${table}`);
       await client.collection(table).delete(id);
       goto("..");
     });

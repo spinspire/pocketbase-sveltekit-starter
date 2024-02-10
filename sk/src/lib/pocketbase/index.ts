@@ -39,7 +39,15 @@ export async function generateText(prompt: string) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return await response.json();
+  const result = await response.json();
+  // Remove quotes from title and slug
+  if (result.title) {
+    result.title = result.title.replace(/["']/g, "");
+  }
+  if (result.slug) {
+    result.slug = result.slug.replace(/["']/g, "");
+  }
+  return result;
 }
 
 export async function login(
