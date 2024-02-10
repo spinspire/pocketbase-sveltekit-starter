@@ -7,7 +7,7 @@
   import type { PageData } from "./$types";
   export let data: PageData;
   $: ({
-    post: { id, title, body, files },
+    post: { id, featuredImage, title, body, files },
   } = data);
   $: $metadata.title = title;
 </script>
@@ -16,6 +16,11 @@
   <Delete table="posts" {id} />
 {/if}
 
+<div>
+  {#if featuredImage}
+    <img src={featuredImage} style="width: 400px;" alt="Featured AI Pic" />
+  {/if}
+</div>
 {#if files && files[0]}
   <img
     src={client.getFileUrl(data.post, files[0], { thumb: "600x0" })}

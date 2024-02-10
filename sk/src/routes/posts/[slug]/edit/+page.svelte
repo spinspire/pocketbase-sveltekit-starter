@@ -43,32 +43,51 @@
     }
   }
 
+  async function generateImageFromDalle(prompt: string) {
+    const response = await fetch("/api/dalle", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt: "Generate an image to represent an article on this topic: " + prompt }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to generate image from Dalle-3");
+    }
+
+    const { imageUrl } = await response.json();
+    post.featuredImage = imageUrl; // Update post with the new featured image URL
+  }
+
   // When submitting, ensure you handle `selectedFiles` appropriately, e.g., uploading them
 
   async function generateTextFromChatGPT() {
-    // Generate title
-    chatGptTitle = await generateGptRequest(
-      "Generate a title for a blog post about " + chatGptPrompt
-    );
-    post.title = chatGptTitle; // Update post title
+  // Parallelize operations
+  const [imageResponse, titleResponse, tagsResponse, bodyResponse] = await Promise.all([
+    generateImageFromDalle(chatGptPrompt),
+    generateGptRequest(
+      "Generate a title for a blog post about " + chatGptPrompt + ".  Do not include single or double parentheses.  Make the title less than 50 characters."
+    ),
+    generateGptRequest(
+      "Generate tags for a blog post titled '" + chatGptTitle + "'" + ".  Separate tags with commas. The tags should be less than 20 characters, and there should be less than 5 tags."
+    ),
+    generateGptRequest(
+      "This is the user's inspiration: " + chatGptPrompt + ".  The post should be at least 300 words.  This should be a stream of consciousness type response.  Do not include single or double parentheses. It should try to capture the idea and concept of the prompt.  It should be written in a conversational tone.  It should be written in the first person.  It should be written in the present tense.  It should be written in the active"
+    ),
+  ]);
 
-    // Generate slug from title
-    chatGptSlug = chatGptTitle
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .substring(0, 50);
-    post.slug = chatGptSlug; // Update post slug
+  // Process title response
+  post.title = titleResponse.replace(/["']/g, "");;
 
-    // Generate tags
-    chatGptTags = await generateGptRequest(
-      "Generate tags for a blog post titled '" + chatGptTitle + "'"
-    );
-    post.tags = chatGptTags.split(",").map((tag) => tag.trim()); // Assuming post has a 'tags' field to update and tags are separated by commas
+  // Generate slug from title
+  post.slug = titleResponse.toLowerCase().replace(/\s+/g, "-").replace(/["':]/g, "").substring(0, 50);
 
-    // Generate body
-    chatGptResponse = await generateGptRequest(chatGptPrompt);
-    post.body = chatGptResponse; // Update post body
-  }
+  // Process tags response
+  post.tags = tagsResponse;
+
+  post.body = bodyResponse;
+}
 
   async function generateGptRequest(prompt: string) {
     const response = await fetch("/api/chatgpt", {
@@ -86,12 +105,69 @@
   }
 </script>
 
+<!-- In your Svelte component -->
+<style>
+  form, div {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  input, textarea, button {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-family: 'Arial', sans-serif;
+  }
+
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  }
+
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+  }
+
+  input[type="file"] {
+    background: none;
+    border: 1px dashed #ccc;
+  }
+
+  /* Adjustments for mobile screens */
+  @media (max-width: 600px) {
+    form, div {
+      width: 90%;
+      margin: 0 auto;
+    }
+  }
+</style>
+
 <form on:submit|preventDefault={submit}>
-  <input name="title" bind:value={post.title} placeholder="title" />
-  <input name="slug" bind:value={post.slug} placeholder="slug" />
-  <textarea name="body" bind:value={post.body} placeholder="body" rows="10" />
+  {#if post.featuredImage}
+    <img src={post.featuredImage} style="size: 400px" alt="Featured AI Pic" />
+  {/if}
+  <input name="title" bind:value={post.title} placeholder="Title" />
+  <input name="slug" bind:value={post.slug} placeholder="Slug" />
+  <textarea name="body" bind:value={post.body} placeholder="Body" rows="10"></textarea>
   <input type="file" on:change={handleFilesChange} multiple />
-  <input name="tags" bind:value={post.tags} placeholder="tags" />
+  <input name="tags" bind:value={post.tags} placeholder="Tags" />
   <button type="submit">Submit</button>
 </form>
 
@@ -101,7 +177,6 @@
     bind:value={chatGptPrompt}
     rows="3"
   ></textarea>
-  <button type="button" on:click={generateTextFromChatGPT}
-    >Generate with ChatGPT</button
-  >
+  <button type="button" on:click={generateTextFromChatGPT}>Generate with ChatGPT</button>
 </div>
+

@@ -41,236 +41,21 @@
       {#if $authModel?.id == post.user}
         <tr>
           <td>
-            {#if post.files && post.files.length > 0}
-              <Image
-                record={{
-                  ...post,
-                  $load: () => {},
-                  _loadExpand: () => Promise.resolve({}),
-                  load: () => Promise.resolve({}),
-                  clone: () => ({
-                    id: "",
-                    created: "",
-                    updated: "",
-                    load: () =>
-                      Promise.resolve({
-                        id: "",
-                        created: "",
-                        updated: "",
-                        load: () => Promise.resolve({}),
-                        _loadExpand: () => Promise.resolve({}),
-                        clone: () => ({}),
-                        $clone: () => ({}),
-                        export: () => ({}),
-                        $export: () => ({}),
-                        $isNew: true,
-                      }),
-                    _loadExpand: () =>
-                      Promise.resolve({
-                        id: "",
-                        created: "",
-                        updated: "",
-                        load: () => Promise.resolve({}),
-                        _loadExpand: () => Promise.resolve({}),
-                        clone: () => ({}),
-                        $clone: () => ({}),
-                        export: () => ({}),
-                        $export: () => ({}),
-                        $isNew: true,
-                      }),
-                    clone: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () => Promise.resolve({}),
-                      _loadExpand: () => Promise.resolve({}),
-                      clone: () => ({}),
-                      $clone: () => ({}),
-                      export: () => ({}),
-                      $export: () => ({}),
-                      $isNew: true,
-                    }),
-                    $clone: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () => Promise.resolve({}),
-                      _loadExpand: () => Promise.resolve({}),
-                      clone: () => ({}),
-                      $clone: () => ({}),
-                      export: () => ({}),
-                      $export: () => ({}),
-                      $isNew: true,
-                    }),
-                    export: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () => Promise.resolve({}),
-                      _loadExpand: () => Promise.resolve({}),
-                      clone: () => ({}),
-                      $clone: () => ({}),
-                      export: () => ({}),
-                      $export: () => ({}),
-                      $isNew: true,
-                    }),
-                    $export: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () => Promise.resolve({}),
-                      _loadExpand: () => Promise.resolve({}),
-                      clone: () => ({}),
-                      $clone: () => ({}),
-                      export: () => ({}),
-                      $export: () => ({}),
-                      $isNew: true,
-                    }),
-                    $isNew: true,
-                  }),
-                  $clone: () => ({
-                    id: "",
-                    created: "",
-                    updated: "",
-                    load: () =>
-                      Promise.resolve({ id: "", created: "", updated: "" }),
-                    _loadExpand: () =>
-                      Promise.resolve({ id: "", created: "", updated: "" }),
-                    clone: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () =>
-                        Promise.resolve({ id: "", created: "", updated: "" }),
-                      _loadExpand: () =>
-                        Promise.resolve({ id: "", created: "", updated: "" }),
-                      clone: () => ({
-                        id: "",
-                        created: "",
-                        updated: "",
-                        load: () => Promise.resolve({}),
-                        _loadExpand: () => Promise.resolve({}),
-                        clone: () => ({}),
-                        $clone: () => ({}),
-                        export: () => ({}),
-                        $export: () => ({}),
-                        $isNew: true,
-                      }),
-                      $clone: () => ({
-                        id: "",
-                        created: "",
-                        updated: "",
-                        load: () => Promise.resolve({}),
-                        _loadExpand: () => Promise.resolve({}),
-                        clone: () => ({}),
-                        $clone: () => ({}),
-                        export: () => ({}),
-                        $export: () => ({}),
-                        $isNew: true,
-                      }),
-                      export: () => ({
-                        id: "",
-                        created: "",
-                        updated: "",
-                        load: () => Promise.resolve({}),
-                        _loadExpand: () => Promise.resolve({}),
-                        clone: () => ({}),
-                        $clone: () => ({}),
-                        export: () => ({}),
-                        $export: () => ({}),
-                        $isNew: true,
-                      }),
-                      $export: () => ({
-                        id: "",
-                        created: "",
-                        updated: "",
-                        load: () => Promise.resolve({}),
-                        _loadExpand: () => Promise.resolve({}),
-                        clone: () => ({}),
-                        $clone: () => ({}),
-                        export: () => ({}),
-                        $export: () => ({}),
-                        $isNew: true,
-                      }),
-                      $isNew: true,
-                    }),
-                    $clone: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () =>
-                        Promise.resolve({ id: "", created: "", updated: "" }),
-                      _loadExpand: () =>
-                        Promise.resolve({ id: "", created: "", updated: "" }),
-                      clone: () => ({
-                        id: "",
-                        created: "",
-                        updated: "",
-                        load: () => Promise.resolve({}),
-                        _loadExpand: () => Promise.resolve({}),
-                        clone: () => ({}),
-                        $clone: () => ({}),
-                        export: () => ({}),
-                        $export: () => ({}),
-                        $isNew: true,
-                      }),
-                      $clone: () => ({
-                        id: "",
-                        created: "",
-                        updated: "",
-                        load: () => Promise.resolve({}),
-                        _loadExpand: () => Promise.resolve({}),
-                        clone: () => ({}),
-                        $clone: () => ({}),
-                        export: () => ({}),
-                        $export: () => ({}),
-                        $isNew: true,
-                      }),
-                      export: () => ({
-                        id: "",
-                        created: "",
-                        updated: "",
-                        load: () => Promise.resolve({}),
-                        _loadExpand: () => Promise.resolve({}),
-                        clone: () => ({}),
-                        $clone: () => ({}),
-                        export: () => ({}),
-                        $export: () => ({}),
-                        $isNew: true,
-                      }),
-                      $export: () => ({
-                        id: "",
-                        created: "",
-                        updated: "",
-                        load: () => Promise.resolve({}),
-                        _loadExpand: () => Promise.resolve({}),
-                        clone: () => ({}),
-                        $clone: () => ({}),
-                        export: () => ({}),
-                        $export: () => ({}),
-                        $isNew: true,
-                      }),
-                      $isNew: true,
-                    }),
-                    export: () => ({ id: "", created: "", updated: "" }),
-                    $export: () => ({ id: "", created: "", updated: "" }),
-                    $isNew: true,
-                  }),
-                  export: () => ({ id: "", created: "", updated: "" }),
-                  $export: () => ({ id: "", created: "", updated: "" }),
-                  $isNew: false,
-                  // Add dummy implementations for any other missing methods
-                }}
-                alt={post.title}
-              />
+            <!-- Display the featured image -->
+            {#if post.featuredImage}
+              <img src={post.featuredImage} alt="Featured pic" />
+            {:else}
+              <p>No featured image available.</p>
             {/if}
           </td>
-          <td><a href={`${post.slug}`}>{post.title}</a></td>
+          <td><a href={"http://localhost:5173/posts/" + `${post.slug}`}>{post.title}</a></td>
           <td>{post.updated}</td>
           {#if post.tags}
             {#each post.tags as tag}
               <span class="tag">{tag.trim()}</span>
             {/each}
+          {:else}
+            <span class="tag">No tags</span>
           {/if}
           <td><a href={`${post.id}/edit`}>Edit</a></td>
           <td><a href={`${post.slug}#delete`}>Delete</a></td>
@@ -278,143 +63,17 @@
       {:else}
         <tr>
           <td>
-            {#if post.files && post.files.length > 0}
-              <Image
-                record={{
-                  ...post,
-                  $load: () => {},
-                  _loadExpand: () => Promise.resolve({}),
-                  load: () => Promise.resolve({}),
-                  clone: () => ({
-                    id: "",
-                    created: "",
-                    updated: "",
-                    load: () => Promise.resolve({}),
-                    _loadExpand: () => Promise.resolve({}),
-                    clone: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () => Promise.resolve({}),
-                      _loadExpand: () => Promise.resolve({}),
-                      clone: () => ({}),
-                      $clone: () => ({}),
-                      export: () => ({}),
-                      $export: () => ({}),
-                      $isNew: true,
-                    }),
-                    $clone: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () => Promise.resolve({}),
-                      _loadExpand: () => Promise.resolve({}),
-                      clone: () => ({}),
-                      $clone: () => ({}),
-                      export: () => ({}),
-                      $export: () => ({}),
-                      $isNew: true,
-                    }),
-                    export: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () => Promise.resolve({}),
-                      _loadExpand: () => Promise.resolve({}),
-                      clone: () => ({}),
-                      $clone: () => ({}),
-                      export: () => ({}),
-                      $export: () => ({}),
-                      $isNew: true,
-                    }),
-                    $export: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () => Promise.resolve({}),
-                      _loadExpand: () => Promise.resolve({}),
-                      clone: () => ({}),
-                      $clone: () => ({}),
-                      export: () => ({}),
-                      $export: () => ({}),
-                      $isNew: true,
-                    }),
-                    $isNew: true,
-                  }),
-                  $clone: () => ({
-                    id: "",
-                    created: "",
-                    updated: "",
-                    load: () => Promise.resolve({}),
-                    _loadExpand: () => Promise.resolve({}),
-                    clone: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () => Promise.resolve({}),
-                      _loadExpand: () => Promise.resolve({}),
-                      clone: () => ({}),
-                      $clone: () => ({}),
-                      export: () => ({}),
-                      $export: () => ({}),
-                      $isNew: true,
-                    }),
-                    $clone: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () => Promise.resolve({}),
-                      _loadExpand: () => Promise.resolve({}),
-                      clone: () => ({}),
-                      $clone: () => ({}),
-                      export: () => ({}),
-                      $export: () => ({}),
-                      $isNew: true,
-                    }),
-                    export: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () => Promise.resolve({}),
-                      _loadExpand: () => Promise.resolve({}),
-                      clone: () => ({}),
-                      $clone: () => ({}),
-                      export: () => ({}),
-                      $export: () => ({}),
-                      $isNew: true,
-                    }),
-                    $export: () => ({
-                      id: "",
-                      created: "",
-                      updated: "",
-                      load: () => Promise.resolve({}),
-                      _loadExpand: () => Promise.resolve({}),
-                      clone: () => ({}),
-                      $clone: () => ({}),
-                      export: () => ({}),
-                      $export: () => ({}),
-                      $isNew: true,
-                    }),
-                    $isNew: true,
-                  }),
-                  export: () => ({ id: "", created: "", updated: "" }),
-                  $export: () => ({ id: "", created: "", updated: "" }),
-                  $isNew: false,
-                  // Add dummy implementations for any other missing methods
-                }}
-                file={post.files[0]}
-                thumb="100x100"
-                alt={post.title}
-              />
+            <!-- Display the featured image -->
+            {#if post.featuredImage}
+              <img src={post.featuredImage} alt="Featured pic" />
+            {:else}
+              <p>No featured image available.</p>
             {/if}
           </td>
           <td><a href={post.slug}>{post.title}</a></td>
-
           <td>{post.updated}</td>
           {#if post.tags}
-            {#each post.tags as tag}
-              <span class="tag">{tag.trim()}</span>
-            {/each}
+            <span class="tag">{post.tags}</span>
           {/if}
         </tr>
       {/if}

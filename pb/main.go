@@ -1,12 +1,12 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/joho/godotenv"
 
 	"pocketbase/auditlog"
 	hooks "pocketbase/hooks"
@@ -34,13 +34,13 @@ func goDotEnvVariable(key string) string {
 
 	// load .env file
 	err := godotenv.Load(".env")
-  
+
 	if err != nil {
-	  log.Fatalf("Error loading .env file")
+		log.Fatalf("Error loading .env file")
 	}
-  
+
 	return os.Getenv(key)
-  }
+}
 
 func chatGptHandler(c echo.Context) error {
 	var requestBody struct {
@@ -57,7 +57,6 @@ func chatGptHandler(c echo.Context) error {
 
 	chatGPTAPIKey := goDotEnvVariable("CHATGPT_API_KEY")
 
-
 	result, err := hooks.DoChatGPT(chatGPTAPIKey, requestBody.Prompt)
 	if err != nil {
 		// Before returning an error response
@@ -66,6 +65,28 @@ func chatGptHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"result": result})
+}
+
+func dalleImageHandler(c echo.Context) error {
+	var requestBody struct {
+		Prompt string `json:"prompt"`
+	}
+
+	if err := c.Bind(&requestBody); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+	}
+
+	dalleAPIKey := goDotEnvVariable("CHATGPT_API_KEY")
+	
+	// Call the Dalle-3 API to generate an image based on the prompt
+	// This is a placeholder for the actual Dalle-3 API call
+	imageUrl, err := hooks.DoDalle3(dalleAPIKey, requestBody.Prompt)
+	if err != nil {
+		log.Printf("Error generating image: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate image"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"imageUrl": imageUrl})
 }
 
 func main() {
@@ -102,6 +123,8 @@ func main() {
 
 		// Add this line to register the /api/chatgpt route
 		e.Router.POST("/api/chatgpt", chatGptHandler)
+
+		e.Router.POST("/api/dalle", dalleImageHandler)
 
 		// serves static files from the provided public dir (if exists)
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDirFlag), true))

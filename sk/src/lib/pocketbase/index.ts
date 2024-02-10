@@ -24,31 +24,6 @@ export const authModel = readable<PBRecord | Admin | null>(
   }
 );
 
-// Add this function somewhere in the file
-export async function generateText(prompt: string) {
-  const response = await fetch('http://127.0.0.1:8090/api/chatgpt', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ prompt })
-  }
-  )
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const result = await response.json();
-  // Remove quotes from title and slug
-  if (result.title) {
-    result.title = result.title.replace(/["']/g, "");
-  }
-  if (result.slug) {
-    result.slug = result.slug.replace(/["']/g, "");
-  }
-  return result;
-}
 
 export async function login(
   email: string,

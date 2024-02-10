@@ -83,7 +83,7 @@ func DoChatGPT(apiKey, prompt string) (string, error) {
 		SetBody(map[string]interface{}{
 			"model":      "gpt-3.5-turbo",
 			"messages":   []interface{}{map[string]interface{}{"role": "system", "content": prompt}},
-			"max_tokens": 500,
+			"max_tokens": 200,
 		}).
 		Post("https://api.openai.com/v1/chat/completions")
 
@@ -99,6 +99,36 @@ func DoChatGPT(apiKey, prompt string) (string, error) {
 
 	content := data["choices"].([]interface{})[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
 	return content, nil
+}
+
+func DoDalle3(apiKey, prompt string) (string, error) {
+	client := resty.New()
+
+	response, err := client.R().
+		SetAuthToken(apiKey).
+		SetHeader("Content-Type", "application/json").
+		SetBody(map[string]interface{}{
+			"model":  "dall-e-2",
+			"prompt": prompt,
+			"size":   "512x512",
+		}).
+		Post("https://api.openai.com/v1/images/generations")
+
+	if err != nil {
+		return "", err
+	}
+
+	var data map[string]interface{}
+	err = json.Unmarshal(response.Body(), &data)
+	if err != nil {
+		return "", err
+	}
+
+	// Extract the image URL from the nested data structure
+	imageData := data["data"].([]interface{})[0].(map[string]interface{})
+	imageUrl := imageData["url"].(string)
+
+	return imageUrl, nil
 }
 
 func executeEventActions(app *pocketbase.PocketBase, event string, table string, record *models.Record) {

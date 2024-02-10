@@ -53,10 +53,11 @@ export type HooksRecord = {
 
 export type PostsRecord = {
 	title: string
+	featuredImage?: string
 	body: string
 	slug: string
 	files?: string[]
-	tags?: string[]
+	tags?: string
 	user?: RecordIdString
 }
 
