@@ -54,7 +54,7 @@ export type HooksRecord = {
 
 export type PostsRecord = {
 	title: string	
-	featuredImage?: string
+	featuredImage?: File
 	body: string
 	slug: string
 	files?: string[]

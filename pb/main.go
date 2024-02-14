@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/joho/godotenv"
 
 	"pocketbase/auditlog"
 	hooks "pocketbase/hooks"
@@ -88,6 +89,8 @@ func dalleImageHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]string{"imageUrl": imageUrl})
 }
+
+
 
 func main() {
 	app := pocketbase.New()

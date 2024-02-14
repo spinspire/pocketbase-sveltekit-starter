@@ -7,62 +7,83 @@
   export let data: PageData;
   $: ({ post } = data);
 
-  let selectedFiles: FileList | null = null;
-  let chatGptPrompt = "";
-  let chatGptResponse = "";
-  let chatGptTitle = ""; // New variable for title
-  let chatGptSlug = ""; // New variable for slug
-  let chatGptTags = ""; // New variable for tags
+  let selectedFiles: File[] = [];
+  let chatGptPrompt: string = '';
+  let chatGptResponse: string = '';
+  let chatGptTitle: string = ''; // New variable for title
+  let chatGptSlug: string = ''; // New variable for slug
+  let chatGptTags: string = ''; // New variable for tags
+
+  let featuredImageUrl: string = '';
+
+  function isValidHttpUrl(input: string): boolean {
+    try {
+      const url = new URL(input);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function imageUrlToFile(imageUrl: string, filename: string): Promise<File> {
+    const response = await fetch(imageUrl);
+    if (!response.ok) throw new Error('Image fetch failed');
+    const blob = await response.blob();
+    return new File([blob], filename, { type: blob.type });
+  }
 
   async function submit(e: SubmitEvent) {
+    e.preventDefault();
     post.user = $authModel?.id;
-    if (
-      post.title.includes('"') ||
-      post.title.includes("'") ||
-      post.slug.includes('"') ||
-      post.slug.includes("'")
-    ) {
-      alert(
-        "Title and slug cannot contain double quotes (\") or single quotes (')."
-      );
-      return; // Stop the submission process
+
+    if (featuredImageUrl && isValidHttpUrl(featuredImageUrl)) {
+      try {
+        const imageFile = await imageUrlToFile(featuredImageUrl, "featured.jpg");
+        post.featuredImage = imageFile;
+      } catch (error) {
+        alert('Failed to process featured image. Please try again.');
+        return;
+      }
+    } else {
+      alert('Featured image URL is not valid.');
+      return;
     }
 
-    alertOnFailure(async () => {
-      await save("posts", post);
-      goto("../..");
-    });
+    try {
+      await save('posts', { ...post });
+      goto('../..');
+    } catch (error) {
+      alert('Failed to save post. Please try again.');
+    }
   }
+
 
   function handleFilesChange(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files) {
-      const selectedFiles = input.files;
-      // If you need to convert FileList to an array for other uses, do it here
-      // For example, to store file names: fileNames = Array.from(selectedFiles).map(file => file.name);
+      selectedFiles = Array.from(input.files);
     }
   }
 
+  // Function to generate image URL from Dalle and set it as featuredImageUrl
   async function generateImageFromDalle(prompt: string) {
-    const response = await fetch("/api/dalle", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt: "Generate an image to represent an article on this topic: " + prompt }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to generate image from Dalle-3");
+    try {
+      const response = await fetch('/api/dalle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+      if (!response.ok) throw new Error('Failed to generate image from Dalle-3');
+      const { imageUrl } = await response.json();
+      if (!isValidHttpUrl(imageUrl)) throw new Error('Invalid URL for featured image');
+      featuredImageUrl = imageUrl; // Set the image URL
+    } catch (error) {
+      alert((error instanceof Error) ? error.message : 'An unknown error occurred');
     }
-
-    const { imageUrl } = await response.json();
-    post.featuredImage = imageUrl; // Update post with the new featured image URL
   }
 
-  // When submitting, ensure you handle `selectedFiles` appropriately, e.g., uploading them
-
-  async function generateTextFromChatGPT() {
+  
+  async function generateFromChatGPT() {
   // Parallelize operations
   const [imageResponse, titleResponse, tagsResponse, bodyResponse] = await Promise.all([
     generateImageFromDalle(chatGptPrompt),
@@ -89,6 +110,9 @@
   post.body = bodyResponse;
 }
 
+// Assume generateGptRequest is implemented to make API requests and handle responses appropriately
+
+
   async function generateGptRequest(prompt: string) {
     const response = await fetch("/api/chatgpt", {
       method: "POST",
@@ -103,28 +127,75 @@
     const data = await response.json();
     return data.result; // Assuming the response has a 'result' field
   }
+
 </script>
 
-<!-- In your Svelte component -->
+
+{#if featuredImageUrl}
+  <div class="featured-image">
+    <img src={featuredImageUrl} alt="Featured Pic" />
+  </div>
+{/if}
+
+<form on:submit|preventDefault={submit}>
+  <label for="title">Title</label>
+  <input id="title" name="title" bind:value={post.title} placeholder="Title" />
+
+  <label for="slug">Slug</label>
+  <input id="slug" name="slug" bind:value={post.slug} placeholder="Slug" />
+
+  <label for="body">Body</label>
+  <textarea
+    id="body"
+    name="body"
+    bind:value={post.body}
+    placeholder="Body"
+    rows="10"
+  ></textarea>
+
+  <!-- <label for="files">Upload Files</label>
+  <input id="files" type="file" on:change={handleFilesChange} multiple />
+ -->
+  <label for="tags">Tags</label>
+  <input id="tags" name="tags" bind:value={post.tags} placeholder="Tags" />
+
+  <button type="submit">Submit</button>
+</form>
+
+<div>
+  <textarea
+    placeholder="Enter ChatGPT Prompt"
+    bind:value={chatGptPrompt}
+    rows="3"
+  ></textarea>
+  <button type="button" on:click={generateFromChatGPT}
+    >Generate with ChatGPT</button
+  >
+</div>
+
 <style>
-  form, div {
+  form,
+  div {
     display: flex;
     flex-direction: column;
     gap: 15px;
     margin-bottom: 20px;
   }
 
-  input, textarea, button {
+  input,
+  textarea,
+  button {
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #ccc;
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
   }
 
-  input:focus, textarea:focus {
+  input:focus,
+  textarea:focus {
     outline: none;
     border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
   }
 
   button {
@@ -150,33 +221,11 @@
     border: 1px dashed #ccc;
   }
 
-  /* Adjustments for mobile screens */
   @media (max-width: 600px) {
-    form, div {
+    form,
+    div {
       width: 90%;
       margin: 0 auto;
     }
   }
 </style>
-
-<form on:submit|preventDefault={submit}>
-  {#if post.featuredImage}
-    <img src={post.featuredImage} style="size: 400px" alt="Featured AI Pic" />
-  {/if}
-  <input name="title" bind:value={post.title} placeholder="Title" />
-  <input name="slug" bind:value={post.slug} placeholder="Slug" />
-  <textarea name="body" bind:value={post.body} placeholder="Body" rows="10"></textarea>
-  <input type="file" on:change={handleFilesChange} multiple />
-  <input name="tags" bind:value={post.tags} placeholder="Tags" />
-  <button type="submit">Submit</button>
-</form>
-
-<div>
-  <textarea
-    placeholder="Enter ChatGPT Prompt"
-    bind:value={chatGptPrompt}
-    rows="3"
-  ></textarea>
-  <button type="button" on:click={generateTextFromChatGPT}>Generate with ChatGPT</button>
-</div>
-
