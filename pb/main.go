@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
-
 	"pocketbase/auditlog"
 	hooks "pocketbase/hooks"
 
@@ -78,19 +77,23 @@ func dalleImageHandler(c echo.Context) error {
 	}
 
 	dalleAPIKey := goDotEnvVariable("CHATGPT_API_KEY")
-	
+
+	apiKey := dalleAPIKey
+	prompt := requestBody.Prompt
+	model := "dall-e-2"
+	size := "256x256"
+
 	// Call the Dalle-3 API to generate an image based on the prompt
 	// This is a placeholder for the actual Dalle-3 API call
-	imageUrl, err := hooks.DoDalle3(dalleAPIKey, requestBody.Prompt)
+	fileName, err := hooks.DoDalle3(apiKey, prompt, model, size)
 	if err != nil {
 		log.Printf("Error generating image: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate image"})
 	}
-
-	return c.JSON(http.StatusOK, map[string]string{"imageUrl": imageUrl})
+	log.Printf("Generated image saved to: %s", fileName)
+	// Serve the image file directly
+	return c.File(fileName)
 }
-
-
 
 func main() {
 	app := pocketbase.New()

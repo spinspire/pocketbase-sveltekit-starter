@@ -1,8 +1,8 @@
 package hooks
 
 import (
+	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/pocketbase/dbx"
@@ -101,16 +102,18 @@ func DoChatGPT(apiKey, prompt string) (string, error) {
 	return content, nil
 }
 
-func DoDalle3(apiKey, prompt string) (string, error) {
+func DoDalle3(apiKey, prompt, model, size string) (string, error) {
 	client := resty.New()
 
 	response, err := client.R().
 		SetAuthToken(apiKey).
 		SetHeader("Content-Type", "application/json").
 		SetBody(map[string]interface{}{
-			"model":  "dall-e-2",
-			"prompt": prompt,
-			"size":   "512x512",
+			"model":          model,
+			"n":              1,
+			"prompt":         prompt,
+			"size":           size,
+			"response_format": "b64_json",
 		}).
 		Post("https://api.openai.com/v1/images/generations")
 
@@ -118,18 +121,53 @@ func DoDalle3(apiKey, prompt string) (string, error) {
 		return "", err
 	}
 
-	var data map[string]interface{}
-	err = json.Unmarshal(response.Body(), &data)
+	if response.StatusCode() != http.StatusOK {
+		return "", fmt.Errorf("unexpected status code: %d, body: %s", response.StatusCode(), response.String())
+	}
+
+	// Log the response to a file
+	logFile, err := os.OpenFile("api_responses.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer logFile.Close()
+	log.SetOutput(logFile)
+	log.Println("response", response.String())
+
+	var respBody struct {
+		Created int64                   `json:"created"`
+		Data    []map[string]interface{} `json:"data"`
+	}
+	err = json.Unmarshal(response.Body(), &respBody)
 	if err != nil {
 		return "", err
 	}
 
-	// Extract the image URL from the nested data structure
-	imageData := data["data"].([]interface{})[0].(map[string]interface{})
-	imageUrl := imageData["url"].(string)
+	// Check if data array is not empty and contains the expected field
+	if len(respBody.Data) == 0 {
+		return "", fmt.Errorf("response data array is empty")
+	}
+	b64Data, ok := respBody.Data[0]["b64_json"].(string)
+	if !ok {
+		return "", fmt.Errorf("base64 image data not found in response")
+	}
 
-	return imageUrl, nil
+	// Decode the base64 string
+	imgData, err := base64.StdEncoding.DecodeString(b64Data)
+	if err != nil {
+		return "", err
+	}
+
+	// Generate a unique file name and write the decoded data to a file
+	fileName := fmt.Sprintf("output_image_%v.png", time.Now().Unix())
+	err = os.WriteFile(fileName, imgData, 0644)
+	if err != nil {
+		return "", err
+	}
+
+	return fileName, nil
 }
+
 
 func executeEventActions(app *pocketbase.PocketBase, event string, table string, record *models.Record) {
 	rows := getHookRows(app.DB(), table, event)
@@ -157,7 +195,7 @@ func executeEventAction(app *pocketbase.PocketBase, event, table, action_type, a
 	case "email":
 		return doEmail(app, action, action_params, record)
 	default:
-		return errors.New(fmt.Sprintf("Unknown action_type: %s", action_type))
+		return fmt.Errorf("unknown action_type: %s", action_type)
 	}
 }
 
@@ -208,5 +246,3 @@ func doPost(action, action_params string, record *models.Record) error {
 	}
 	return nil
 }
-
-
