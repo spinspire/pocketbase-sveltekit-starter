@@ -17,59 +17,35 @@
     e.preventDefault();
     post.user = $authModel?.id;
 
-    // Handle image upload if a new image has been generated
-    if (post.featuredImage instanceof File) {
-      try {
-        // Upload the File object (post.featuredImage) to the server
-        const formData = new FormData();
-        formData.append("image", post.featuredImage);
-        // Replace '/api/upload' with your actual image upload endpoint
-        const uploadResponse = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-        if (!uploadResponse.ok) throw new Error("Image upload failed");
-        const uploadResult = await uploadResponse.json();
-        // Assume the server returns the URL or identifier of the uploaded image
-        post.featuredImage = uploadResult.url; // Update post.featuredImage with the URL
-      } catch (error) {
-        alert(
-          error instanceof Error
-            ? error.message
-            : "An unknown error occurred during image upload"
-        );
-        return; // Exit the function to prevent saving the post without a valid image
-      }
-    }
-
     // Proceed with saving the post
     try {
-      await save("posts", post); // Now post.featuredImage should be a URL or identifier
+      await save("posts", post);
       goto("../..");
     } catch (error) {
       alert("Failed to save post. Please try again.");
     }
   }
 
-  async function generateImageFromDalle(prompt: string) {
-    try {
-      const response = await fetch("/api/dalle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      });
-      if (!response.ok)
-        throw new Error("Failed to generate image from Dalle-3");
-      const blob = await response.blob(); // Get the blob from the response
-      post.featuredImage = new File([blob], "featured.png", {
-        type: "image/png",
-      }); // Convert blob to File object
-    } catch (error) {
-      alert(
-        error instanceof Error ? error.message : "An unknown error occurred"
-      );
-    }
+  async function generateImageFromDalle(prompt) {
+  try {
+    const response = await fetch("/api/dalle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
+    if (!response.ok)
+      throw new Error("Failed to generate image from Dalle-3");
+    const data = await response.json(); // Parse the JSON response
+    post.featuredImage = data.url; // Use the URL returned from the server
+    console.log("Featured Image URL:", post.featuredImage);
+  } catch (error) {
+    console.error("Error:", error);
+    alert(
+      error instanceof Error ? error.message : "An unknown error occurred"
+    );
   }
+}
+
 
   async function generateFromChatGPT() {
     // Parallelize operations
@@ -109,7 +85,7 @@
 </script>
 
 {#if post.featuredImage}
-  <img src={URL.createObjectURL(post.featuredImage)} alt="Featured Pic" />
+  <img src={post.featuredImage} alt="Featured Pic" />
 {/if}
 
 <form on:submit|preventDefault={submit}>
@@ -135,6 +111,7 @@
   <input id="tags" name="tags" bind:value={post.tags} placeholder="Tags" />
 
   <button type="submit">Submit</button>
+  <img src={`http://localhost:8090/dalle_image_1708071009.png`} alt="Featured Pic" />
 </form>
 
 <div>

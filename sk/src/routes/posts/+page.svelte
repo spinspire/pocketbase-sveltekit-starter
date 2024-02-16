@@ -43,12 +43,19 @@
           <td>
             <!-- Display the featured image -->
             {#if post.featuredImage}
-              <img src={post.featuredImage} alt="Featured pic" />
+            <img
+              src={post.featuredImage}
+              alt="Featured Pic"
+            />
             {:else}
               <p>No featured image available.</p>
             {/if}
           </td>
-          <td><a href={"http://localhost:5173/posts/" + `${post.slug}`}>{post.title}</a></td>
+          <td
+            ><a href={"http://localhost:5173/posts/" + `${post.slug}`}
+              >{post.title}</a
+            ></td
+          >
           <td>{post.updated}</td>
           {#if post.tags}
             {#each post.tags as tag}
@@ -65,7 +72,10 @@
           <td>
             <!-- Display the featured image -->
             {#if post.featuredImage}
-              <img src={post.featuredImage} alt="Featured pic" />
+              <img
+                src={post.featuredImage}
+                alt="Featured Pic"
+              />
             {:else}
               <p>No featured image available.</p>
             {/if}

@@ -1,15 +1,19 @@
 package main
 
 import (
+	"encoding/base64"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
-	"github.com/joho/godotenv"
 	"pocketbase/auditlog"
 	hooks "pocketbase/hooks"
+
+	"github.com/joho/godotenv"
 
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
@@ -22,10 +26,10 @@ import (
 func defaultPublicDir() string {
 	if strings.HasPrefix(os.Args[0], os.TempDir()) {
 		// most likely ran with go run
-		return "./pb_public"
+		return "./pb_public/"
 	}
 
-	return filepath.Join(os.Args[0], "../pb_public")
+	return filepath.Join(os.Args[0], "../pb_public/")
 }
 
 // use godot package to load/read the .env file and
@@ -76,29 +80,46 @@ func dalleImageHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
 	}
 
-	dalleAPIKey := goDotEnvVariable("CHATGPT_API_KEY")
-
-	apiKey := dalleAPIKey
+	dalleAPIKey := goDotEnvVariable("CHATGPT_API_KEY") // Ensure this is correctly named. Adjust according to your actual environment variable retrieval function
 	prompt := requestBody.Prompt
-	model := "dall-e-2"
-	size := "256x256"
+	model := "dall-e-2" // Make sure to use the correct model name
+	size := "256x256"   // Adjust based on what sizes your model supports
 
-	// Call the Dalle-3 API to generate an image based on the prompt
-	// This is a placeholder for the actual Dalle-3 API call
-	fileName, err := hooks.DoDalle3(apiKey, prompt, model, size)
+	b64Data, err := hooks.DoDalle3(dalleAPIKey, prompt, model, size)
 	if err != nil {
 		log.Printf("Error generating image: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate image"})
 	}
-	log.Printf("Generated image saved to: %s", fileName)
-	// Serve the image file directly
-	return c.File(fileName)
+
+	// Decode base64 string to []byte
+	data, err := base64.StdEncoding.DecodeString(b64Data)
+	if err != nil {
+		log.Printf("Error decoding base64 data: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to decode image data"})
+	}
+
+	// Create a unique file name
+	fileName := fmt.Sprintf("dalle_image_%v.png", time.Now().Unix())
+	filePath := filepath.Join("./pb_public/", fileName) // Adjust the path as necessary
+
+	// Write data to file
+	err = os.WriteFile(filePath, data, 0644)
+	if err != nil {
+		log.Printf("Error writing image to file: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to save image file"})
+	}
+
+	// Construct the full URL to return
+	url := fmt.Sprintf("http://localhost:8090/%s", fileName)
+
+	// Return the full URL to the frontend
+	return c.JSON(http.StatusOK, map[string]interface{}{"url": url})
 }
 
 func main() {
 	app := pocketbase.New()
 
-	var publicDirFlag string
+	var publicDirFlag string = "./pb_public" // Ensure this points to the correct directory
 
 	// add "--publicDir" option flag
 	app.RootCmd.PersistentFlags().StringVar(
@@ -147,7 +168,7 @@ func main() {
 			// },
 		})
 
-		return nil
+				return nil
 	})
 
 	if err := app.Start(); err != nil {
