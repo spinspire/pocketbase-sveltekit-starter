@@ -22,75 +22,108 @@
   });
 </script>
 
-<div>
-  <span>
-    {#if $authModel}
-      <a href="new/edit">Create New</a>
-    {:else}
-      <p>Please login to create new posts.</p>
-    {/if}
-    <div style="text-align: right;">
-      <button on:click={deleteAllPosts}>Delete All Posts</button>
-    </div></span
-  >
+<style>
+  .create-link, .edit-link, .delete-link {
+    color: #007bff;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  .create-link:hover, .edit-link:hover, .delete-link:hover {
+    text-decoration: underline;
+  }
+
+  .delete-all-button {
+    background-color: #dc3545; /* Bootstrap danger color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    float: right; /* Aligns the button to the right */
+  }
+
+  .delete-all-button:hover {
+    background-color: #c82333; /* Darker shade on hover */
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  td, th {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+
+  img {
+    width: 100px; /* Fixed width for images */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 5px;
+  }
+
+  .no-posts {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .tag {
+    display: inline-block;
+    background-color: #333333;
+    border-radius: 20px;
+    padding: 3px 10px;
+    margin: 2px;
+    font-size: 12px;
+  }
+</style>
+
+<div class="action-buttons">
+  {#if $authModel}
+    <a class="create-link" href="new/edit">Create New</a>
+  {:else}
+    <p>Please login to create new posts.</p>
+  {/if}
+  <button class="delete-all-button" on:click={deleteAllPosts}>Delete All Posts</button>
 </div>
 <hr />
+{#if $posts.items.length > 0}
 <table>
   <tbody>
     {#each $posts.items as post}
       {#if $authModel?.id == post.user}
         <tr>
           <td>
-            <!-- Display the featured image -->
             {#if post.featuredImage}
-            <img
-              src={post.featuredImage}
-              alt="Featured Pic"
-            />
+              <img src={post.featuredImage} alt="Featured Pic" />
             {:else}
               <p>No featured image available.</p>
             {/if}
           </td>
-          <td
-            ><a href={"http://localhost:5173/posts/" + `${post.slug}`}
-              >{post.title}</a
-            ></td
-          >
-          <td>{post.updated}</td>
-          {#if post.tags}
-            {#each post.tags as tag}
-              <span class="tag">{tag.trim()}</span>
-            {/each}
-          {:else}
-            <span class="tag">No tags</span>
-          {/if}
-          <td><a href={`${post.id}/edit`}>Edit</a></td>
-          <td><a href={`${post.slug}#delete`}>Delete</a></td>
-        </tr>
-      {:else}
-        <tr>
           <td>
-            <!-- Display the featured image -->
-            {#if post.featuredImage}
-              <img
-                src={post.featuredImage}
-                alt="Featured Pic"
-              />
+            <a class="post-link" href={"http://localhost:5173/posts/" + `${post.slug}`}>{post.title}</a>
+          </td>
+          <td>{post.updated}</td>
+          <td>
+            {#if post.tags && post.tags.length}
+              {#each post.tags as tag}
+                <span class="tag">{tag.trim()}</span>
+              {/each}
             {:else}
-              <p>No featured image available.</p>
+              <span class="tag">No tags</span>
             {/if}
           </td>
-          <td><a href={post.slug}>{post.title}</a></td>
-          <td>{post.updated}</td>
-          {#if post.tags}
-            <span class="tag">{post.tags}</span>
-          {/if}
+          <td><a class="edit-link" href={`${post.id}/edit`}>Edit</a></td>
+          <td><a class="delete-link" href={`${post.slug}#delete`}>Delete</a></td>
         </tr>
       {/if}
-    {:else}
-      <tr>
-        <td>No posts found.</td>
-      </tr>
     {/each}
   </tbody>
 </table>
+{:else}
+  <div class="no-posts">No posts found.</div>
+{/if}
