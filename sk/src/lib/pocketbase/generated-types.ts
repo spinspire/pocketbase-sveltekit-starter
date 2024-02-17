@@ -58,6 +58,7 @@ export type PostsRecord = {
 	slug: string
 	files?: string[]
 	tags?: string
+	blogSummary?: string
 	user?: RecordIdString
 }
 

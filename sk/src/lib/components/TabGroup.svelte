@@ -15,9 +15,9 @@
   <slot />
 </div>
 
-<style lang="scss">
+<style>
   .tabs {
-    border-bottom: solid var(--tab-color-active-bg, white) 2px;
+    border-bottom: 2px solid var(--tab-color-active-bg, white);
   }
   .tab-content {
     padding: 1em 0;

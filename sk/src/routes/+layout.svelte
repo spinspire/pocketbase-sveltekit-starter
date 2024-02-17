@@ -1,23 +1,23 @@
 <script context="module">
-  import "../app.scss";
-  import { beforeNavigate } from "$app/navigation";
-  import { base } from "$app/paths";
-  import { metadata } from "$lib/app/stores";
-  import Alerts from "$lib/components/Alerts.svelte";
-  import Nav from "$lib/components/Nav.svelte";
-  import { site, sponsor } from "$lib/config";
+import "../app.scss";
+import { beforeNavigate } from "$app/navigation";
+import { base } from "$app/paths";
+import { metadata } from "$lib/app/stores";
+import Alerts from "$lib/components/Alerts.svelte";
+import Nav from "$lib/components/Nav.svelte";
+import { site, sponsor } from "$lib/config";
 </script>
 
 <script lang="ts">
-  import LoginBadge from "$lib/components/LoginBadge.svelte";
+import "../app.pcss";
 
-  $: title = $metadata.title ? $metadata.title + " | " + site.name : site.name;
-  $: description = $metadata.description ?? site.description;
-  $: headline = $metadata.headline ?? $metadata.title;
-  // reset metadata on navigation so that the new page inherits nothing from the old page
-  beforeNavigate(() => {
-    $metadata = {};
-  });
+$: title = $metadata.title ? $metadata.title + " | " + site.name : site.name;
+$: description = $metadata.description ?? site.description;
+$: headline = $metadata.headline ?? $metadata.title;
+// reset metadata on navigation so that the new page inherits nothing from the old page
+beforeNavigate(() => {
+  $metadata = {};
+});
 </script>
 
 <svelte:head>
@@ -26,38 +26,38 @@
 </svelte:head>
 
 <header>
-  <a href={`${base}/`} class="logo"
-    ><img src={`${base}/favicon.ico`} alt="application logo" /></a
-  >
-  <Nav />
-  <LoginBadge />
+  <div class="min-h-full">
+    <Nav></Nav>
+  </div>
 </header>
+
 <main>
-  {#if headline}
-    <h1>{headline}</h1>
-  {/if}
-  <Alerts />
-  <slot />
+  <div class="bg-base-100">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 class="text-primary text-3xl font-bold tracking-tight sm:text-4xl">
+          {#if headline}
+            {headline}
+          {/if}
+        </h2>
+        <p class="text-secondary mt-2 text-lg leading-8">
+          {#if description}
+            {description}
+          {/if}
+        </p>
+        <Alerts></Alerts>
+      </div>
+      <slot />
+    </div>
+  </div>
 </main>
+
 <footer>
   <div>
     <em>{site.name}</em> is an
-    <a href={site.source_url} target="_blank" rel="noreferrer"
-      >Open Source project</a
-    >
-    sponsored by
-    <a href={sponsor.url} target="_blank" rel="noreferrer">{sponsor.name}</a>.
+    <a href={site.source_url} target="_blank" rel="noreferrer">modible 2024</a>
   </div>
 </footer>
 
-<style lang="scss">
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    .logo {
-      width: 2rem;
-      height: 2rem;
-    }
-  }
+<style>
 </style>

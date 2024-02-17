@@ -14,86 +14,78 @@
   let passwordConfirm: string;
   let create = false;
   let admin = false;
+  let activeTab = signup ? 'SignUp' : 'SignIn'; // Add this line
 
   async function submit() {
     if (create) {
-      await coll.create({ email, name, password, passwordConfirm });
-    }
-    if (admin) {
-      await client.admins.authWithPassword(email, password);
+      try {
+        await coll.create({ email, name, password, passwordConfirm });
+        // Handle success (e.g., navigate to another page or show a success message)
+      } catch (error) {
+        console.error("Error creating user:", error);
+        // Handle error (e.g., show an error message)
+      }
+    } else if (admin) {
+      try {
+        await client.admins.authWithPassword(email, password);
+        // Handle admin auth success
+      } catch (error) {
+        console.error("Admin authentication error:", error);
+        // Handle error
+      }
     } else {
-      await coll.authWithPassword(email, password);
+      try {
+        await coll.authWithPassword(email, password);
+        // Handle user auth success
+      } catch (error) {
+        console.error("User authentication error:", error);
+        // Handle error
+      }
     }
   }
 </script>
 
-<form on:submit|preventDefault={submit}>
+<form on:submit|preventDefault={submit} class="form-control w-full max-w-xs">
   {#if passwordLogin}
-    {#if signup}
-      <TabGroup active="SignIn">
-        <div slot="tabs">
-          <Tab key="SignIn">Sign In</Tab>
-          <Tab key="SignUp">Sign Up</Tab>
-        </div>
-        <TabContent key="SignIn">
-          <input bind:value={email} required type="text" placeholder="email" />
-          <input
-            bind:value={password}
-            required
-            type="password"
-            placeholder="password"
-          />
-          <label title="sign-in as admin"
-            ><input type="checkbox" bind:checked={admin} />Admin</label
-          >
-          <button type="submit" on:click={() => (create = false)}
-            >Sign In</button
-          >
-        </TabContent>
+    <div class="tabs">
+      <a class="tab tab-bordered {activeTab === 'SignIn' ? 'tab-active' : ''}" on:click={() => (activeTab = 'SignIn', signup = false)}>Sign In</a>
+      <a class="tab tab-bordered {activeTab === 'SignUp' ? 'tab-active' : ''}" on:click={() => (activeTab = 'SignUp', signup = true)}>Sign Up</a>
+    </div>
 
-        <TabContent key="SignUp">
-          <input bind:value={email} required type="text" placeholder="email" />
-          <input
-            bind:value={password}
-            required
-            type="password"
-            placeholder="password"
-          />
-          <input
-            bind:value={passwordConfirm}
-            required
-            type="password"
-            placeholder="confirm password"
-          />
-          <input
-            bind:value={name}
-            required
-            type="text"
-            placeholder="name / label"
-          />
-          <input type="hidden" name="register" value={true} />
-          <button type="submit" on:click={() => (create = true)}>Sign Up</button
-          >
-        </TabContent>
-      </TabGroup>
-    {:else}
-      <h2>Sign In</h2>
-      <input bind:value={email} required type="text" placeholder="email" />
-      <input
-        bind:value={password}
-        required
-        type="password"
-        placeholder="password"
-      />
-      <button type="submit" on:click={() => (create = false)}>Sign In</button>
+    {#if activeTab === 'SignIn'}
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Email</span>
+        </label>
+        <input class="input input-bordered" bind:value={email} required type="text" placeholder="email" />
+        <label class="label">
+          <span class="label-text">Password</span>
+        </label>
+        <input class="input input-bordered" bind:value={password} required type="password" placeholder="password" />
+        <label class="cursor-pointer label">
+          <span class="label-text">Admin</span> 
+          <input type="checkbox" class="checkbox" bind:checked={admin} />
+        </label>
+        <button class="btn btn-primary" type="submit" on:click={() => (create = false)}>Sign In</button>
+      </div>
+    {:else if activeTab === 'SignUp'}
+      <div class="form-control">
+        <input class="input input-bordered" bind:value={email} required type="text" placeholder="email" />
+        <input class="input input-bordered" bind:value={password} required type="password" placeholder="password" />
+        <input class="input input-bordered" bind:value={passwordConfirm} required type="password" placeholder="confirm password" />
+        <input class="input input-bordered" bind:value={name} required type="text" placeholder="name / label" />
+        <input type="hidden" name="register" value={true} />
+        <button class="btn btn-primary" type="submit" on:click={() => (create = true)}>Sign Up</button>
+      </div>
     {/if}
   {/if}
+  
   {#await coll.listAuthMethods({ $autoCancel: false }) then methods}
-    {#each methods.authProviders as p}
-      <button type="button" on:click={() => providerLogin(p, coll)}
-        >Sign-in with {p.name}</button
-      >
-    {/each}
+    <div class="pt-4">
+      {#each methods.authProviders as p}
+        <button class="btn btn-outline" type="button" on:click={() => providerLogin(p, coll)}>Sign-in with {p.name}</button>
+      {/each}
+    </div>
   {:catch}
     <!-- pocketbase not working -->
   {/await}

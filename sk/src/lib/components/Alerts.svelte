@@ -65,24 +65,4 @@
 </article>
 
 <style>
-  .dismiss {
-    cursor: pointer;
-    padding: 0px 5px;
-    border-radius: 50%;
-  }
-  blockquote {
-    margin: 0 0;
-  }
-  .success {
-    color: var(--links);
-    border-left-color: var(--links);
-  }
-  .warning {
-    color: var(--variable);
-    border-left-color: var(--variable);
-  }
-  .error {
-    color: var(--danger);
-    border-left-color: var(--danger);
-  }
 </style>
