@@ -5,7 +5,7 @@ import LoginBadge from "$lib/components/LoginBadge.svelte";
 const links = [
   ["/create/", "create"],
   ["/posts/", "remember"],
-  ["/hello/", "inspire"],
+  ["/inspire/", "inspire"],
   ["/explore/", "explore"],
   ["/reflect/", "reflect"],
 ];
