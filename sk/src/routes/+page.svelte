@@ -1,6 +1,22 @@
 <script lang="ts">
-  import { metadata } from "$lib/app/stores";
-  $metadata.title = "Home";
+import { metadata } from "$lib/app/stores";
+$metadata.title = "mind";
+
+$: test = "";
 </script>
 
-<a href="/hello">hello</a>
+<div>
+  <main class="container mx-auto my-12 px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-8 justify-center">
+      <!-- <a href="new/edit">hello</a> -->
+      <!-- Sidebar -->
+      <aside class="space-y-6">
+        <article class="prose p-6">
+          <h1>Welcome to Your Creative Space</h1>
+        <h2>Where ideas flow and grow</h2>
+        <p>Welcome to a minimalist platform designed for thinkers, creators, and dreamers. Here, your ideas can bloom into beautiful creations, guided by inspiration and powered by technology. Dive into your personal journal, explore new concepts, and let your creativity soar. Welcome to simplicity. Welcome to focus. Welcome to your new creative haven.</p>    
+        </article>
+      </aside>
+    </div>
+  </main>
+</div>

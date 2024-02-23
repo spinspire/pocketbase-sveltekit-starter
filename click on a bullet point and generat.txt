@@ -1,0 +1,115 @@
+click on a bullet point and generate a new article
+generate a tree based on the article tags and titles
+
+-------
+Remember
+
+One Sentence.
+->
+Interpret users intent
+-> respond with 3 different interpretations of the users entry
+User selects an option
+Blog is generated based on user selection.
+
+-------
+Create
+
+1) User can view a blog a click bullet points to generate new articles
+2) User can enter a new statement
+->
+Interpret users intent
+-> respond with 3 different interpretations of the users entry
+User selects an option
+Blog is generated based on user selection.
+3) User can ask the AI to generate 3 new concepts/ideas based on the article
+-> User can choose which one the generate a new article
+
+User can enter notes about the blog
+
+-------
+Inspire
+
+User can view a tree of the blogs.
+User can select tags to filter blogs
+User can add multiple blogs, and generate a new blog based on them
+
+This will have a left pane and a main window
+
+The left pane will have the tree
+
+you can search the tags in a search menu and it will change the main view to the returned blogs
+
+----------------
+
+Project Overview: AI Journal Webapp
+Menu System and Navigation:
+A fixed, globally accessible menu provides seamless navigation across the app, featuring links to all main pages: Home (Create Page), Remember, Inspire, Explore, Reflect, and any other utility pages like Settings or Help.
+The menu integrates user-centric features like quick access to recent documents, a search bar for content within the app, and user profile settings.
+Pages and Functionalities:
+Home (Create Page)
+
+Functionality: Central hub for content creation, featuring a minimalist design with a versatile input box for text, links, or questions. The system dynamically responds based on the type of input.
+Data Interactions: Inputs are processed to generate content, parse links, or provide answers. User-generated content is saved and can be linked or referenced in other areas of the app.
+Prototype Code: Function to process user input and determine action.
+python
+Copy code
+def process_input(user_input):
+    # Pseudocode to categorize input type
+    if is_link(user_input):
+        return parse_link(user_input)
+    elif is_question(user_input):
+        return generate_answer(user_input)
+    else:
+        return generate_content(user_input)
+Remember Page
+
+Functionality: Allows users to input a thought and receive multiple interpretations or expansions. Users select one to develop into a full article.
+Data Interactions: Inputs and selections are stored for user history and can influence future content recommendations or interpretations.
+Prototype Code: Function to interpret user input.
+python
+Copy code
+def interpret_thought(user_thought):
+    # Generate interpretations (simplified)
+    interpretations = generate_interpretations(user_thought)
+    return interpretations
+Inspire Page
+
+Functionality: Visual and interactive exploration of blog connections and content synthesis based on selected blogs or tags.
+Data Interactions: Uses tag and content metadata to organize and display connections. User selections for synthesis are processed to create new, combined content.
+Prototype Code: Function to synthesize content from selections.
+python
+Copy code
+def synthesize_content(selected_blogs):
+    # Combine content from selected blogs
+    combined_content = combine(selected_blogs)
+    return combined_content
+Explore Page
+
+Functionality: Discovery of AI-curated content and random content suggestions. Includes personalized recommendations based on user activity.
+Data Interactions: Tracks user interactions to refine recommendations. External data (e.g., trending topics) may be incorporated for curation.
+Prototype Code: Function for personalized recommendations.
+python
+Copy code
+def get_recommendations(user_profile):
+    # Fetch recommendations based on user profile
+    recommendations = fetch_curated_content(user_profile)
+    return recommendations
+Reflect Page
+
+Functionality: Private space for journaling and personal reflection with prompts based on user activity or significant dates. Offers growth tracking and insights.
+Data Interactions: Interacts with user-generated content and activity logs to provide personalized prompts and track personal growth metrics.
+Prototype Code: Function to generate reflection prompts.
+python
+Copy code
+def generate_reflection_prompt(user_activity):
+    # Generate prompts based on user activity
+    prompt = create_prompt(user_activity)
+    return prompt
+Interconnections and Data Flow:
+User Profile and Activity Tracking: Central to personalizing experiences across Explore, Reflect, and personalized content recommendations. User data, including preferences, content interactions, and history, is stored securely and used to tailor app interactions.
+Content Creation and Sharing: Content generated or curated by the user in the Create and Remember pages can be shared, tagged, and integrated into the Inspire and Explore pages for broader community engagement.
+External Data Integration: For the Explore page and content parsing features (e.g., summarizing shared links), external APIs or scraping techniques may be employed, adhering to privacy and copyright laws.
+Implementation Considerations:
+Security and Privacy: Ensure user data is handled securely, with clear privacy policies and compliance with regulations (e.g., GDPR).
+Scalability: Design backend systems to handle increasing amounts of user data and content efficiently.
+User Experience: Focus on intuitive design and seamless navigation across pages, ensuring responsiveness and accessibility.

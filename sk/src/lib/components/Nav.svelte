@@ -2,12 +2,14 @@
 import { base } from "$app/paths";
 import { page } from "$app/stores";
 import LoginBadge from "$lib/components/LoginBadge.svelte";
-import ThemeSwitch from "$lib/components/ThemeSwitch.svelte";
 const links = [
-  ["/", "create"],
+  ["/create/", "create"],
   ["/posts/", "remember"],
   ["/hello/", "inspire"],
+  ["/explore/", "explore"],
+  ["/reflect/", "reflect"],
 ];
+
 </script>
 
 <nav>
@@ -42,7 +44,7 @@ const links = [
           {/each}
         </ul>
       </div>
-      <a href="/" class="btn btn-ghost text-xl">modMemory</a>
+      <a href="/" class="btn btn-ghost text-xl">mind</a>
     </div>
     <div class="navbar-center hidden lg:flex">
       <ul class="menu menu-horizontal px-1">
@@ -53,7 +55,6 @@ const links = [
       </ul>
     </div>
     <div class="navbar-end">
-      <ThemeSwitch></ThemeSwitch>
       <LoginBadge></LoginBadge>
     </div>
   </div>

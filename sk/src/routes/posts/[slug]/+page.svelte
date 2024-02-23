@@ -5,6 +5,7 @@ import { metadata } from "$lib/app/stores";
 import Delete from "$lib/components/Delete.svelte";
 import { client } from "$lib/pocketbase";
 import type { PageData } from "./$types";
+import Markdown from 'svelte-markdown';
 export let data: PageData;
 $: ({
   post: { id, featuredImage, title, body, files },
@@ -21,10 +22,10 @@ $: $metadata.title = title;
     <figure class="my-4">
       <img
         src={featuredImage}
-        alt="Featured AI Pic"
-        class="rounded-lg shadow-md"
+        alt={title}
+        class="rounded-lg shadow-md mx-auto"
       />
-      <figcaption>{title}</figcaption>
+      <figcaption class="text-center text-sm mt-2">{title}</figcaption>
     </figure>
   {/if}
   {#if files && files[0]}
@@ -32,22 +33,24 @@ $: $metadata.title = title;
       <img
         src={client.getFileUrl(data.post, files[0], { thumb: "600x0" })}
         alt={title}
-        class="rounded-lg shadow-md"
+        class="mx-auto"
       />
     </figure>
   {/if}
 
-  <!-- Using Tailwind's typography plugin (prose) to style the article content -->
-  <article class="prose lg:prose-lg mx-auto">
-    {@html body}
+  <article class="prose lg:prose-lg mx-auto text-justify">
+    <Markdown source={body} />
   </article>
 
   <div class="mt-8 text-center">
     <a href={`${base}/auditlog/posts/${id}`} class="btn btn-primary">
-      Audit Log
+      Audit Log88
     </a>
   </div>
 </div>
+
+
+
 
 <style>
 /* Additional custom styles can go here */

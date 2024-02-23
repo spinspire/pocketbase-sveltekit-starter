@@ -6,8 +6,9 @@
   import Tab from "./Tab.svelte";
   import TabContent from "./TabContent.svelte";
   import TabGroup from "./TabGroup.svelte";
+  import ThemeSwitch from "$lib/components/ThemeSwitch.svelte";
+  
   const coll = client.collection(authCollection);
-
   let email: string;
   let name: string;
   let password: string;
@@ -90,3 +91,4 @@
     <!-- pocketbase not working -->
   {/await}
 </form>
+<ThemeSwitch></ThemeSwitch>

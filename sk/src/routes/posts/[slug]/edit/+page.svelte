@@ -4,8 +4,10 @@ import { metadata } from "$lib/app/stores";
 import { authModel, save } from "$lib/pocketbase";
 import { alertOnFailure } from "$lib/pocketbase/ui";
 import type { PageData } from "./$types";
+import Markdown from "svelte-markdown";
 
 export let data: PageData;
+
 
 $: ({ post } = data);
 $: $metadata.title = post.title;
@@ -51,7 +53,7 @@ let tagPrompt =
   "Please summarize the provided blog article, focusing on its main points and themes. Following your summary, identify and list 3-5 relevant tags that capture the essence of the article. These tags should be short, lowercase, single words, and separated by commas. Ensure the tags strictly adhere to this format: 'example1, example2, example3'. Do not include spaces between the commas and words, and do not use any format other than the one specified. Do not output the summary ONLY the tags.";
 
 let blogSummaryPrompt =
-  "Please review the provided blog article thoroughly. After your review, compose a few sentences summary that encapsulates the main points and themes of the article. It should be between 100 and 150 words exactlyThis summary should be concise and engaging, designed to accompany the article's title on a Tailwind CSS card as a brief overview. Ensure the summary captures the essence of the blog, highlighting its value or unique perspective to intrigue and inform potential readers.Use eleborate markdown and emojis to make the output more engaging and visually appealing. Do not output the body or tags, ONLY the summary. Do not use any format other than the one specified.";
+  "Please review the provided blog article thoroughly. After your review, compose a few sentences summary that encapsulates the main points and themes of the article. It should be between 40-80 words exactlyThis summary should be concise and engaging, designed to accompany the article's title on a Tailwind CSS card as a brief overview. Ensure the summary captures the essence of the blog, highlighting its value or unique perspective to intrigue and inform potential readers.Use eleborate markdown and emojis to make the output more engaging and visually appealing. Do not output the body or tags, ONLY the summary. Do not use any format other than the one specified.";
 
 async function submit(e: SubmitEvent) {
   e.preventDefault();
@@ -83,7 +85,9 @@ async function generateImageFromDalle(prompt: string) {
   }
 }
 
-async function generateFromChatGPT() {
+// Export the generateFromChatGPT function
+export async function generateFromChatGPT(userPrompt: string) {
+  chatGptPrompt = userPrompt;
   // Generate body
   const bodyResponse = await generateGptRequest(
     promptFormat + "This is the user's inspiration: '" + chatGptPrompt + "'"
@@ -120,6 +124,16 @@ async function generateFromChatGPT() {
   const imageResponse = await generateImageFromDalle(
     titleResponse + "  " + tagsResponse
   );
+
+  return {
+    title: post.title,
+    slug: post.slug,
+    body: post.body,
+    blogSummary: post.blogSummary,
+    tags: post.tags,
+    featuredImage: post.featuredImage,
+    // ... any other fields you need
+  };
 }
 
 async function generateGptRequest(prompt: string) {
@@ -134,141 +148,113 @@ async function generateGptRequest(prompt: string) {
 }
 </script>
 
-<main class="mt-24 pb-8">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <h1 class="sr-only">Page title</h1>
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8">
-      <!-- GPT Prompt and Blog Cards on the Right -->
-      <div class="space-y-4">
-        <!-- GPT Prompt -->
-        <div class="bg-base-300 overflow-hidden rounded-lg shadow">
-          <div class="p-6">
+<main class="container mx-auto my-12 px-4 sm:px-6 lg:px-8">
+  <div class="grid gap-8 lg:grid-cols-3">
+    <!-- Form and GPT Prompt -->
+    <section class="space-y-6 lg:col-span-2">
+      <div class="bg-base-200 p-6">
+        <h1 class="mb-4 text-xl font-semibold">Create a New Journal Entry</h1>
+        <form on:submit|preventDefault={submit} class="space-y-4">
+          <div class="form-control w-full">
+            <label class="label" for="title">
+              <span class="label-text">Title</span>
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              bind:value={post.title}
+              class="input input-bordered w-full"
+              placeholder="Your journal title"
+            />
+          </div>
+
+          <div class="form-control w-full">
+            <label class="label" for="slug">
+              <span class="label-text">Slug</span>
+            </label>
+            <input
+              type="text"
+              id="slug"
+              name="slug"
+              bind:value={post.slug}
+              class="input input-bordered w-full"
+              placeholder="your-journal-title"
+            />
+          </div>
+
+          <div class="form-control w-full">
+            <label class="label" for="body">
+              <span class="label-text">Body</span>
+            </label>
             <textarea
+              id="body"
+              name="body"
+              bind:value={post.body}
+              rows="10"
               class="textarea textarea-bordered w-full"
-              placeholder="Enter your GPT prompt here"
-              bind:value={chatGptPrompt}
+              placeholder="What's on your mind?"
             ></textarea>
-            <button class="btn btn-primary mt-2" on:click={generateFromChatGPT}
-              >Submit</button
-            >
           </div>
-        </div>
 
-        <!-- Dynamically Updated Blog Card -->
-        <div
-          class="bg-base-primary m-4 flex flex-col justify-between rounded-xl"
-        >
-          <div>
-            <div class="relative w-full">
-              <figure>
-                <img
-                    src={post.featuredImage || 'https://via.placeholder.com/256x256.png?text=AI+Blog'}
-                  alt="Featured Pic"
-                  class="aspect-[16/9] w-full rounded-t-2xl object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
-                />
-              </figure>
-            </div>
-            <div class="m-4 max-w-xl">
-              <div class="group relative mt-3">
-                <a
-                  href="#"
-                  class="prose prose-lg text-primary line-clamp-2 font-bold"
-                >
-                  {post.title}
-                </a>
-                <div class="prose prose-sm text-base-content mt-5">
-                  {post.blogSummary || 'No summary available.'}
-                </div>
-              </div>
-            </div>
+          <div class="form-control w-full">
+            <label class="label" for="tags">
+              <span class="label-text">Tags</span>
+            </label>
+            <input
+              id="tags"
+              name="tags"
+              bind:value={post.tags}
+              class="input input-bordered w-full"
+              placeholder="Tags, comma separated"
+            />
           </div>
-          <div class="p-4">
-            <div class="mb-4 justify-between">
-              {#if post.tags && post.tags.length}
-                {#each post.tags.split(',') as tag}
-                  <a href="#" class="badge badge-outline badge-accent"
-                    >{tag.trim()}</a
-                  >
-                {/each}
-              {:else}
-                <div class="badge badge-outline badge-accent">No tags</div>
-              {/if}
-            </div>            
-          </div>
-        </div>
+
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
       </div>
-      <!-- Form on the Left -->
-      <div class="lg:col-span-2">
-        <!-- Your form here -->
-        <div class="bg-base-300 overflow-hidden rounded-lg shadow">
-          <div class="p-6">
-            <form on:submit|preventDefault={submit} class="space-y-6">
-              <div class="form-control">
-                <label class="label" for="title">
-                  <span class="label-text">Title</span>
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  placeholder="What is this?"
-                  bind:value={post.title}
-                  class="input input-bordered"
-                />
-              </div>
 
-              <div class="form-control">
-                <label class="label" for="slug">
-                  <span class="label-text">Slug</span>
-                </label>
-                <input
-                  type="text"
-                  id="slug"
-                  name="slug"
-                  bind:value={post.slug}
-                  placeholder="Slug"
-                  class="input input-bordered"
-                />
-              </div>
-
-              <div class="form-control">
-                <label class="label" for="body">
-                  <span class="label-text">Body</span>
-                </label>
-                <textarea
-                  id="body"
-                  name="body"
-                  bind:value={post.body}
-                  placeholder="Body"
-                  rows="10"
-                  class="textarea textarea-bordered"
-                ></textarea>
-              </div>
-
-              <div class="form-control">
-                <label class="label" for="tags">
-                  <span class="label-text">Tags</span>
-                </label>
-                <input
-                  id="tags"
-                  name="tags"
-                  bind:value={post.tags}
-                  placeholder="Tags, comma separated"
-                  class="input input-bordered"
-                />
-              </div>
-
-              <button type="submit" class="btn">Submit</button>
-            </form>
-          </div>
-        </div><div class="text-right pt-4">
-          <a
-            class="btn btn-outline btn-secondary"
-            href={`${post.slug}#delete`}>Delete</a
+      <div class="bg-base-200 p-6">
+        <h2 class="mb-4 text-lg font-semibold">GPT Prompt</h2>
+        <div class="form-control">
+          <textarea
+            class="textarea h-24 w-full"
+            placeholder="Enter your GPT prompt here"
+            bind:value={chatGptPrompt}
+          ></textarea>
+          <button class="btn btn-primary mt-4" on:click={() => generateFromChatGPT(chatGptPrompt)}
+            >Generate</button
           >
         </div>
       </div>
-    </div>
+    </section>
+
+    <!-- Blog Cards -->
+    <aside class="space-y-4">
+      <div class="card bg-base-200">
+        <figure>
+          <img
+            src={post.featuredImage || 'https://via.placeholder.com/256x256.png?text=AI+Blog'}
+            alt={post.title}
+          />
+        </figure>
+        <div class="card-body">
+          <h3 class="card-title">
+            <a href="#" class="text-lg font-bold">{post.title}</a>
+          </h3>
+          <p>{post.blogSummary || 'No summary available.'}</p>
+          <div class="card-actions justify-end">
+            {#if post.tags}
+              {#each post.tags.split(',') as tag}
+                <div class="badge badge-outline">{tag.trim()}</div>
+              {/each}
+            {:else}
+              <div class="badge badge-outline">No Tags</div>
+            {/if}
+          </div>
+        </div>
+      </div>
+    </aside>
   </div>
 </main>
 

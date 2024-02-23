@@ -5,7 +5,7 @@ import { base } from "$app/paths";
 import { metadata } from "$lib/app/stores";
 import Alerts from "$lib/components/Alerts.svelte";
 import Nav from "$lib/components/Nav.svelte";
-import { site, sponsor } from "$lib/config";
+import { site } from "$lib/config";
 </script>
 
 <script lang="ts">
@@ -32,19 +32,19 @@ beforeNavigate(() => {
 </header>
 
 <main>
-  <div class="bg-base-100">
-    <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl text-center">
+  <div class="bg-base-100 justify-center pt-16">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8 ">
+      <div class="mx-auto max-w-2xl text-center ">
         <h2 class="text-primary text-3xl font-bold tracking-tight sm:text-4xl">
           {#if headline}
             {headline}
           {/if}
         </h2>
-        <p class="text-secondary mt-2 text-lg leading-8">
+        <!-- <p class="text-secondary mt-2 text-lg leading-8">
           {#if description}
             {description}
           {/if}
-        </p>
+        </p> -->
         <Alerts></Alerts>
       </div>
       <slot />
@@ -53,10 +53,10 @@ beforeNavigate(() => {
 </main>
 
 <footer>
-  <div>
-    <em>{site.name}</em> is an
+<!--   <div>
+    <em>{site.name}</em> by
     <a href={site.source_url} target="_blank" rel="noreferrer">modible 2024</a>
-  </div>
+  </div> -->
 </footer>
 
 <style>

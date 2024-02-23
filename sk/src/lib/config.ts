@@ -1,11 +1,7 @@
 export const site = {
-  name: "PocketBase SvelteKit Starter",
-  source_url: "https://github.com/spinspire/pocketbase-sveltekit-starter",
+  name: "mind",
+  source_url: "https://modible.com/mind",
   description:
-    "A start app showing how to use SvelteKit frontend with PocketBase backend",
+    "Capture your inspiration and ideas with mind. A simple and elegant journaling app that helps you stay organized.",
 };
 
-export const sponsor = {
-  name: "SpinSpire",
-  url: "https://spinspire.com",
-};
