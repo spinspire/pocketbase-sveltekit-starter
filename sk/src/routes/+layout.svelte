@@ -32,7 +32,7 @@ beforeNavigate(() => {
 </header>
 
 <main>
-  <div class="bg-base-100 justify-center pt-16">
+  <div class="bg-base-100 justify-center pt-4">
     <div class="mx-auto max-w-7xl px-6 lg:px-8 ">
       <div class="mx-auto max-w-2xl text-center ">
         <h2 class="text-primary text-3xl font-bold tracking-tight sm:text-4xl">

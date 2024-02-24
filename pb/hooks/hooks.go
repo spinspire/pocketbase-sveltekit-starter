@@ -82,7 +82,7 @@ func DoChatGPT(apiKey, prompt string) (string, error) {
 		SetBody(map[string]interface{}{
 			"model":      "gpt-3.5-turbo",
 			"messages":   []interface{}{map[string]interface{}{"role": "system", "content": prompt}},
-			"max_tokens": 400,
+			"max_tokens": 100,
 		}).
 		Post("https://api.openai.com/v1/chat/completions")
 
@@ -125,13 +125,13 @@ func DoDalle3(apiKey, prompt, model, size string) (string, error) {
 	}
 
 	// Log the response for debugging purposes
-	logFile, err := os.OpenFile("api_responses.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	/* logFile, err := os.OpenFile("api_responses.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer logFile.Close()
 	log.SetOutput(logFile)
-	log.Println("response", response.String())
+	log.Println("response", response.String()) */
 
 	var respBody struct {
 		Created int64                    `json:"created"`

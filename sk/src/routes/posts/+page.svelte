@@ -18,7 +18,7 @@ async function deleteAllPosts() {
   });
 }
 
-$metadata.title = "remember";
+$metadata.title = "";
 $metadata.description = "AI powered note taking";
 const posts = watch<PostsResponse>("posts", {
   sort: "-updated",
@@ -26,11 +26,11 @@ const posts = watch<PostsResponse>("posts", {
 </script>
 
 <div class="bg-base-100">
-  <div class="mx-auto flex h-full max-w-7xl flex-col px-6 lg:px-8 mt-8">
+  <div class="mx-auto flex h-full max-w-7xl flex-col px-6 lg:px-8">
 
     <div
       class="grid max-w-none flex-grow grid-cols-1 gap-x-2 gap-y-20 overflow-y-auto lg:max-w-none lg:grid-cols-3 p-4"
-      style="max-height: calc(100vh - 30rem);"
+      style="max-height: calc(80vh);"
     >
       {#if $posts.items.length > 0}
         {#each $posts.items as post}

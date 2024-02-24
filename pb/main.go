@@ -83,7 +83,7 @@ func dalleImageHandler(c echo.Context) error {
 	dalleAPIKey := goDotEnvVariable("CHATGPT_API_KEY") // Ensure this is correctly named. Adjust according to your actual environment variable retrieval function
 	prompt := requestBody.Prompt
 	model := "dall-e-2" // Make sure to use the correct model name
-	size := "1024x1024"   // Adjust based on what sizes your model supports
+	size := "256x256"   // Adjust based on what sizes your model supports
 
 	b64Data, err := hooks.DoDalle3(dalleAPIKey, prompt, model, size)
 	if err != nil {
