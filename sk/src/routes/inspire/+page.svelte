@@ -10,3 +10,5 @@
     $metadata.title = "inspire";
     $metadata.description = "inspire ai";
     </script>
+
+    Coming Soon

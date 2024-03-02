@@ -10,3 +10,5 @@
     $metadata.title = "explore";
     $metadata.description = "explore ai";
     </script>
+
+Coming Soon

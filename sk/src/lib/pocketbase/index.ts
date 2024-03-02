@@ -57,6 +57,40 @@ export async function save(collection: string, record: any, create = false) {
   }
 }
 
+export async function savePostWithTags(collection: string, record: any, create = false) {
+  // Separate tags from the main record data
+  const { tags: tagsStr, ...postData } = record;
+  const tags = tagsStr.split(",").map((tag: string) => tag.trim()).filter((tag: any) => tag);
+
+  // Save the post data first
+  const postResult = await save(collection, postData, create);
+  const postId = create ? postResult.id : record.id; // Assuming the ID is returned for new records
+
+  // Now handle the tags
+  await processTags(tags, postId);
+
+  return postResult;
+}
+
+async function processTags(tags: string[], postId: string) {
+  for (const tagName of tags) {
+    let tagRecord = await findOrCreateTag(tagName);
+    await linkTagToPost(tagRecord.id, postId);
+  }
+}
+
+async function findOrCreateTag(tagName: string): Promise<PBRecord> {
+  // Implement the logic to find a tag by name or create it if it doesn't exist
+  // This is a placeholder function
+  return new PBRecord();
+}
+
+async function linkTagToPost(tagId: string, postId: string) {
+  // Implement the logic to create a record in the `taggings` collection linking the tag to the post
+  // This is a placeholder function
+}
+
+
 // convert obj to FormData in case one of the fields is instanceof FileList
 function object2formdata(obj: {}) {
   // check if any field's value is an instanceof FileList
@@ -111,7 +145,7 @@ export function watch<T>(
     // fetch first page
     collection
       .getList(page, perPage, queryParams)
-      .then((r) => set((result = r)));
+      .then((r) => set((result = r as ListResult<T>)));
     // watch for changes (only if you're in the browser)
     if (realtime)
       collection.subscribe("*", ({ action, record }) => {
@@ -126,23 +160,23 @@ export function watch<T>(
             case "update":
               record = await expand(queryParams.expand, record);
               return result.items.map((item) =>
-                item.id === record.id ? record : item
+                (item as { id: string }).id === record.id ? record : item
               );
             case "create":
               record = await expand(queryParams.expand, record);
               const index = result.items.findIndex((r) => r.id === record.id);
               // replace existing if found, otherwise append
               if (index >= 0) {
-                result.items[index] = record;
+                result.items[index] = record as T;
                 return result.items;
               } else {
-                return [...result.items, record];
+                return [...result.items, record as T];
               }
             case "delete":
               return result.items.filter((item) => item.id !== record.id);
           }
           return result.items;
-        })(action).then((items) => set((result = { ...result, items })));
+        })(action).then((items) => set((result = { ...result, items } as ListResult<T>)));
       });
   });
   async function setPage(newpage: number) {

@@ -232,3 +232,24 @@ func doPost(action, action_params string, record *models.Record) error {
 	}
 	return nil
 }
+
+// This function would go in a new or existing file where you manage database interactions.
+func processTagsForPost(db *pocketbase.PocketBase, postID string, tagsStr string) error {
+	// Split the tags string by comma
+	tags := strings.Split(tagsStr, ",")
+	uniqueTags := make(map[string]bool)
+	for _, tag := range tags {
+			// Trim spaces and ensure tag is lowercase for consistency
+			cleanTag := strings.ToLower(strings.TrimSpace(tag))
+			if cleanTag != "" {
+					uniqueTags[cleanTag] = true
+			}
+	}
+
+	// Here you would interact with your database to find existing tags,
+	// create new ones if necessary, and link them to the post via the taggings table.
+	// The specifics of these operations depend on how you've set up your models
+	// and how you interact with PocketBase collections.
+
+	return nil // Implement error handling based on your logic
+}
