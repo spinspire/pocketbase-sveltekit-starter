@@ -33,3 +33,6 @@ export const tagPrompt =
 
 export const blogSummaryPrompt =
   "Please review the provided blog article thoroughly. After your review, compose a few sentences summary that encapsulates the main points and themes of the article. It should be between 40-80 words exactlyThis summary should be concise and engaging, designed to accompany the article's title on a Tailwind CSS card as a brief overview. Ensure the summary captures the essence of the blog, highlighting its value or unique perspective to intrigue and inform potential readers.Use eleborate markdown and emojis to make the output more engaging and visually appealing. Do not output the body or tags, ONLY the summary. Do not use any format other than the one specified.";
+
+  export const imagePrompt = 
+  "Please review the provided text and generate a prompt for a slick minimal, modern image that captures the essence of the text."

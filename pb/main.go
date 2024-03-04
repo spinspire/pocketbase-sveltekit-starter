@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -22,6 +25,16 @@ import (
 	"github.com/pocketbase/pocketbase/plugins/jsvm"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
+
+type TextToImageImage struct {
+	Base64       string `json:"base64"`
+	Seed         uint32 `json:"seed"`
+	FinishReason string `json:"finishReason"`
+}
+
+type TextToImageResponse struct {
+	Images []TextToImageImage `json:"artifacts"` // Ensure the JSON tag matches the key in the response
+}
 
 func defaultPublicDir() string {
 	if strings.HasPrefix(os.Args[0], os.TempDir()) {
@@ -116,6 +129,97 @@ func dalleImageHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"url": url})
 }
 
+func dreamStudioHandler(c echo.Context) error {
+    log.Println("Starting dreamStudioHandler...")
+
+    var requestBody struct {
+        Prompt string `json:"prompt"`
+    }
+
+    if err := c.Bind(&requestBody); err != nil {
+        log.Printf("Error binding request body: %v\n", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+    }
+
+    log.Printf("Received prompt: %s\n", requestBody.Prompt)
+
+    // Define request data with the user's prompt
+    requestData := map[string]interface{}{
+        "text_prompts": []map[string]string{
+            {"text": requestBody.Prompt},
+        },
+        "cfg_scale": 7,
+        "height":    512,
+        "width":     512,
+        "samples":   1,
+        "steps":     30,
+    }
+
+    requestBodyJson, err := json.Marshal(requestData)
+    if err != nil {
+        log.Printf("Error marshaling request body: %v\n", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error marshaling request body"})
+    }
+
+    apiHost := os.Getenv("API_HOST")
+    if apiHost == "" {
+        apiHost = "https://api.stability.ai"
+    }
+    engineId := "stable-diffusion-v1-6"
+    reqUrl := fmt.Sprintf("%s/v1/generation/%s/text-to-image", apiHost, engineId)
+
+    apiKey := os.Getenv("STABILITY_API_KEY")
+    if apiKey == "" {
+        log.Println("STABILITY_API_KEY is missing")
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Missing STABILITY_API_KEY environment variable"})
+    }
+
+    req, err := http.NewRequest("POST", reqUrl, bytes.NewBuffer(requestBodyJson))
+    req.Header.Add("Content-Type", "application/json")
+    req.Header.Add("Authorization", "Bearer "+apiKey)
+
+    res, err := http.DefaultClient.Do(req)
+    if err != nil || res.StatusCode != 200 {
+        log.Printf("Failed to execute request or non-200 status code: %v, status code: %d\n", err, res.StatusCode)
+        body, _ := io.ReadAll(res.Body)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to execute request or non-200 status code: " + string(body)})
+    }
+    defer res.Body.Close()
+
+    var response TextToImageResponse
+    if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
+        log.Printf("Failed to parse response body: %v\n", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to parse response body"})
+    }
+
+    if len(response.Images) == 0 {
+        log.Println("No images returned from API")
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "No images returned from API"})
+    }
+
+    // Correctly handle base64 decoding
+    firstImage := response.Images[0]
+    imageData, err := base64.StdEncoding.DecodeString(firstImage.Base64)
+    if err != nil {
+        log.Printf("Error decoding base64 data: %v\n", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to decode image data"})
+    }
+
+    fileName := fmt.Sprintf("dreamstudio_image_%v.png", time.Now().Unix())
+    filePath := filepath.Join("./pb_public/", fileName)
+
+    err = os.WriteFile(filePath, imageData, 0644)
+    if err != nil {
+        log.Printf("Error writing image to file: %v\n", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to save image file"})
+    }
+
+    url := fmt.Sprintf("http://localhost:8090/%s", fileName)
+
+    log.Println("Returning image URL to the client")
+    return c.JSON(http.StatusOK, map[string]interface{}{"url": url})
+}
+
 func main() {
 	app := pocketbase.New()
 
@@ -153,6 +257,9 @@ func main() {
 
 		e.Router.POST("/api/dalle", dalleImageHandler)
 
+		// New Dream Studio API route
+		e.Router.POST("/api/dreamstudio", dreamStudioHandler)
+
 		// serves static files from the provided public dir (if exists)
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDirFlag), true))
 
@@ -168,7 +275,7 @@ func main() {
 			// },
 		})
 
-				return nil
+		return nil
 	})
 
 	if err := app.Start(); err != nil {

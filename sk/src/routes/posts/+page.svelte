@@ -20,9 +20,11 @@ async function deleteAllPosts() {
 
 $metadata.title = "";
 $metadata.description = "AI powered note taking";
+
 const posts = watch<PostsResponse>("posts", {
   sort: "-updated",
 });
+
 </script>
 
 <div class="bg-base-100">

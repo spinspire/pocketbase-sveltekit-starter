@@ -80,9 +80,9 @@ func DoChatGPT(apiKey, prompt string) (string, error) {
 		SetAuthToken(apiKey).
 		SetHeader("Content-Type", "application/json").
 		SetBody(map[string]interface{}{
-			"model":      "gpt-3.5-turbo",
+			"model":      "gpt-4-0125-preview",
 			"messages":   []interface{}{map[string]interface{}{"role": "system", "content": prompt}},
-			"max_tokens": 100,
+			"max_tokens": 400,
 		}).
 		Post("https://api.openai.com/v1/chat/completions")
 
