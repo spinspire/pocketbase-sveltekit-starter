@@ -1,0 +1,1 @@
+web: ./pb/pocketbase.exe
