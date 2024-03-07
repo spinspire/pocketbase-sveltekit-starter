@@ -51,7 +51,7 @@ npm run dev:backend
 npm run dev
 ```
 
-Now visit http://localhost:5173 (sk) or http://localhost:8090 (pb)
+Now visit http://localhost:5173 (sk) or http://localhost:8080 (pb)
 
 Now making changes in the Svelte code (frontend) or Go code (backend) will show
 results (almost) immediately.

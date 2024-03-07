@@ -313,7 +313,7 @@ function selectInterpretation(interpretation: string) {
         <h2 class="text-2xl font-bold">{post.title}</h2>
       </div>
       <div class="mt-4">
-        <p>Slug: {post.slug}</p>
+        <p>{post.slug}</p>
       </div>
       <div class="mt-4">
         <div class="mb-4 flex flex-wrap gap-2">
@@ -325,8 +325,6 @@ function selectInterpretation(interpretation: string) {
                 >
               {/each}
             {/if}
-          {:else}
-            <div class="badge badge-outline badge-accent">No tags</div>
           {/if}
         </div>
       </div>

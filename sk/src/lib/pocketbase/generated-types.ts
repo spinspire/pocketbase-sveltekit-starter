@@ -3,8 +3,11 @@
 */
 
 export enum Collections {
+	Auditlog = "auditlog",
 	Hooks = "hooks",
 	Posts = "posts",
+	Taggings = "taggings",
+	Tags = "tags",
 	Users = "users",
 }
 
@@ -31,6 +34,16 @@ export type AuthSystemFields = {
 
 // Record types for each collection
 
+export type AuditlogRecord<Tdata = unknown, Toriginal = unknown> = {
+	collection: string
+	record: string
+	event: string
+	user?: RecordIdString
+	admin?: string
+	data?: null | Tdata
+	original?: null | Toriginal
+}
+
 export enum HooksEventOptions {
 	"insert" = "insert",
 	"update" = "update",
@@ -39,6 +52,7 @@ export enum HooksEventOptions {
 
 export enum HooksActionTypeOptions {
 	"command" = "command",
+	"email" = "email",
 	"post" = "post",
 }
 export type HooksRecord = {
@@ -53,13 +67,22 @@ export type HooksRecord = {
 
 export type PostsRecord = {
 	title: string
-	featuredImage?: string
 	body: string
 	slug: string
 	files?: string[]
-	tags?: string
-	blogSummary?: string
 	user?: RecordIdString
+	tags?: string
+	featuredImage?: string
+	blogSummary?: string
+}
+
+export type TaggingsRecord = {
+	tag_id: RecordIdString
+	post_id: RecordIdString
+}
+
+export type TagsRecord = {
+	name: string
 }
 
 export type UsersRecord = {
@@ -68,12 +91,18 @@ export type UsersRecord = {
 }
 
 // Response types include system fields and match responses from the PocketBase API
+export type AuditlogResponse<Tdata = unknown, Toriginal = unknown> = AuditlogRecord<Tdata, Toriginal> & BaseSystemFields
 export type HooksResponse = HooksRecord & BaseSystemFields
 export type PostsResponse = PostsRecord & BaseSystemFields
+export type TaggingsResponse = TaggingsRecord & BaseSystemFields
+export type TagsResponse = TagsRecord & BaseSystemFields
 export type UsersResponse = UsersRecord & AuthSystemFields
 
 export type CollectionRecords = {
+	auditlog: AuditlogRecord
 	hooks: HooksRecord
 	posts: PostsRecord
+	taggings: TaggingsRecord
+	tags: TagsRecord
 	users: UsersRecord
 }

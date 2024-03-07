@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"pocketbase/auditlog"
+	//"pocketbase/auditlog"
 	hooks "pocketbase/hooks"
 
 	"github.com/joho/godotenv"
@@ -123,7 +123,7 @@ func dalleImageHandler(c echo.Context) error {
 	}
 
 	// Construct the full URL to return
-	url := fmt.Sprintf("http://localhost:8090/%s", fileName)
+	url := fmt.Sprintf("http://localhost:8080/%s", fileName)
 
 	// Return the full URL to the frontend
 	return c.JSON(http.StatusOK, map[string]interface{}{"url": url})
@@ -214,7 +214,7 @@ func dreamStudioHandler(c echo.Context) error {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to save image file"})
     }
 
-    url := fmt.Sprintf("http://localhost:8090/%s", fileName)
+    url := fmt.Sprintf("http://localhost:8080/%s", fileName)
 
     log.Println("Returning image URL to the client")
     return c.JSON(http.StatusOK, map[string]interface{}{"url": url})
@@ -245,7 +245,7 @@ func main() {
 	})
 
 	// call this only if you want to auditlog tables named in AUDITLOG env var
-	auditlog.Register(app)
+	//auditlog.Register(app)
 
 	// call this only if you want to use the configurable "hooks" functionality
 	hooks.PocketBaseInit(app)

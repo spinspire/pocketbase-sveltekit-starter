@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite dev",
     "dev:backend": "cd ../pb && modd",
-    "backend": "cd ../pb && ./pocketbase serve --publicDir=../sk/build",
+    "backend": "cd ../pb && pocketbase serve --publicDir=../sk/build",
     "build": "vite build",
     "build:backend": "cd ../pb && go build",
     "typegen": "pocketbase-typegen --db ../pb/pb_data/data.db --out ./src/lib/pocketbase/generated-types.ts",

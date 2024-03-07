@@ -1,0 +1,60 @@
+# flyctl launch added from .gitignore
+**\.cache
+**\.local
+**\.npm
+**\.env
+**\.ash_history
+docker-compose.override.yml
+
+# flyctl launch added from pb\.gitignore
+pb\.cache
+pb\pocketbase
+pb\pocketbase*.zip
+pb\pb_data
+pb\tmp
+# pb\pb_public
+
+# flyctl launch added from sk\.gitignore
+sk\**\.DS_Store
+sk\**\node_modules
+sk\playwright-report
+# sk\build
+sk\.svelte-kit
+sk\package
+sk\**\.env
+sk\**\.env.*
+!sk\**\.env.example
+
+# flyctl launch added from sk\node_modules\.pnpm\digest-fetch@1.3.0\node_modules\digest-fetch\.gitignore
+!sk\node_modules\.pnpm\digest-fetch@1.3.0\node_modules\digest-fetch\**\.gitignore
+sk\node_modules\.pnpm\digest-fetch@1.3.0\node_modules\digest-fetch\**\node_modules
+sk\node_modules\.pnpm\digest-fetch@1.3.0\node_modules\digest-fetch\**\packing
+
+
+# flyctl launch added from sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\.gitignore
+# ignore most things, include some others
+sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\*
+sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\.*
+
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\bin
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\lib
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\docs
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\package.json
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\package-lock.json
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\README.md
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\CONTRIBUTING.md
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\LICENSE
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\CHANGELOG.md
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\example
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\scripts
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\tap-snapshots
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\test
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\.travis.yml
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\.gitignore
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\.gitattributes
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\coverage-map.js
+!sk\node_modules\.pnpm\minipass-sized@1.0.3\node_modules\minipass-sized\**\index.js
+
+# flyctl launch added from sk\node_modules\.pnpm\tailwindcss@3.4.1\node_modules\tailwindcss\stubs\.gitignore
+!sk\node_modules\.pnpm\tailwindcss@3.4.1\node_modules\tailwindcss\stubs\**\*
+fly.toml

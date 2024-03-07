@@ -4,10 +4,10 @@ services:
   pb:
     image: golang:1.20-alpine
     entrypoint: /app/pb/entrypoint.sh
-    command: "/app/pb/pocketbase serve --http 0.0.0.0:8090 --publicDir ../sk/build"
+    command: "/app/pb/pocketbase serve --http 0.0.0.0:8080 --publicDir ../sk/build"
     user: ${UID}:${GID}
     expose:
-      - 8090
+      - 8080
     working_dir: /app/pb
     environment:
       - HOME=/app/pb
