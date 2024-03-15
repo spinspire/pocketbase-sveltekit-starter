@@ -44,6 +44,7 @@
   "type": "module",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.14.1",
+    "marked": "^12.0.1",
     "pocketbase": "^0.15.2",
     "svelte-markdown": "^0.4.1"
   }

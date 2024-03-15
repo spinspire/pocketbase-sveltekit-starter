@@ -11,7 +11,7 @@ FROM alpine
 WORKDIR /app/pb
 COPY --from=builder /build/pocketbase /app/pb/pocketbase
 COPY pb/pb_migrations ./pb_migrations
-COPY ./sk/build /app/pb/pb_public
+COPY ./sk/build ./pb_public
 # Make sure this line correctly copies the templates directory
 COPY pb/data/email_templates ./data/email_templates
-ENTRYPOINT ["/app/pb/pocketbase", "serve", "--http", "0.0.0.0:8080", "--publicDir", "/app/pb/pb_public"]
+ENTRYPOINT ["/app/pb/pocketbase", "serve", "--http", "0.0.0.0:8090", "--publicDir", "/app/pb/pb_public"]

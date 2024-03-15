@@ -4,7 +4,7 @@ import { page } from "$app/stores";
 import LoginBadge from "$lib/components/LoginBadge.svelte";
 const links = [
   ["/create/", "create"],
-  ["/posts/", "remember"],
+  ["/remember/", "remember"],
   ["/inspire/", "inspire"],
   ["/explore/", "explore"],
   ["/reflect/", "reflect"],

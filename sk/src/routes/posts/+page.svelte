@@ -20,91 +20,69 @@ async function deleteAllPosts() {
 
 $metadata.title = "";
 $metadata.description = "AI powered note taking";
-
 const posts = watch<PostsResponse>("posts", {
   sort: "-updated",
 });
-
 </script>
 
-<div class="bg-base-100">
-  <div class="mx-auto flex h-full max-w-7xl flex-col px-6 lg:px-8">
-
+{#if $posts.items.length > 0}
+  {#each $posts.items as post}
     <div
-      class="grid max-w-none flex-grow grid-cols-1 gap-x-2 gap-y-20 overflow-y-auto lg:max-w-none lg:grid-cols-3 p-4"
-      style="max-height: calc(80vh);"
+      class="card bg-base-300 flex w-full flex-col justify-between p-4 shadow-xl"
     >
-      {#if $posts.items.length > 0}
-        {#each $posts.items as post}
-          <div
-            class="card bg-base-300 flex w-full p-4 flex-col justify-between shadow-xl"
-          >
-            <div>
-              <figure class="relative w-full">
-                <img
-                  src={post.featuredImage || 'https://via.placeholder.com/800x400.png?text=AI+Blog'}
-                  alt={post.title}
-                  class="object-cover w-full t-2xl aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
-                />
-              </figure>
-              <div class="m-4 max-w-xl">
-                <div class="prose items-center gap-x-4">
-                  <time datetime="2020-03-16" class="text-accent">
-                    {new Date(post.updated).toLocaleDateString()}
-                  </time>
-                </div>
-                <div class="group relative mt-3">
-                  <a
-                    href={"http://localhost:5173/posts/" + post.slug}
-                    class="text-primary prose-lg line-clamp-2 font-bold"
-                    >{post.title}</a
-                  >
-                  <div
-                    class="prose-sm text-base-content mt-3 line-clamp-6 text-justify"
-                  >
-                    <Markdown source={post.blogSummary} />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="relative mb-4 flex-col gap-x-4 text-center">
-              {#if post.tags && post.tags.length}
-                {#each post.tags.split(',') as tag}
-                  <a href="#" class="badge badge-outline badge-accent"
-                    >{tag.trim()}</a
-                  >
-                {/each}
-              {:else}
-                <div class="badge badge-outline badge-accent">No tags</div>
-              {/if}
-            </div>
-            <div class="flex justify-between p-2">
-              <a class="btn btn-outline" href={`${post.id}/edit`}>Edit</a>
-              <a
-                class="btn btn-outline btn-secondary"
-                href={`${post.slug}#delete`}>Delete</a
-              >
+      <div>
+        <figure class="relative w-full">
+          <img
+            src={post.featuredImage}
+            alt={post.title}
+            class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+          />
+        </figure>
+        <div class="m-4 max-w-xl">
+          <div class="prose items-center gap-x-4">
+            <time datetime="2020-03-16" class="text-accent">
+              {new Date(post.updated).toLocaleDateString()}
+            </time>
+          </div>
+          <div class="group relative mt-3">
+            <a
+              href={import.meta.env.VITE_APP_SK_URL + "/posts/" + post.slug}
+              class="text-primary prose-lg line-clamp-2 font-bold"
+            >
+              {post.title}
+            </a>
+            <div
+              class="prose-sm text-base-content mt-3 line-clamp-6 text-justify"
+            >
+              <Markdown source={post.blogSummary || post.body} />
             </div>
           </div>
-        {/each}
-      {:else}
-        <div class="col-span-full py-8 text-center">No posts found.</div>
-      {/if}
+        </div>
+      </div>
+      <div class="relative mb-4 flex-col gap-x-4 text-center">
+        {#if post.tags && post.tags.length}
+          {#each post.tags as tag}
+            <a href="#" class="badge badge-outline badge-accent">{tag}</a>
+          {/each}
+        {:else}
+          <div class="badge badge-outline badge-accent">No tags</div>
+        {/if}
+      </div>
+      <!-- The rest of your component... -->
     </div>
+  {/each}
+{/if}
 
-    {#if $authModel}
-      <div class="my-4 text-right">
-        <button class="btn btn-error ml-2" on:click={deleteAllPosts}
-          >Delete All Posts</button
-        >
+{#if $posts.items.length === 0}
+  <div
+    class="card bg-base-300 flex w-full flex-col justify-between p-4 shadow-xl"
+  >
+    <div>
+      <div class="m-4 max-w-xl">
+        <div class="prose items-center gap-x-4">
+          <div class="text-accent">No posts found</div>
+        </div>
       </div>
-    {:else}
-      <div class="my-4 text-center">
-        <p>Please login to manage posts.</p>
-      </div>
-    {/if}
+    </div>
   </div>
-</div>
-
-<style>
-</style>
+{/if}

@@ -1,13 +1,21 @@
 <script lang="ts">
+import type { Record, Admin } from "pocketbase";
 import { onDestroy } from "svelte";
 import { authModel, client } from "../pocketbase";
 import { alerts } from "./Alerts.svelte";
 import Dialog from "./Dialog.svelte";
 import LoginForm from "./LoginForm.svelte";
+
 let signup = true;
+
 async function logout() {
   client.authStore.clear();
 }
+
+function getFileUrl(authModel: Record | Admin, avatar: any) {
+  return `${import.meta.env.VITE_APP_SK_URL}/files/${authModel.id}/${avatar}`;
+}
+
 const unsubscribe = client.authStore.onChange((token, model) => {
   if (model) {
     const { name, username } = model;
@@ -28,7 +36,7 @@ $: console.log({ $authModel });
     <div class="badge" slot="trigger">
       {#if $authModel.avatar}
         <img
-          src={client.getFileUrl($authModel, $authModel.avatar)}
+          src={getFileUrl($authModel, $authModel.avatar)}
           alt="profile pic"
         />
       {/if}
@@ -40,7 +48,7 @@ $: console.log({ $authModel });
       <div class="badge">
         {#if $authModel.avatar}
           <img
-            src={client.getFileUrl($authModel, $authModel.avatar)}
+            src={getFileUrl($authModel, $authModel.avatar)}
             alt="profile pic"
           />
         {/if}
@@ -52,7 +60,6 @@ $: console.log({ $authModel });
     </div>
   </Dialog>
 {:else}
-
   <Dialog>
     <button slot="trigger">{signup ? "enter" : "Sign In"}</button>
     <LoginForm signup={signup} />

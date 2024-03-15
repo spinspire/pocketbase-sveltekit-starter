@@ -1,8 +1,9 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { authModel, save } from "$lib/pocketbase";
+import { authModel, client, save } from "$lib/pocketbase";
 import type { PageData } from "./$types";
-import Anthropic from "@anthropic-ai/sdk";
+import { apiRequest } from "$lib/utils/api"; // Adjust the path as necessary
+import { marked } from "marked";
 import {
   promptFormat,
   titlePrompt,
@@ -10,68 +11,192 @@ import {
   blogSummaryPrompt,
   imagePrompt,
 } from "$lib/utils/prompts";
+import PocketBase from "pocketbase";
+import { onMount } from "svelte";
 
 
 // Initialize states and reactive variables
-let isLoadingGptContent = false;
-let isLoadingGptTitle = false;
-let isLoadingGptTags = false;
-let isLoadingGptSummary = false;
-let isLoadingDalleImage = false;
+let isLoading = {
+  content: false,
+  title: false,
+  tags: false,
+  summary: false,
+  image: false,
+};
 let formSubmitted = false;
 let loadingMessage = "";
-let currentStep = 0; // Add a reactive variable to track the current step
+let currentStep = 0;
+let chatGptInts: any[] = [];
+let originalPrompt = "";
+let base64Image;
+let curTags = "";
+let isAuthenticated = false;
 
-// Simplify and consolidate reactive statements
 $: post = {
   title: "",
   slug: "",
   body: "",
-  tags: [],
+  tags: [] as string[],
   blogSummary: "",
   featuredImage: "",
   user: $authModel?.id || "",
-  interpretations: [],
+  interpretations: [] as any[],
 };
 
 $: chatGptPrompt = "";
 
+// Assuming you have the API key stored in an environment variable
+const engineId = "stable-diffusion-v1-6";
+const apiHost = "https://api.stability.ai";
+const apiKey = import.meta.env.VITE_STABILITY_API_KEY;
 
+if (!apiKey) throw new Error("Missing Stability API key.");
 
-
-// Utility function to handle API requests
-async function apiRequest(endpoint: string, method: string, body: any) {
-  const response = await fetch(endpoint, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) {
-    const errorMessage = await response.text();
-    throw new Error(errorMessage);
-  }
-  return response.json();
-}
-
-function resetLoadingStates() {
-  isLoadingGptContent = false;
-  isLoadingGptTitle = false;
-  isLoadingGptTags = false;
-  isLoadingGptSummary = false;
-  isLoadingDalleImage = false;
-}
-
-// Simplified and refactored version of saveBlog, generateImageFromDalle, and generateFromChatGPT functions
-async function saveBlog() {
-  if (!post.user) {
-    alert("Please log in to save your post.");
-    return;
-  }
+onMount(async () => {
   try {
-    await save("posts", post);
-    goto(`${import.meta.env.VITE_APP_BASE_URL}/posts/${post.slug}`);
+    if (!$authModel) {
+      console.error("User is not authenticated.");
+      isAuthenticated = false;
+      return;
+    }
+    else
+    {
+      isAuthenticated = true;
+    }
   } catch (error) {
-    alertOnFailure(error);
+    console.error("Error checking user authentication:", error);
+    isAuthenticated = false;
+  }
+});
+
+
+async function ensureTagsExist(tags: string[]): Promise<string[]> {
+  const tagIds = [];
+  console.log("Ensuring tags exist:", tags);
+  for (const title of tags) {
+    try {
+      // Use a filter expression to search for the tag by title
+      const filterExpression = `title = "${title.replace(/"/g, '\\"')}"`; // Escape double quotes in title
+      console.log("Checking for tag:", title);
+
+      // Attempt to find the tag by its title
+      const existingTags = await client.collection('tags').getList(1, 1, { filter: filterExpression });
+
+      let existingTag = existingTags.items.length > 0 ? existingTags.items[0] : null;
+
+      // If the tag doesn't exist, create it
+      if (!existingTag) {
+        console.log("Tag does not exist, creating new tag:", title);
+        existingTag = await client.collection('tags').create({ title });
+        console.log("Created new tag:", existingTag);
+      } else {
+        console.log("Found existing tag:", existingTag);
+      }
+
+      // Store the tag's ID
+      if (existingTag)
+        tagIds.push(existingTag.id);
+      else
+        throw new Error("Failed to create tag");
+    } catch (error) {
+      console.error("Error handling tag:", title, error);
+      throw error; // Optionally rethrow the error or handle it as needed
+    }
+  }
+  return tagIds;
+}
+
+
+// Link tags to the created post
+async function linkTagsToPost(tagIds: string[], postId: string) {
+  for (const tagId of tagIds) {
+    // For each tag, create a record in the 'postsTags' collection linking it to the post
+    await client.collection("postsTags").create({
+      post: postId, // Assuming 'post' is the correct field name in 'postsTags' for linking to the post ID
+      tag: tagId, // Adjust field names as necessary based on your 'postsTags' collection schema
+    });
+  }
+}
+
+// Assuming `pb` is your PocketBase client instance and authentication is set up correctly
+async function uploadImageAndSavePost(
+  base64Image: string,
+  curTags: string = ""
+): Promise<void> {
+  try {
+    // Convert base64 image to Blob
+    const imageBlob = await fetch(`data:image/png;base64,${base64Image}`).then(
+      (res) => res.blob()
+    );
+    if (imageBlob.size > 5242880) {
+      // 5MB
+      throw new Error("Image size exceeds the maximum limit of 5MB.");
+    }
+    const formData = new FormData();
+    formData.append("file", imageBlob, "postImage.png");
+    console.log("Uploading image to PocketBase...");
+
+    // Upload the image to the 'images' collection
+    const createdImageRecord = await client.collection("images").create(formData);
+    console.log("Image uploaded successfully", createdImageRecord);
+    // Ensure curTags is not undefined before splitting, default to an empty string if undefined
+    const tagsArray = (curTags || "")
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag);
+    console.log("Tags array:", tagsArray);
+    // Continue with tag existence check, image upload, and post creation...
+    const tagIds = await ensureTagsExist(tagsArray);
+    console.log("Tag IDs:", tagIds);
+    // Assuming post object setup is done before this and includes necessary post fields
+    post.featuredImage = createdImageRecord.id;
+    console.log("Post object with image:", post);
+    // Save the post and link tags as before
+    // Ensure save and linkTagsToPost functions are correctly implemented
+    const createdPost = await save("posts", post, true);
+    console.log("Post saved successfully", createdPost);
+    await linkTagsToPost(tagIds, createdPost.id);
+    console.log("Post saved successfully with tags and image", createdPost);
+    goto(`${import.meta.env.VITE_APP_SK_URL}/posts/${post.slug}`);
+  } catch (error) {
+    console.error(`Failed to upload image and save post: ${error}`);
+    alertOnFailure(`Failed to upload image and save post: ${error}`);
+  }
+}
+
+async function saveImage(post: { featuredImage: string }) {
+  try {
+    console.log("Uploading image...");
+    const imageResponse = await fetch(post.featuredImage);
+    if (!imageResponse.ok) {
+      console.log(
+        "Failed to fetch image from temporary URL:",
+        post.featuredImage
+      );
+      throw new Error(
+        `Failed to fetch image from temporary URL: ${post.featuredImage}`
+      );
+    }
+    console.log("Image fetched successfully");
+    const imageBlob = await imageResponse.blob();
+
+    // Prepare the form data for uploading
+    const formData = new FormData();
+    formData.append("file", imageBlob, "postImage.png"); // Adjust the field name according to your PocketBase collection schema
+
+    console.log("Uploading image to PocketBase...");
+
+    // Upload and create new record in PocketBase
+    const createdRecord = await client.collection("yourCollectionName").create({
+      // Assuming "file" is the field name in your PocketBase collection for the image
+      // and other fields as necessary.
+      file: formData.get("file"),
+      title: "Image Title", // Example, replace with actual data if needed
+    });
+
+    console.log("Image uploaded successfully", createdRecord);
+  } catch (error) {
+    console.error("Error uploading image to PocketBase:", error);
   }
 }
 
@@ -95,12 +220,51 @@ async function generateImageFromDalle(prompt: string) {
   }
 }
 
-async function generateImageFromSD(prompt: string) {
+// Updated generateImageFromSD to handle backend response change
+async function generateImageFromSD(prompt: string): Promise<string> {
+  isLoading.image = true;
   try {
-    const data = await apiRequest("/api/dreamstudio", "POST", { prompt });
-    post.featuredImage = data.url;
+    const response = await fetch(
+      `${apiHost}/v1/generation/${engineId}/text-to-image`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          text_prompts: [
+            {
+              text: prompt,
+            },
+          ],
+          cfg_scale: 7,
+          height: 512,
+          width: 512,
+          steps: 30,
+          samples: 1,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Non-200 response: ${await response.text()}`);
+    }
+
+    const responseJSON = await response.json();
+
+    // Assuming you want to use the first image artifact
+    const imageBase64 = responseJSON.artifacts[0].base64;
+
+    isLoading.image = false;
+    // Return the base64 image data
+    return imageBase64;
   } catch (error) {
-    alertOnFailure(error);
+    console.error("Error generating image:", error);
+    throw error; // Propagate error for further handling
+  } finally {
+    isLoading.image = false;
   }
 }
 
@@ -126,20 +290,55 @@ async function generateGptInterpretations(promptString: string) {
   try {
     // Use the provided `promptString` instead of `post.prompt`
     const interpretationsResponse = await generateGptRequest(
-      `Interpret this statement and provide three different ideas that are one sentence long, separated by a comma, make sure to separate each complete idea by a comma: '${promptString}'`
+      `Be creative, be fun, be unique.  You are a thinker and an idea genrator.  People give you a phrase or a thought, and you rephrase that into 5 different ideas, one from each of the listed five perspectives:
+      
+        { view: "Optimistic", description: "Always sees the glass as half full and believes in the best possible outcome." },
+        { view: "Pessimistic", description: "Tends to see the downside in every situation and prepares for the worst." },
+        { view: "Realistic", description: "Looks at the facts and figures to make practical and logical decisions." },
+        { view: "Creative", description: "Thinks outside the box and approaches problems with a fresh perspective." },
+        { view: "Analytical", description: "Breaks down problems into smaller parts to understand the underlying issues." }
+      
+
+      
+      Respond to the user by providing  five seperate prompts based on if the person who had the idea also had that type of perspective.  Generate 5 alternative prompts that further explain the concept in a different viewpoint by each of the perspectives.
+      
+      Return 5 sentences, # - hashtag, make sure to separate each complete idea by a '#' - just sthe symbol # - only use # to seperate the sentences, do not use in the ideas - start each sentence with the name of the view person: - this is the prompt - remember this will be parsed according to these rules: '${promptString}'`
     );
 
-    const interpretationsArray = interpretationsResponse
-      .split(",")
-      .map((interpretation: string) => interpretation.trim());
+    originalPrompt = promptString;
+
+    console.log(interpretationsResponse);
 
     // Assign the array of interpretations directly to `post.interpretations`
-    post.interpretations = interpretationsArray;
+    chatGptInts = parseInterpretations(interpretationsResponse);
+
+    console.log(chatGptInts);
     formSubmitted = true;
   } catch (error) {
     alertOnFailure(error);
   } finally {
   }
+}
+
+function parseInterpretations(response: string) {
+  // Split the response by the '#' symbol to separate each sentence
+  const rawInterpretations = response.split("#");
+
+  // Map each raw interpretation to a trimmed and processed version
+  const interpretationsArray = rawInterpretations.map(
+    (interpretation: string) => {
+      // Trim leading and trailing whitespace from each interpretation
+      const trimmedInterpretation = interpretation.trim();
+
+      // Further processing can be added here if needed, e.g., parsing each sentence's structure
+      // Since the prompt mentions starting each sentence with the name of the view person and other rules,
+      // any additional parsing based on these rules would be implemented here.
+
+      return trimmedInterpretation;
+    }
+  );
+
+  return interpretationsArray;
 }
 
 export async function generateBlogFromChatGPT(userPrompt: string) {
@@ -148,12 +347,12 @@ export async function generateBlogFromChatGPT(userPrompt: string) {
     return;
   }
 
-  resetLoadingStates();
+  //resetLoadingStates();
   currentStep = 0; // Reset the step at the start
 
   try {
     // Generate the main content of the post using ChatGPT
-    isLoadingGptContent = true;
+    isLoading.content = true;
     loadingMessage = "Generating post content...";
     let bodyResponse = await generateGptRequest(
       `${promptFormat}This is the user's inspiration: '${userPrompt}'`
@@ -164,18 +363,18 @@ export async function generateBlogFromChatGPT(userPrompt: string) {
 
     post.body = bodyResponse;
     updateProgressBar(10);
-    isLoadingGptContent = false;
-    isLoadingGptTitle = true;
+    isLoading.content = false;
+    isLoading.title = true;
     loadingMessage = "Generating post title...";
     const titleResponse = await generateGptRequest(
       `${titlePrompt}This is the user's article: '${bodyResponse}'`
     );
     post.title = titleResponse.replace(/["']/g, "");
     updateProgressBar(20);
-    isLoadingGptTitle = false;
+    isLoading.title = false;
 
     // Generate a slug for the URL
-    isLoadingGptTags = true;
+    isLoading.tags = true;
     loadingMessage = "Generating post slug...";
     post.slug = titleResponse
       .toLowerCase()
@@ -185,48 +384,48 @@ export async function generateBlogFromChatGPT(userPrompt: string) {
 
     // Generate tags for the post
     loadingMessage = "Generating post tags...";
-    const tagsResponse = await generateGptRequest(
+    curTags = await generateGptRequest(
       `${tagPrompt}This is the blog article: '${bodyResponse}'`
     );
-    post.tags = tagsResponse; // Assuming the tagsResponse is a comma-separated string
+    //post.tags = tagsResponse; // Assuming the tagsResponse is a comma-separated string
     updateProgressBar(30);
-    isLoadingGptTags = false;
+    isLoading.tags = false;
 
     // Generate a summary for the blog post
-    isLoadingGptSummary = true;
+    isLoading.summary = true;
     loadingMessage = "Generating post summary...";
     const blogSummaryResponse = await generateGptRequest(
       `${blogSummaryPrompt}This is the blog article: '${bodyResponse}'`
     );
     post.blogSummary = blogSummaryResponse;
     updateProgressBar(40);
-    isLoadingGptSummary = false;
+    isLoading.summary = false;
 
-    isLoadingDalleImage = true;
+    isLoading.image = true;
     loadingMessage = "Generating post image prompt...";
     const imagePromptText = await generateGptRequest(
       `${imagePrompt}This is the blog article summary: '${blogSummaryResponse}'`
     );
     updateProgressBar(50);
 
-    // Optionally generate an image for the post
+    // Generate the image and get the base64 data
     loadingMessage = "Generating post image...";
-    //await generateImageFromDalle(titleResponse);
-    await generateImageFromSD(imagePromptText);
+    const base64Image = await generateImageFromSD(imagePromptText);
     updateProgressBar(60);
-    isLoadingDalleImage = false;
+    isLoading.image = false;
 
-    // Save the post
+    // Save the post with the image
     loadingMessage = "Saving post...";
-    await saveBlog();
+    await uploadImageAndSavePost(base64Image, curTags);
   } catch (error) {
     alertOnFailure(error);
     // Reset all loading states in case of an error
-    isLoadingGptContent = false;
-    isLoadingGptTitle = false;
-    isLoadingGptTags = false;
-    isLoadingGptSummary = false;
-    isLoadingDalleImage = false;
+    isLoading.content = false;
+    isLoading.title = false;
+    isLoading.tags = false;
+    isLoading.summary = false;
+    isLoading.image = false;
+
     return null;
   }
 
@@ -264,23 +463,26 @@ function goBack() {
 }
 
 function selectInterpretation(interpretation: string) {
-  chatGptPrompt = interpretation;
+  chatGptPrompt = originalPrompt + " - " + interpretation;
+
+  console.log("Captured the final prompt: " + chatGptPrompt);
+
   // Start loading here
-  isLoadingGptContent = true; // Assuming this is the first step in generating the blog
+  isLoading.content = true; // Assuming this is the first step in generating the blog
   loadingMessage = "Generating blog...";
-  generateBlogFromChatGPT(interpretation)
+  generateBlogFromChatGPT(chatGptPrompt)
     .then(() => {
-      isLoadingGptContent = false; // Reset or update loading states as necessary when done
+      isLoading.content = false; // Reset or update loading states as necessary when done
     })
     .catch((error) => {
       alertOnFailure(error); // Handle errors
-      isLoadingGptContent = false; // Ensure loading state is reset on error
+      isLoading.content = false; // Ensure loading state is reset on error
     });
 }
 </script>
 
 <div>
-  {#if isLoadingGptContent || isLoadingGptTitle || isLoadingGptTags || isLoadingGptSummary || isLoadingDalleImage}
+  {#if isLoading.content || isLoading.title || isLoading.tags || isLoading.summary || isLoading.image}
     <div class="mt-12 flex flex-col items-center space-y-4">
       <!-- Simplified SVG Spinner - Removed nested <svg> tags -->
       <svg
@@ -307,7 +509,9 @@ function selectInterpretation(interpretation: string) {
       <progress class="progress progress-primary w-56" value="1" max="100"
       ></progress>
       <div class="mt-4">
-        <p>{post.body}</p>
+        <div class="mt-4">
+          {@html marked(post.body || "")}
+        </div>
       </div>
       <div class="mt-4">
         <h2 class="text-2xl font-bold">{post.title}</h2>
@@ -317,15 +521,16 @@ function selectInterpretation(interpretation: string) {
       </div>
       <div class="mt-4">
         <div class="mb-4 flex flex-wrap gap-2">
-          {#if post.tags && post.tags.length}
+          Tags
+          <!-- {#if post.tags && post.tags.length}
             {#if typeof post.tags === 'string'}
               {#each post.tags.split(',') as tag}
-                <a href="#" class="badge badge-outline badge-accent"
+                <a href="/" class="badge badge-outline badge-accent"
                   >{tag.trim()}</a
                 >
               {/each}
             {/if}
-          {/if}
+          {/if} -->
         </div>
       </div>
       <div class="mt-4">
@@ -361,12 +566,12 @@ function selectInterpretation(interpretation: string) {
   {:else}
     <main class="container mx-auto my-12 px-4 sm:px-6 lg:px-8">
       <section class="space-y-6">
-        {#if post.interpretations.length > 0}
+        {#if chatGptInts.length > 0}
           <div class="mb-4 text-xl font-semibold">
             Select an interpretation:
           </div>
           <div class="flex flex-wrap gap-2">
-            {#each post.interpretations as interpretation}
+            {#each chatGptInts as interpretation}
               <button
                 class="btn btn-outline"
                 on:click={() => selectInterpretation(interpretation)}

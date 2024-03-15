@@ -6,4 +6,18 @@ declare namespace App {
   // interface PageData {}
   // interface Error {}
   // interface Platform {}
+
+  export interface PageData {
+    post: {
+      id : string;
+      title : string;
+      slug : string;
+      body : string;
+      tags : string[];
+      blogSummary : string;
+      featuredImage : string;
+      prompt : string;
+    },
+    featuredImageUrl?: string; // Add this line to include the featuredImageUrl
+  }
 }

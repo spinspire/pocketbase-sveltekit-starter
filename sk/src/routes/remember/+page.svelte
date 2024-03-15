@@ -1,28 +1,38 @@
 <script lang="ts">
-import { metadata } from "$lib/app/stores";
-import Image from "$lib/components/Image.svelte";
-import { authModel, watch } from "$lib/pocketbase";
-import type { PostsResponse } from "$lib/pocketbase/generated-types";
-import { alertOnFailure } from "$lib/pocketbase/ui";
-import { client } from "$lib/pocketbase";
-import Markdown from "svelte-markdown";
-import { goto } from "$app/navigation";
+  import { metadata } from "$lib/app/stores";
+  import Image from "$lib/components/Image.svelte";
+  import { authModel, watch } from "$lib/pocketbase";
+  import type { PostsResponse } from "$lib/pocketbase/generated-types";
+  import { alertOnFailure } from "$lib/pocketbase/ui";
+  import { client } from "$lib/pocketbase";
+  import Markdown from "svelte-markdown";
+  import { goto } from "$app/navigation";
 
-async function deleteAllPosts() {
-  alertOnFailure(async () => {
-    const postsResponse = await client.collection("posts").getList();
-    for (const post of postsResponse.items) {
-      await client.collection("posts").delete(post.id);
-    }
-    // Optionally, refresh the posts list or navigate as needed
+  async function deleteAllPosts() {
+    alertOnFailure(async () => {
+      const postsResponse = await client.collection("posts").getList();
+      for (const post of postsResponse.items) {
+        await client.collection("posts").delete(post.id);
+      }
+      // Optionally, refresh the posts list or navigate as needed
+    });
+  }
+
+  $metadata.title = "";
+  $metadata.description = "AI powered note taking";
+  const posts = watch<PostsResponse>("posts", {
+    sort: "-updated",
   });
-}
 
-$metadata.title = "";
-$metadata.description = "AI powered note taking";
-const posts = watch<PostsResponse>("posts", {
-  sort: "-updated",
-});
+  async function getFeaturedImageUrl(post: any) {
+    if (post.featuredImage) {
+      const image = await client.collection("images").getOne(post.featuredImage);
+      if (image && image.file) {
+        return client.getFileUrl(image, image.file);
+      }
+    }
+    return 'https://via.placeholder.com/800x400.png?text=AI+Blog';
+  }
 </script>
 
 <div class="bg-base-100">
@@ -38,11 +48,11 @@ const posts = watch<PostsResponse>("posts", {
           >
             <div>
               <figure class="relative w-full">
-                <img
-                  src={post.featuredImage || 'https://via.placeholder.com/800x400.png?text=AI+Blog'}
-                  alt={post.title}
-                  class="object-cover w-full t-2xl aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
-                />
+                {#await getFeaturedImageUrl(post)}
+                  <img src="https://via.placeholder.com/800x400.png?text=Loading..." alt="Loading..." class="object-cover w-full t-2xl aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]" />
+                {:then featuredImageUrl}
+                  <img src={featuredImageUrl} alt={post.title} class="object-cover w-full t-2xl aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]" />
+                {/await}
               </figure>
               <div class="m-4 max-w-xl">
                 <div class="prose items-center gap-x-4">
@@ -52,7 +62,7 @@ const posts = watch<PostsResponse>("posts", {
                 </div>
                 <div class="group relative mt-3">
                   <a
-                    href={"http://localhost:5173/posts/" + post.slug}
+                    href={import.meta.env.VITE_APP_SK_URL + "/posts/" + post.slug}
                     class="text-primary prose-lg line-clamp-2 font-bold"
                     >{post.title}</a
                   >
@@ -76,7 +86,7 @@ const posts = watch<PostsResponse>("posts", {
               {/if}
             </div>
             <div class="flex justify-between p-2">
-              <a class="btn btn-outline" href={`${post.id}/edit`}>Edit</a>
+              <a class="btn btn-outline" href={`/posts/` + post.slug + `/edit`}>Edit</a>
               <a
                 class="btn btn-outline btn-secondary"
                 href={`${post.slug}#delete`}>Delete</a
@@ -102,6 +112,3 @@ const posts = watch<PostsResponse>("posts", {
     {/if}
   </div>
 </div>
-
-<style>
-</style>

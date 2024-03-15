@@ -6,6 +6,12 @@ import { metadata } from "$lib/app/stores";
 import Alerts from "$lib/components/Alerts.svelte";
 import Nav from "$lib/components/Nav.svelte";
 import { site } from "$lib/config";
+
+// Import PocketBase SDK
+import PocketBase from 'pocketbase';
+
+// Initialize PocketBase client
+const pb = new PocketBase('http://127.0.0.1:8090');
 </script>
 
 <script lang="ts">
