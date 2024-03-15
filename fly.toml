@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for pocketbase-sveltekit-starter-bitter-glade-7537-summer-shadow-1313 on 2024-03-07T00:51:57-06:00
+# fly.toml app configuration file generated for pocketbase-sveltekit-starter-small-sun-6530 on 2024-03-15T07:53:53-05:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'pocketbase-sveltekit-starter-bitter-glade-7537-summer-shadow-1313'
+app = 'pocketbase-sveltekit-starter-small-sun-6530'
 primary_region = 'atl'
 
 [build]
