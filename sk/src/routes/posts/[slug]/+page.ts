@@ -17,6 +17,7 @@ export const load: PageLoad = async function ({ params }) {
     }
 
     const post: {
+      userid: any;
       id: string;
       title: string;
       slug: string;

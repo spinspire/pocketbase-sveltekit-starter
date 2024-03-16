@@ -9,7 +9,7 @@
     alertOnFailure(async () => {
       console.log(`Attempting to delete record with ID: ${id} from table: ${table}`);
       await client.collection(table).delete(id);
-      goto("..");
+      goto("/remember");
     });
   }
 </script>
@@ -19,5 +19,5 @@
     <aside>Are you sure you want to delete the following record?</aside>
   </article>
   <button type="submit">Yes - Proceed</button>
-  <button type="reset" on:click={() => goto("..")}>No - Cancel</button>
+  <button type="reset" on:click={() => goto("/remember")}>No - Cancel</button>
 </form>

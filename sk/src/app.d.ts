@@ -16,6 +16,7 @@ declare namespace App {
       tags : string[];
       blogSummary : string;
       featuredImage : string;
+      userid : string;
       prompt : string;
     },
     featuredImageUrl?: string; // Add this line to include the featuredImageUrl

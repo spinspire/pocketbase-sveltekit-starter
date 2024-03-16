@@ -39,7 +39,7 @@ $: post = {
   tags: [] as string[],
   blogSummary: "",
   featuredImage: "",
-  user: $authModel?.id || "",
+  userid: $authModel?.id || "",
   interpretations: [] as any[],
 };
 
@@ -151,8 +151,9 @@ async function uploadImageAndSavePost(
     // Assuming post object setup is done before this and includes necessary post fields
     post.featuredImage = createdImageRecord.id;
     console.log("Post object with image:", post);
-    // Save the post and link tags as before
-    // Ensure save and linkTagsToPost functions are correctly implemented
+    
+    post.userid = $authModel?.id || "";
+
     const createdPost = await save("posts", post, true);
     console.log("Post saved successfully", createdPost);
     await linkTagsToPost(tagIds, createdPost.id);

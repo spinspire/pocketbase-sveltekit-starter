@@ -59,7 +59,9 @@ export type PostsRecord = {
 	slug: string
 	files?: string[]
 	tags?: string
-	user?: RecordIdString
+	userid?: RecordIdString
+	prompt?: string
+	blogSummary?: string
 }
 
 export type UsersRecord = {

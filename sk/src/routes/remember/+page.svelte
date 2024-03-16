@@ -62,7 +62,7 @@
                 </div>
                 <div class="group relative mt-3">
                   <a
-                    href={import.meta.env.VITE_APP_SK_URL + "/posts/" + post.slug}
+                    href={"/posts/" + post.slug}
                     class="text-primary prose-lg line-clamp-2 font-bold"
                     >{post.title}</a
                   >
@@ -89,7 +89,7 @@
               <a class="btn btn-outline" href={`/posts/` + post.slug + `/edit`}>Edit</a>
               <a
                 class="btn btn-outline btn-secondary"
-                href={`${post.slug}#delete`}>Delete</a
+                href={`/posts/${post.slug}#delete`}>Delete</a
               >
             </div>
           </div>

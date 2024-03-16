@@ -5,6 +5,27 @@ import { authModel, save } from "$lib/pocketbase";
 import { alertOnFailure } from "$lib/pocketbase/ui";
 import type { PageData } from "./$types";
 import Markdown from "svelte-markdown";
+export let featuredImageUrl: string;
+export let data: PageData;
+
+$: if (data) {
+  const {
+    post: {
+      id,
+      title,
+      slug,
+      body,
+      tags,
+      blogSummary,
+      featuredImage,
+      prompt,
+      userid,
+    },
+    featuredImageUrl: newFeaturedImageUrl,
+  } = data;
+  featuredImageUrl = newFeaturedImageUrl;
+  $metadata.title = title;
+}
 
 import {
   promptFormat,
@@ -12,9 +33,8 @@ import {
   tagPrompt,
   blogSummaryPrompt,
 } from "$lib/utils/prompts";
-
-export let data: PageData;
-
+import { page } from "$app/stores";
+    import Delete from "$lib/components/Delete.svelte";
 
 $: ({ post } = data);
 $: $metadata.title = post.title;
@@ -28,12 +48,12 @@ let chatGptTags: string = ""; // Variable for tags
 
 async function submit(e: SubmitEvent) {
   e.preventDefault();
-  post.user = $authModel?.id;
+  post.userid = $authModel?.id;
 
   // Proceed with saving the post
   try {
     await save("posts", post);
-    goto("../..");
+    goto("../remember");
   } catch (error) {
     alert("Failed to save post. Please try again.");
   }
@@ -101,6 +121,7 @@ export async function generateFromChatGPT(userPrompt: string) {
     slug: post.slug,
     body: post.body,
     blogSummary: post.blogSummary,
+    userid: post.userid,
     tags: post.tags,
     featuredImage: post.featuredImage,
     // ... any other fields you need
@@ -158,14 +179,9 @@ async function generateGptRequest(prompt: string) {
             <label class="label" for="body">
               <span class="label-text">Body</span>
             </label>
-            <textarea
-              id="body"
-              name="body"
-              bind:value={post.body}
-              rows="10"
-              class="textarea textarea-bordered w-full"
-              placeholder="What's on your mind?"
-            ></textarea>
+            <article class="prose lg:prose-lg mx-auto text-justify">
+              <Markdown source={data.post.body} />
+            </article>
           </div>
 
           <div class="form-control w-full">
@@ -193,8 +209,9 @@ async function generateGptRequest(prompt: string) {
             placeholder="Enter your GPT prompt here"
             bind:value={chatGptPrompt}
           ></textarea>
-          <button class="btn btn-primary mt-4" on:click={() => generateFromChatGPT(chatGptPrompt)}
-            >Generate</button
+          <button
+            class="btn btn-primary mt-4"
+            on:click={() => generateFromChatGPT(chatGptPrompt)}>Generate</button
           >
         </div>
       </div>
@@ -205,7 +222,7 @@ async function generateGptRequest(prompt: string) {
       <div class="card bg-base-200">
         <figure>
           <img
-            src={post.featuredImage || 'https://via.placeholder.com/256x256.png?text=AI+Blog'}
+            src={featuredImageUrl || 'https://via.placeholder.com/256x256.png?text=AI+Blog'}
             alt={post.title}
           />
         </figure>
