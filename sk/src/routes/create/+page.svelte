@@ -2,7 +2,7 @@
 import { goto } from "$app/navigation";
 import { authModel, client, save } from "$lib/pocketbase";
 import type { PageData } from "./$types";
-import { apiRequest } from "$lib/utils/api"; // Adjust the path as necessary
+import { apiRequest } from "$lib/utils/api";
 import { marked } from "marked";
 import {
   promptFormat,
@@ -10,10 +10,9 @@ import {
   tagPrompt,
   blogSummaryPrompt,
   imagePrompt,
+  introPrompt,
 } from "$lib/utils/prompts";
-import PocketBase from "pocketbase";
 import { onMount } from "svelte";
-
 
 // Initialize states and reactive variables
 let isLoading = {
@@ -32,6 +31,22 @@ let base64Image;
 let curTags = "";
 let isAuthenticated = false;
 
+interface Tag {
+  id: string;
+  title: string;
+}
+
+interface Post {
+  title: string;
+  slug: string;
+  body: string;
+  tags: string[];
+  blogSummary: string;
+  featuredImage: string;
+  userid: string;
+  prompt: string;
+}
+
 $: post = {
   title: "",
   slug: "",
@@ -40,164 +55,126 @@ $: post = {
   blogSummary: "",
   featuredImage: "",
   userid: $authModel?.id || "",
-  interpretations: [] as any[],
+  prompt: "",
 };
 
 $: chatGptPrompt = "";
 
-// Assuming you have the API key stored in an environment variable
 const engineId = "stable-diffusion-v1-6";
 const apiHost = "https://api.stability.ai";
 const apiKey = import.meta.env.VITE_STABILITY_API_KEY;
 
-if (!apiKey) throw new Error("Missing Stability API key.");
-
-onMount(async () => {
-  try {
-    if (!$authModel) {
-      console.error("User is not authenticated.");
-      isAuthenticated = false;
-      return;
-    }
-    else
-    {
-      isAuthenticated = true;
-    }
-  } catch (error) {
-    console.error("Error checking user authentication:", error);
-    isAuthenticated = false;
-  }
-});
-
-
-async function ensureTagsExist(tags: string[]): Promise<string[]> {
-  const tagIds = [];
-  console.log("Ensuring tags exist:", tags);
-  for (const title of tags) {
-    try {
-      // Use a filter expression to search for the tag by title
-      const filterExpression = `title = "${title.replace(/"/g, '\\"')}"`; // Escape double quotes in title
-      console.log("Checking for tag:", title);
-
-      // Attempt to find the tag by its title
-      const existingTags = await client.collection('tags').getList(1, 1, { filter: filterExpression });
-
-      let existingTag = existingTags.items.length > 0 ? existingTags.items[0] : null;
-
-      // If the tag doesn't exist, create it
-      if (!existingTag) {
-        console.log("Tag does not exist, creating new tag:", title);
-        existingTag = await client.collection('tags').create({ title });
-        console.log("Created new tag:", existingTag);
-      } else {
-        console.log("Found existing tag:", existingTag);
-      }
-
-      // Store the tag's ID
-      if (existingTag)
-        tagIds.push(existingTag.id);
-      else
-        throw new Error("Failed to create tag");
-    } catch (error) {
-      console.error("Error handling tag:", title, error);
-      throw error; // Optionally rethrow the error or handle it as needed
-    }
-  }
-  return tagIds;
+if (!apiKey) {
+  console.error("Missing Stability API key.");
+  throw new Error("Missing Stability API key.");
 }
 
+onMount(async () => {
+  isAuthenticated = !!authModel;
+});
 
-// Link tags to the created post
+async function ensureTagsExist(tags: string[]): Promise<Tag[]> {
+  const tagObjects: Tag[] = [];
+  for (const title of tags) {
+    const filterExpression = `title = "${title.replace(/"/g, '\\"')}"`;
+    const existingTags = await client
+      .collection("tags")
+      .getList(1, 1, { filter: filterExpression });
+    console.log("These are the existing tags: " + existingTags);
+
+    let existingTag =
+      existingTags.items.length > 0 ? existingTags.items[0] : null;
+
+    if (!existingTag) {
+      existingTag = await client.collection("tags").create({ title });
+    }
+
+    if (existingTag) {
+      tagObjects.push({ id: existingTag.id, title: existingTag.title });
+    } else {
+      throw new Error("Failed to create or retrieve tag");
+    }
+  }
+  return tagObjects;
+}
+
 async function linkTagsToPost(tagIds: string[], postId: string) {
   for (const tagId of tagIds) {
-    // For each tag, create a record in the 'postsTags' collection linking it to the post
     await client.collection("postsTags").create({
-      post: postId, // Assuming 'post' is the correct field name in 'postsTags' for linking to the post ID
-      tag: tagId, // Adjust field names as necessary based on your 'postsTags' collection schema
+      posts: postId,
+      tags: tagId,
     });
   }
 }
 
-// Assuming `pb` is your PocketBase client instance and authentication is set up correctly
 async function uploadImageAndSavePost(
   base64Image: string,
-  curTags: string = ""
+  curTags: string
 ): Promise<void> {
   try {
-    // Convert base64 image to Blob
+    // Convert base64 to Blob
     const imageBlob = await fetch(`data:image/png;base64,${base64Image}`).then(
       (res) => res.blob()
     );
+
+    // Check image size
     if (imageBlob.size > 5242880) {
-      // 5MB
       throw new Error("Image size exceeds the maximum limit of 5MB.");
     }
+
+    // Prepare form data for image upload
     const formData = new FormData();
     formData.append("file", imageBlob, "postImage.png");
-    console.log("Uploading image to PocketBase...");
 
-    // Upload the image to the 'images' collection
-    const createdImageRecord = await client.collection("images").create(formData);
-    console.log("Image uploaded successfully", createdImageRecord);
-    // Ensure curTags is not undefined before splitting, default to an empty string if undefined
-    const tagsArray = (curTags || "")
+    // Prepare post data
+    post.userid = $authModel?.id || "";
+
+    // Upload image and create image record
+    const createdImageRecord = await client
+      .collection("images")
+      .create(formData);
+
+    post.featuredImage = createdImageRecord.id; // Assuming this is the correct field for image ID
+
+    // Process tags
+    const tagsArray = curTags
       .split(",")
       .map((tag) => tag.trim())
       .filter((tag) => tag);
-    console.log("Tags array:", tagsArray);
-    // Continue with tag existence check, image upload, and post creation...
-    const tagIds = await ensureTagsExist(tagsArray);
-    console.log("Tag IDs:", tagIds);
-    // Assuming post object setup is done before this and includes necessary post fields
-    post.featuredImage = createdImageRecord.id;
-    console.log("Post object with image:", post);
-    
-    post.userid = $authModel?.id || "";
+    console.log("This is the tagsArray: " + tagsArray);
 
-    const createdPost = await save("posts", post, true);
-    console.log("Post saved successfully", createdPost);
-    await linkTagsToPost(tagIds, createdPost.id);
-    console.log("Post saved successfully with tags and image", createdPost);
+    // Ensure tags exist in the `tags` collection and get their IDs
+    const tagObjects = await ensureTagsExist(tagsArray);
+    console.log("This is the tags objects" + tagObjects);
+
+    // Prepare post data
+    const postToCreate = {
+      title: post.title,
+      slug: post.slug,
+      body: post.body,
+      blogSummary: post.blogSummary,
+      featuredImage: createdImageRecord.id,
+      userid: $authModel?.id || "",
+      prompt: post.prompt,
+      // Do not include tags here as they are handled separately
+    };
+
+    // Create post record
+    const createdPost = await save("posts", postToCreate, true);
+
+    // Link tags to the post by creating records in the postsTags table
+    for (const tagObject of tagObjects) {
+      await client.collection("postsTags").create({
+        posts: createdPost.id,
+        tags: tagObject.id,
+      });
+    }
+
+    // Redirect to the new post
     goto(`${import.meta.env.VITE_APP_SK_URL}/posts/${post.slug}`);
   } catch (error) {
     console.error(`Failed to upload image and save post: ${error}`);
     alertOnFailure(`Failed to upload image and save post: ${error}`);
-  }
-}
-
-async function saveImage(post: { featuredImage: string }) {
-  try {
-    console.log("Uploading image...");
-    const imageResponse = await fetch(post.featuredImage);
-    if (!imageResponse.ok) {
-      console.log(
-        "Failed to fetch image from temporary URL:",
-        post.featuredImage
-      );
-      throw new Error(
-        `Failed to fetch image from temporary URL: ${post.featuredImage}`
-      );
-    }
-    console.log("Image fetched successfully");
-    const imageBlob = await imageResponse.blob();
-
-    // Prepare the form data for uploading
-    const formData = new FormData();
-    formData.append("file", imageBlob, "postImage.png"); // Adjust the field name according to your PocketBase collection schema
-
-    console.log("Uploading image to PocketBase...");
-
-    // Upload and create new record in PocketBase
-    const createdRecord = await client.collection("yourCollectionName").create({
-      // Assuming "file" is the field name in your PocketBase collection for the image
-      // and other fields as necessary.
-      file: formData.get("file"),
-      title: "Image Title", // Example, replace with actual data if needed
-    });
-
-    console.log("Image uploaded successfully", createdRecord);
-  } catch (error) {
-    console.error("Error uploading image to PocketBase:", error);
   }
 }
 
@@ -211,7 +188,6 @@ function showAlert(message: any, type: string) {
   // For a better user experience, replace this with your UI framework's alert system
   alert(`${type.toUpperCase()}: ${message}`);
 }
-
 async function generateImageFromDalle(prompt: string) {
   try {
     const data = await apiRequest("/api/dalle", "POST", { prompt });
@@ -220,8 +196,6 @@ async function generateImageFromDalle(prompt: string) {
     alertOnFailure(error);
   }
 }
-
-// Updated generateImageFromSD to handle backend response change
 async function generateImageFromSD(prompt: string): Promise<string> {
   isLoading.image = true;
   try {
@@ -235,14 +209,11 @@ async function generateImageFromSD(prompt: string): Promise<string> {
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          text_prompts: [
-            {
-              text: prompt,
-            },
-          ],
+          text_prompts: [{ text: prompt }],
           cfg_scale: 7,
           height: 512,
           width: 512,
+          stepswidth: 512,
           steps: 30,
           samples: 1,
         }),
@@ -254,28 +225,14 @@ async function generateImageFromSD(prompt: string): Promise<string> {
     }
 
     const responseJSON = await response.json();
-
-    // Assuming you want to use the first image artifact
     const imageBase64 = responseJSON.artifacts[0].base64;
 
-    isLoading.image = false;
-    // Return the base64 image data
     return imageBase64;
   } catch (error) {
     console.error("Error generating image:", error);
-    throw error; // Propagate error for further handling
+    throw error;
   } finally {
     isLoading.image = false;
-  }
-}
-
-// Updated Progress Bar Update Function
-function updateProgressBar(step: number) {
-  const progressElement = document.querySelector(
-    ".progress"
-  ) as HTMLProgressElement;
-  if (progressElement) {
-    progressElement.value = step;
   }
 }
 
@@ -291,19 +248,7 @@ async function generateGptInterpretations(promptString: string) {
   try {
     // Use the provided `promptString` instead of `post.prompt`
     const interpretationsResponse = await generateGptRequest(
-      `Be creative, be fun, be unique.  You are a thinker and an idea genrator.  People give you a phrase or a thought, and you rephrase that into 5 different ideas, one from each of the listed five perspectives:
-      
-        { view: "Optimistic", description: "Always sees the glass as half full and believes in the best possible outcome." },
-        { view: "Pessimistic", description: "Tends to see the downside in every situation and prepares for the worst." },
-        { view: "Realistic", description: "Looks at the facts and figures to make practical and logical decisions." },
-        { view: "Creative", description: "Thinks outside the box and approaches problems with a fresh perspective." },
-        { view: "Analytical", description: "Breaks down problems into smaller parts to understand the underlying issues." }
-      
-
-      
-      Respond to the user by providing  five seperate prompts based on if the person who had the idea also had that type of perspective.  Generate 5 alternative prompts that further explain the concept in a different viewpoint by each of the perspectives.
-      
-      Return 5 sentences, # - hashtag, make sure to separate each complete idea by a '#' - just sthe symbol # - only use # to seperate the sentences, do not use in the ideas - start each sentence with the name of the view person: - this is the prompt - remember this will be parsed according to these rules: '${promptString}'`
+      introPrompt + promptString
     );
 
     originalPrompt = promptString;
@@ -321,50 +266,62 @@ async function generateGptInterpretations(promptString: string) {
   }
 }
 
-function parseInterpretations(response: string) {
-  // Split the response by the '#' symbol to separate each sentence
-  const rawInterpretations = response.split("#");
+function parseInterpretations(response: string): any[] {
+  // Split the response by newline to separate each perspective
+  const rawInterpretations = response.split("\n");
 
-  // Map each raw interpretation to a trimmed and processed version
-  const interpretationsArray = rawInterpretations.map(
-    (interpretation: string) => {
-      // Trim leading and trailing whitespace from each interpretation
-      const trimmedInterpretation = interpretation.trim();
+  // Create an array to store the interpretations
+  const interpretations: any[] = [];
 
-      // Further processing can be added here if needed, e.g., parsing each sentence's structure
-      // Since the prompt mentions starting each sentence with the name of the view person and other rules,
-      // any additional parsing based on these rules would be implemented here.
+  // Iterate over each raw interpretation
+  rawInterpretations.forEach((interpretation: string) => {
+    // Split the interpretation by the first colon to separate the perspective name and content
+    const parts = interpretation.split(": ");
 
-      return trimmedInterpretation;
+    // Check if both parts exist
+    if (parts.length === 2) {
+      const [perspectiveName, content] = parts;
+      const trimmedPerspectiveName = perspectiveName.trim();
+      const trimmedContent = content.trim();
+
+      // Store the interpretation in the interpretations array
+      interpretations.push({
+        perspectiveName: trimmedPerspectiveName,
+        content: trimmedContent,
+      });
     }
-  );
+  });
 
-  return interpretationsArray;
+  return interpretations;
 }
 
-export async function generateBlogFromChatGPT(userPrompt: string) {
+function updateProgressBar(step: number) {
+  const progressElement = document.querySelector(
+    ".progress"
+  ) as HTMLProgressElement;
+  if (progressElement) {
+    progressElement.value = step;
+  }
+}
+
+async function generateBlogFromChatGPT(userPrompt: string) {
   if (!$authModel?.id) {
     alert("Please log in to save your post.");
     return;
   }
 
-  //resetLoadingStates();
-  currentStep = 0; // Reset the step at the start
-
+  currentStep = 0;
   try {
-    // Generate the main content of the post using ChatGPT
     isLoading.content = true;
+    post.userid = $authModel?.id || "";
     loadingMessage = "Generating post content...";
     let bodyResponse = await generateGptRequest(
       `${promptFormat}This is the user's inspiration: '${userPrompt}'`
     );
-    if (bodyResponse === null) {
-      throw new Error("Failed to generate body response");
-    }
-
     post.body = bodyResponse;
     updateProgressBar(10);
     isLoading.content = false;
+
     isLoading.title = true;
     loadingMessage = "Generating post title...";
     const titleResponse = await generateGptRequest(
@@ -374,25 +331,20 @@ export async function generateBlogFromChatGPT(userPrompt: string) {
     updateProgressBar(20);
     isLoading.title = false;
 
-    // Generate a slug for the URL
-    isLoading.tags = true;
-    loadingMessage = "Generating post slug...";
     post.slug = titleResponse
       .toLowerCase()
       .replace(/\s+/g, "-")
       .replace(/["':]/g, "")
       .substring(0, 50);
+    post.prompt = userPrompt;
 
-    // Generate tags for the post
     loadingMessage = "Generating post tags...";
     curTags = await generateGptRequest(
       `${tagPrompt}This is the blog article: '${bodyResponse}'`
     );
-    //post.tags = tagsResponse; // Assuming the tagsResponse is a comma-separated string
-    updateProgressBar(30);
-    isLoading.tags = false;
 
-    // Generate a summary for the blog post
+    updateProgressBar(30);
+
     isLoading.summary = true;
     loadingMessage = "Generating post summary...";
     const blogSummaryResponse = await generateGptRequest(
@@ -403,34 +355,23 @@ export async function generateBlogFromChatGPT(userPrompt: string) {
     isLoading.summary = false;
 
     isLoading.image = true;
-    loadingMessage = "Generating post image prompt...";
-    const imagePromptText = await generateGptRequest(
-      `${imagePrompt}This is the blog article summary: '${blogSummaryResponse}'`
-    );
-    updateProgressBar(50);
-
-    // Generate the image and get the base64 data
     loadingMessage = "Generating post image...";
-    const base64Image = await generateImageFromSD(imagePromptText);
+    const base64Image = await generateImageFromSD(userPrompt);
     updateProgressBar(60);
     isLoading.image = false;
 
-    // Save the post with the image
     loadingMessage = "Saving post...";
+    console.log("This is the curTags: " + curTags);
     await uploadImageAndSavePost(base64Image, curTags);
   } catch (error) {
     alertOnFailure(error);
-    // Reset all loading states in case of an error
     isLoading.content = false;
     isLoading.title = false;
     isLoading.tags = false;
     isLoading.summary = false;
     isLoading.image = false;
-
-    return null;
   }
 
-  // Return the post object for further use or confirmation
   return {
     title: post.title,
     slug: post.slug,
@@ -438,6 +379,8 @@ export async function generateBlogFromChatGPT(userPrompt: string) {
     tags: post.tags,
     blogSummary: post.blogSummary,
     featuredImage: post.featuredImage,
+    prompt: userPrompt,
+    userid: post.userid,
   };
 }
 
@@ -575,8 +518,8 @@ function selectInterpretation(interpretation: string) {
             {#each chatGptInts as interpretation}
               <button
                 class="btn btn-outline"
-                on:click={() => selectInterpretation(interpretation)}
-                >{interpretation}</button
+                on:click={() => selectInterpretation(interpretation.content)}
+                >{interpretation.content}</button
               >
             {/each}
           </div>

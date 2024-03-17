@@ -13,8 +13,9 @@ export const load: PageLoad = async function ({ params }) {
   try {
     // Fetch the post by slug
     const { items } = await client.collection("posts").getList(undefined, undefined, {
-      filter: `slug='${encodeURIComponent(decodeURIComponent(slug))}'`,
+      filter: `slug='${slug}'`,
     });
+    
     console.log("items", items);
 
     if (items.length === 0) {
@@ -34,6 +35,7 @@ export const load: PageLoad = async function ({ params }) {
     } = items[0];
 
     let featuredImageUrl = "";
+    console.log("tags", post.tags);
 
     // Check if the post has a featuredImage
     if (post.featuredImage) {

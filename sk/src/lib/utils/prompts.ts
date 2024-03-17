@@ -36,3 +36,25 @@ export const blogSummaryPrompt =
 
   export const imagePrompt = 
   "Please review the provided text and generate a prompt for a slick minimal, modern image that captures the essence of the text."
+
+  export const introPrompt =
+  `You are a creative and unique idea generator. When given a phrase or thought, your task is to rephrase it into 5 distinct ideas, each from a different perspective:
+
+  1. Optimistic: Always sees the glass as half full and believes in the best possible outcome.
+  2. Pessimistic: Tends to see the downside in every situation and prepares for the worst.
+  3. Realistic: Looks at the facts and figures to make practical and logical decisions.
+  4. Creative: Thinks outside the box and approaches problems with a fresh perspective.
+  5. Analytical: Breaks down problems into smaller parts to understand the underlying issues.
+  
+  Respond by providing five separate prompts based on how someone with each perspective would interpret the original idea. Generate alternative prompts that further explain the concept from each viewpoint.
+  
+  Format your response as follows:
+  Optimistic: [Optimistic interpretation]
+  Pessimistic: [Pessimistic interpretation]
+  Realistic: [Realistic interpretation]
+  Creative: [Creative interpretation]
+  Analytical: [Analytical interpretation]
+  
+  Do not use hashtags or any other separators between the ideas. Simply start each line with the perspective name followed by a colon and the corresponding interpretation.
+  
+  Here is the original thought or phrase to interpret:`;

@@ -1,12 +1,13 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { metadata } from "$lib/app/stores";
-import { authModel, save } from "$lib/pocketbase";
+import { authModel, client, save } from "$lib/pocketbase";
 import { alertOnFailure } from "$lib/pocketbase/ui";
 import type { PageData } from "./$types";
 import Markdown from "svelte-markdown";
 export let featuredImageUrl: string;
 export let data: PageData;
+import { onMount } from "svelte";
 
 $: if (data) {
   const {
@@ -34,7 +35,7 @@ import {
   blogSummaryPrompt,
 } from "$lib/utils/prompts";
 import { page } from "$app/stores";
-    import Delete from "$lib/components/Delete.svelte";
+import Delete from "$lib/components/Delete.svelte";
 
 $: ({ post } = data);
 $: $metadata.title = post.title;
@@ -45,19 +46,87 @@ let chatGptResponse: string = "";
 let chatGptTitle: string = ""; // Variable for title
 let chatGptSlug: string = ""; // Variable for slug
 let chatGptTags: string = ""; // Variable for tags
+let tagString = ""; // Will hold the comma-separated tags
 
-async function submit(e: SubmitEvent) {
-  e.preventDefault();
-  post.userid = $authModel?.id;
+onMount(async () => {
+    if (data && data.post) {
+      // Fetch the related tags for the post
+      const postsTagsResponse = await client.collection('postsTags').getList(1, 50, {
+        filter: `posts = "${data.post.id}"`,
+      });
+      console.log("Posts Tags Response:", postsTagsResponse);
+      const tagIds = postsTagsResponse.items.map((postTag) => postTag.tags);
+      console.log("Tag IDs:", tagIds);
+      const tags = await Promise.all(
+        tagIds.map((tagId) => client.collection('tags').getOne(tagId))
+      );
+      console.log("Tags:", tags);
+      tagString = tags.map(tag => tag.title).join(', ');
+      console.log("Tag String:", tagString);
+    }
+  });
 
-  // Proceed with saving the post
-  try {
-    await save("posts", post);
-    goto("../remember");
-  } catch (error) {
-    alert("Failed to save post. Please try again.");
+  async function submit(e: SubmitEvent) {
+    e.preventDefault();
+
+    // Handle the tags
+    const tagsArray = tagString.split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+
+
+    // Validate the tags here (e.g., check for duplicates or invalid characters)
+    // This is a placeholder for your validation logic
+
+    // Update the post with any other changes
+    const updatedPost = {
+      ...data.post,
+      // ... other fields like title, body, etc.
+    };
+
+    // Save the post
+    const savedPost = await save('posts', updatedPost);
+
+    // Update the postsTags relationships
+    await updatePostsTagsRelationships(savedPost.id, tagsArray);
+
+    // Redirect after successful save
+    goto(`/posts/${savedPost.slug}`);
   }
-}
+
+  async function updatePostsTagsRelationships(postId: string, tagsArray: string[]) {
+    // Delete old postsTags relationships
+    const oldPostsTags = await client.collection('postsTags').getList(1, 50, {
+      filter: `posts = "${postId}"`,
+    });
+    for (const postTag of oldPostsTags.items) {
+      await client.collection('postsTags').delete(postTag.id);
+    }
+
+    // Create new postsTags relationships
+    for (const tagTitle of tagsArray) {
+      // Check if the tag exists
+      const existingTags = await client.collection('tags').getList(1, 1, {
+        filter: `title = "${tagTitle}"`,
+      });
+
+      let tagId;
+      if (existingTags.items.length === 0) {
+        // Create the tag if it doesn't exist
+        const newTag = await client.collection('tags').create({ title: tagTitle });
+        tagId = newTag.id;
+      } else {
+        // Use the existing tag
+        tagId = existingTags.items[0].id;
+      }
+
+      // Create the postsTags relationship
+      await client.collection('postsTags').create({
+        posts: postId,
+        tags: tagId,
+      });
+    }
+  }
 
 async function generateImageFromDalle(prompt: string) {
   try {
@@ -189,9 +258,10 @@ async function generateGptRequest(prompt: string) {
               <span class="label-text">Tags</span>
             </label>
             <input
+              type="text"
               id="tags"
               name="tags"
-              bind:value={post.tags}
+              bind:value={tagString}
               class="input input-bordered w-full"
               placeholder="Tags, comma separated"
             />
@@ -207,7 +277,7 @@ async function generateGptRequest(prompt: string) {
           <textarea
             class="textarea h-24 w-full"
             placeholder="Enter your GPT prompt here"
-            bind:value={chatGptPrompt}
+            bind:value={post.prompt}
           ></textarea>
           <button
             class="btn btn-primary mt-4"
@@ -232,8 +302,8 @@ async function generateGptRequest(prompt: string) {
           </h3>
           <p>{post.blogSummary || 'No summary available.'}</p>
           <div class="card-actions justify-end">
-            {#if post.tags}
-              {#each post.tags.split(',') as tag}
+            {#if tagString}
+              {#each tagString.split(',') as tag (tag)}
                 <div class="badge badge-outline">{tag.trim()}</div>
               {/each}
             {:else}
@@ -245,6 +315,3 @@ async function generateGptRequest(prompt: string) {
     </aside>
   </div>
 </main>
-
-<style>
-</style>

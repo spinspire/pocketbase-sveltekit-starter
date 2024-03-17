@@ -82,7 +82,7 @@ func DoChatGPT(apiKey, prompt string) (string, error) {
 		SetBody(map[string]interface{}{
 			"model":      "gpt-3.5-turbo-0125",
 			"messages":   []interface{}{map[string]interface{}{"role": "system", "content": prompt}},
-			"max_tokens": 200,
+			"max_tokens": 500,
 		}).
 		Post("https://api.openai.com/v1/chat/completions")
 

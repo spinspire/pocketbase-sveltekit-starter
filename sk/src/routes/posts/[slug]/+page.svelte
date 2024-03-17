@@ -110,21 +110,21 @@ import { metadata } from "$lib/app/stores";
 import Delete from "$lib/components/Delete.svelte";
 import { client } from "$lib/pocketbase";
 import type { PageData } from "./$types";
-export let featuredImageUrl: string;
-export let data: PageData;
 import Markdown from "svelte-markdown";
-
+export let data: PageData;
+export let featuredImageUrl: string;
+let postsTagsFix: any[];
 $: if (data) {
   const {
-    post: { id, title, slug, body, tags, blogSummary, featuredImage, prompt },
+    post: { id, title, slug, body, blogSummary, featuredImage, prompt },
     featuredImageUrl: newFeaturedImageUrl,
+    tags: newPostsTagsFix,
   } = data;
   featuredImageUrl = newFeaturedImageUrl;
+  postsTagsFix = newPostsTagsFix;
   $metadata.title = title;
 }
 console.log("On Load: [featuredImageUrl] ", featuredImageUrl);
-
-let postsTagsFix: any[];
 </script>
 
 {#if $page.url.hash === "#delete"}
@@ -147,22 +147,21 @@ let postsTagsFix: any[];
   <article class="prose lg:prose-lg mx-auto text-justify">
     <Markdown source={data.post.body} />
   </article>
-
+  <!-- Inside your Svelte component -->
   <div class="mt-8">
     <h2 class="text-2xl">Tags</h2>
-    {#if Array.isArray(postsTagsFix)}
+    {#if Array.isArray(data.tags)}
       <ul class="flex flex-wrap">
-        {#each postsTagsFix as tag (tag.id)}
+        {#each data.tags as tag (tag.id)}
           <li class="mr-2">
             <a href={`${base}/tags/${tag.id}`} class="btn btn-sm btn-primary">
-              {tag.name}
+              {tag.title}
             </a>
           </li>
         {/each}
       </ul>
     {/if}
   </div>
-
   <div class="mt-8 text-center">
     <a href={`${base}/auditlog/posts/${data.post.id}`} class="btn btn-primary">
       Audit Log
