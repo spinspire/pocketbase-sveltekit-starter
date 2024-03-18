@@ -48,19 +48,32 @@ async function submit() {
 <form on:submit|preventDefault={submit} class="form-control w-full max-w-xs">
   {#if passwordLogin}
     <div class="tabs">
-      <a
+      <button
         class="tab-bordered tab {activeTab === 'SignIn' ? 'tab-active' : ''}"
-        on:click={() => (activeTab = 'SignIn', signup = false)}>Sign In</a
+        on:click={() => (activeTab = 'SignIn', signup = false)}
+        on:keydown={(event) => {
+          if (event.key === 'Enter') {
+            activeTab = 'SignIn';
+            signup = false;
+          }
+        }}
+        type="button"
+        aria-label="Sign In"
       >
-      <a
+        Sign In
+      </button>
+      <button
         class="tab-bordered tab {activeTab === 'SignUp' ? 'tab-active' : ''}"
-        on:click={() => (activeTab = 'SignUp', signup = true)}>Sign Up</a
+        on:click={() => (activeTab = 'SignUp', signup = true)}
+        type="button"
       >
+        Sign Up
+      </button>
     </div>
 
     {#if activeTab === 'SignIn'}
       <div class="form-control">
-        <label class="label">
+        <label class="label" for="email-input">
           <span class="label-text">Email</span>
         </label>
         <input
@@ -69,10 +82,26 @@ async function submit() {
           required
           type="text"
           placeholder="email"
+          id="email-input"
         />
-        <label class="label">
+        <input
+          class="input input-bordered"
+          bind:value={email}
+          required
+          type="text"
+          placeholder="email"
+        />
+        <label class="label" for="password-input">
           <span class="label-text">Password</span>
         </label>
+        <input
+          class="input input-bordered"
+          bind:value={password}
+          required
+          type="password"
+          placeholder="password"
+          id="password-input"
+        />
         <input
           class="input input-bordered"
           bind:value={password}

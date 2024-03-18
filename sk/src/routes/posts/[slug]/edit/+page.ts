@@ -26,10 +26,20 @@ export const load: PageLoad = async function ({ params }) {
       body: string;
       tags: string[];
       blogSummary: string;
-      featuredImage: string;
+      featuredImage: string | null;
       prompt: string;
-    } = items[0];
-
+    } = items[0] as unknown as {
+      userid: any;
+      id: string;
+      title: string;
+      slug: string;
+      body: string;
+      tags: string[];
+      blogSummary: string;
+      featuredImage: string | null;
+      prompt: string;
+    };
+    
     let featuredImageUrl = "";
 
     if (post.featuredImage) {

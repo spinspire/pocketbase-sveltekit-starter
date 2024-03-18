@@ -19,7 +19,7 @@ export let data: PageData;
         <td>{item.admin || (Array.isArray(item.expand.user) ? item.expand.user[0]?.name : item.expand.user?.name) || item.user}</td>
       </tr>
       <tr>
-        <td colspan="3"><Changes auditlog={item} /></td>
+        <!--<td colspan="3"><Changes auditlog={item} /></td>-->
       </tr>
     {:else}
       <tr>
