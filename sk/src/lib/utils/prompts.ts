@@ -127,10 +127,11 @@ Please generate a title for the given blog post, strictly adhering to the specif
 
 export const tagPrompt = `Please analyze the provided blog article and generate relevant tags based on its main points and themes. The tags should:
 
-- Consist of 5-8 concise, lowercase, single-word tags that capture the essence of the article
-- Be separated by commas, without any spaces between the commas and words
+- Consist of 3-5 concise, lowercase, single-word tags, can be 2 or 3 words just joined together) that capture the essence of the article
+- They shoud be separated by commas, without any spaces between the commas and words
 - Cover key topics, concepts, or categories mentioned in the article
 - Help readers quickly identify the article's main focus areas and improve searchability
+- Only use alphabets, no special characters or numbers
 - Be output as plain text, strictly adhering to the specified format: 'tag1,tag2,tag3,tag4,tag5'
 
 Example Input:

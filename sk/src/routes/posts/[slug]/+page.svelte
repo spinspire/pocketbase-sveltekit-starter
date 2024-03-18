@@ -58,11 +58,7 @@ console.log("On Load: [featuredImageUrl] ", featuredImageUrl);
     {#if Array.isArray(data.tags)}
       <ul class="flex flex-wrap">
         {#each data.tags as tag (tag.id)}
-          <li class="mr-2">
-            <a href={`${base}/tags/${tag.id}`} class="btn btn-primary btn-sm">
-              {tag.title}
-            </a>
-          </li>
+          <div class="badge badge-primary badge-outline p-4 m-2">{tag.title}</div>
         {/each}
       </ul>
     {/if}
