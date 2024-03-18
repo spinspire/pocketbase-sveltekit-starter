@@ -1,0 +1,3189 @@
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\app.d.ts
+Contents:
+import type { PocketBase } from "pocketbase"
+
+declare global {
+  namespace App {
+    interface Locals {
+      pb: PocketBase;
+    }
+  }
+}
+
+declare namespace App {
+  export interface PageData {
+    post?: {
+      id: string;
+      title: string;
+      slug: string;
+      body: string;
+      tags: string[];
+      blogSummary: string;
+      featuredImage: string;
+      userid: string;
+      prompt: string;
+    };
+    featuredImageUrl?: string;
+  }
+}
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\app.html
+Contents:
+<!doctype html>
+<html lang="en" class="h-full" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%sveltekit.assets%/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    %sveltekit.head%
+  </head>
+  <body class="h-full">
+    <div>%sveltekit.body%</div>
+  </body>
+</html>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\app.pcss
+Contents:
+
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\app.scss
+Contents:
+/* Write your global styles here, in PostCSS syntax */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\textGen.py
+Contents:
+import os
+
+def parse_directory_to_file(output_file_name):
+    """
+    Recursively traverses the directory structure from the current working directory,
+    writing the path and contents of each file found to an output file in the same directory.
+    """
+    start_dir = os.getcwd()  # Use current working directory
+    output_file_path = os.path.join(start_dir, output_file_name)
+    
+    with open(output_file_path, 'w') as output_file:
+        for root, dirs, files in os.walk(start_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                # Skip the output file itself to avoid recursion
+                if file_path == output_file_path:
+                    continue
+                try:
+                    with open(file_path, 'r') as f:
+                        contents = f.read()
+                        output_file.write(f"Path: {file_path}\n")
+                        output_file.write("Contents:\n")
+                        output_file.write(contents + "\n\n")
+                except Exception as e:
+                    print(f"Error reading file {file_path}: {e}")
+
+# Example usage
+output_file_name = "directory_contents.txt"  # Output file in the current directory
+parse_directory_to_file(output_file_name)
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\config.ts
+Contents:
+export const site = {
+  name: "mind",
+  source_url: "https://modible.com/mind",
+  description:
+    "Capture your inspiration and ideas with mind. A simple and elegant journaling app that helps you stay organized.",
+};
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\app\stores.ts
+Contents:
+import { writable } from "svelte/store";
+
+export interface Metadata {
+  title?: string;
+  description?: string;
+  headline?: string;
+}
+
+export const metadata = writable<Metadata>({});
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\Alerts.svelte
+Contents:
+<script lang="ts" context="module">
+import { writable } from "svelte/store";
+
+interface Alert {
+  message: string;
+  type: string;
+  timeout?: number;
+  html?: boolean;
+}
+
+export const alerts = {
+  ...writable<Alert[]>([]),
+  add({ message, type = "info", timeout = 0, html = false }: Alert) {
+    const alert = { message, type, html };
+    this.update((v) => [...v, alert]);
+    if (timeout) {
+      setTimeout(() => {
+        dismiss(alert);
+      }, timeout);
+    }
+  },
+  info(message: string, timeout = 0) {
+    this.add({ message, type: "info", timeout });
+  },
+  success(message: string, timeout = 0) {
+    this.add({ message, type: "success", timeout });
+  },
+  warning(message: string, timeout = 0) {
+    this.add({ message, type: "warning", timeout });
+  },
+  error(message: string, timeout = 0) {
+    this.add({ message, type: "error", timeout });
+  },
+};
+
+export function errorAlert(message: string) {
+  const type = "error";
+}
+
+function dismiss(alert: Alert) {
+  alerts.update((val) => val.filter((a) => a !== alert));
+}
+
+function dismissAll() {
+  alerts.set([]);
+}
+</script>
+
+<svelte:window
+  on:unhandledrejection={(e) => alerts.error(e.reason.toString())}
+/>
+
+<article>
+  {#if $alerts.length > 1}
+    <button on:click={dismissAll} class="tight">Dismiss All</button>
+  {/if}
+  {#each $alerts as alert}
+    <blockquote class={alert.type}>
+      <button on:click={() => dismiss(alert)} class="dismiss">&times;</button>
+      {#if alert.html}
+        {@html alert.message}
+      {:else}
+        {alert.message}
+      {/if}
+    </blockquote>
+  {/each}
+</article>
+
+<style>
+</style>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\DateShow.svelte
+Contents:
+<script lang="ts">
+export let date: string;
+let dt: Date,
+  // year: number,
+  // dom: number,
+  // dow: number,
+  // mon: number,
+  year: string,
+  dom: string,
+  dowName: string,
+  monName: string;
+const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+$: {
+  dt = new Date(date);
+  // year = dt.getFullYear();
+  // dom = dt.getDate();
+  // dow = dt.getDay();
+  // mon = dt.getMonth();
+  [dowName, monName, dom, year] = dt.toDateString().split(" ");
+}
+</script>
+
+<div class="date" title={dt.toLocaleString()}>
+  <div class="dow">{dowName}</div>
+  <div>
+    <div class="mon">{monName}</div>
+    <div class="dom">{dom}</div>
+  </div>
+  <div class="year">{year}</div>
+</div>
+
+<style lang="scss">
+.date {
+  display: inline-flex;
+  background-color: var(--border);
+  border-radius: 50%;
+  height: 5em;
+  aspect-ratio: 1;
+  padding: 0.5em;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-alt);
+  > div {
+    display: flex;
+    flex-direction: row;
+    gap: 0.25em;
+    > * {
+      font-weight: bold;
+    }
+  }
+}
+</style>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\Delete.svelte
+Contents:
+<script lang="ts">
+import { goto } from "$app/navigation";
+import { client } from "$lib/pocketbase";
+import { alertOnFailure } from "$lib/pocketbase/ui";
+
+export let id: string;
+export let table: string;
+async function submit() {
+  alertOnFailure(async () => {
+    console.log(
+      `Attempting to delete record with ID: ${id} from table: ${table}`
+    );
+    await client.collection(table).delete(id);
+    goto("/remember");
+  });
+}
+</script>
+
+<form on:submit|preventDefault={submit}>
+  <article>
+    <aside>Are you sure you want to delete the following record?</aside>
+  </article>
+  <button type="submit">Yes - Proceed</button>
+  <button type="reset" on:click={() => goto("/remember")}>No - Cancel</button>
+</form>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\Dialog.svelte
+Contents:
+<script lang="ts">
+  export let open: boolean;
+
+  function handleClose() {
+    open = false;
+  }
+</script>
+
+<dialog class="modal" {open} on:close={handleClose}>
+  <div class="modal-box">
+    <div class="modal-action">
+      <button class="btn btn-primary" on:click={handleClose}>Close</button>
+    </div>
+    <slot />
+  </div>
+</dialog>
+
+<style>
+  /* Add any necessary styles */
+</style>
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\FileInput.svelte
+Contents:
+<script lang="ts">
+import { createEventDispatcher } from "svelte";
+
+export let files: FileList;
+export let accept = ".*";
+export let multiple = true;
+export let pasteFile = false;
+const dispatch = createEventDispatcher();
+function paste(e: ClipboardEvent) {
+  if (pasteFile && e.clipboardData?.files) {
+    files = e.clipboardData.files;
+    dispatch("change", files);
+  }
+}
+</script>
+
+<svelte:body on:paste={paste} />
+
+<label class="file">
+  <div><slot>Drag/drop files here.</slot></div>
+  <input
+    type="file"
+    multiple={multiple}
+    bind:files={files}
+    on:change={(e) => dispatch("change", files)}
+    accept={accept}
+  />
+</label>
+
+<style lang="scss">
+label.file {
+  cursor: pointer;
+  border: dashed 2px gray;
+  padding: 1em;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  input[type="file"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+}
+</style>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\Image.svelte
+Contents:
+<script lang="ts">
+import { client } from "$lib/pocketbase";
+import type { Record } from "pocketbase";
+
+export let record: Record;
+export let file: string;
+export let thumb: string | undefined;
+
+let props: any;
+$: ({ record, file, thumb, ...props } = $$props);
+$: src = file
+  ? client.getFileUrl(record, file, { thumb })
+  : `https://via.placeholder.com/${thumb ?? "100x100"}`;
+</script>
+
+<!-- svelte-ignore a11y-missing-attribute -->
+<img {...props} src={src} rel="noreferrer" />
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\LoginBadge.svelte
+Contents:
+<script lang="ts">
+  import type { Record, Admin } from "pocketbase";
+  import { onDestroy } from "svelte";
+  import { authModel, client } from "../pocketbase";
+  import { alerts } from "./Alerts.svelte";
+  import Dialog from "./Dialog.svelte";
+  import LoginForm from "./LoginForm.svelte";
+
+  let isDialogOpen = false;
+
+  async function logout() {
+    client.authStore.clear();
+    isDialogOpen = false;
+  }
+
+  function getFileUrl(authModel: Record | Admin, avatar: any) {
+    const baseUrl = import.meta.env.VITE_APP_BASE_URL + "/api/files/_pb_users_auth_";
+    const userId = authModel.id;
+    const fileName = avatar;
+    const token = client.authStore.token;
+
+    return `${baseUrl}/${userId}/${fileName}?token=${token}`;
+  }
+
+  const unsubscribe = client.authStore.onChange((token, model) => {
+    if (model) {
+      const { name, username } = model;
+      alerts.success(`Signed in as ${name || username || "Admin"}`, 5000);
+    } else {
+      alerts.success(`Signed out`, 5000);
+    }
+  }, false);
+
+  onDestroy(() => {
+    unsubscribe();
+  });
+</script>
+
+{#if $authModel}
+  <div class="badge" on:click={() => (isDialogOpen = true)}>
+    {#if $authModel.avatar}
+      <img class="inline-block h-10 w-10 rounded-md mx-4"  src={getFileUrl($authModel, $authModel.avatar)} alt="profile pic" />
+    {/if}
+    <samp>{$authModel?.name || $authModel?.username || $authModel?.email}</samp>
+  </div>
+
+  <Dialog bind:open={isDialogOpen}>
+    <div class="wrapper">
+      <div class="badge">
+        {#if $authModel.avatar}
+          <img class="inline-block h-10 w-10 rounded-md mx-4"  src={getFileUrl($authModel, $authModel.avatar)} alt="profile pic" />
+        {/if}
+        <samp>{$authModel?.name ?? $authModel?.username ?? $authModel?.email}</samp>
+      </div>
+      <button on:click={logout}>Sign Out</button>
+    </div>
+  </Dialog>
+{:else}
+  <button class="btn btn-primary" on:click={() => (isDialogOpen = true)}>Sign In</button>
+
+  <Dialog bind:open={isDialogOpen}>
+    <LoginForm />
+  </Dialog>
+{/if}
+
+<style lang="scss">
+  /* ... */
+</style>
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\LoginForm.svelte
+Contents:
+<script lang="ts">
+export let authCollection = "users";
+export let passwordLogin = true;
+export let signup = true;
+import { client, providerLogin } from "../pocketbase";
+const coll = client.collection(authCollection);
+let email: string;
+let name: string;
+let password: string;
+let passwordConfirm: string;
+let create = false;
+let admin = false;
+let activeTab = signup ? "SignUp" : "SignIn";
+let errorMessage = "";
+let successMessage = "";
+async function submit() {
+  if (create) {
+    try {
+      await coll.create({ email, name, password, passwordConfirm });
+      successMessage = "User created successfully!";
+      errorMessage = "";
+    } catch (error) {
+      console.error("Error creating user:", error);
+      errorMessage = "Error creating user. Please try again.";
+      successMessage = "";
+    }
+  } else if (admin) {
+    try {
+      await client.admins.authWithPassword(email, password);
+      successMessage = "Admin authenticated successfully!";
+      errorMessage = "";
+    } catch (error) {
+      console.error("Admin authentication error:", error);
+      errorMessage =
+        "Admin authentication failed. Please check your credentials.";
+      successMessage = "";
+    }
+  } else {
+    try {
+      await coll.authWithPassword(email, password);
+      successMessage = "User authenticated successfully!";
+      errorMessage = "";
+    } catch (error) {
+      console.error("User authentication error:", error);
+      errorMessage =
+        "User authentication failed. Please check your credentials.";
+      successMessage = "";
+    }
+  }
+}
+</script>
+
+<form on:submit|preventDefault={submit} class="form-control w-full max-w-xs">
+  {#if passwordLogin}
+    <div class="tabs mb-4">
+      <a
+        class="tab tab-bordered {activeTab === 'SignIn' ? 'tab-active' : ''}"
+        on:click={() => (activeTab = 'SignIn', signup = false)}
+      >
+        Sign In
+      </a>
+      <a
+        class="tab tab-bordered {activeTab === 'SignUp' ? 'tab-active' : ''}"
+        on:click={() => (activeTab = 'SignUp', signup = true)}
+      >
+        Sign Up
+      </a>
+    </div>
+
+    {#if activeTab === 'SignIn'}
+      <div class="form-control w-full max-w-xs space-y-4">
+        <label class="label" for="email-input">
+          <span class="label-text">Email</span>
+        </label>
+        <input
+          class="input input-bordered w-full max-w-xs"
+          bind:value={email}
+          required
+          type="email"
+          placeholder="email"
+          id="email-input"
+          autocomplete="email"
+        />
+
+        <label class="label" for="password-input">
+          <span class="label-text">Password</span>
+        </label>
+        <input
+          class="input input-bordered w-full max-w-xs"
+          bind:value={password}
+          required
+          type="password"
+          placeholder="password"
+          id="password-input"
+          autocomplete="current-password"
+        />
+
+        <div class="flex items-center">
+          <label class="label cursor-pointer">
+            <span class="label-text mr-2">Admin</span>
+            <input type="checkbox" class="checkbox" bind:checked={admin} />
+          </label>
+        </div>
+
+        <button
+          class="btn btn-primary mt-4 w-full max-w-xs"
+          type="submit"
+          on:click={() => (create = false)}
+        >
+          Sign In
+        </button>
+      </div>
+    {:else if activeTab === 'SignUp'}
+      <div class="form-control w-full max-w-xs space-y-4">
+        <input
+          class="input input-bordered w-full max-w-xs"
+          bind:value={email}
+          required
+          type="text"
+          placeholder="email"
+        />
+
+        <input
+          class="input input-bordered w-full max-w-xs"
+          bind:value={password}
+          required
+          type="password"
+          placeholder="password"
+        />
+
+        <input
+          class="input input-bordered w-full max-w-xs"
+          bind:value={passwordConfirm}
+          required
+          type="password"
+          placeholder="confirm password"
+        />
+
+        <input
+          class="input input-bordered w-full max-w-xs"
+          bind:value={name}
+          required
+          type="text"
+          placeholder="name / label"
+        />
+
+        <input type="hidden" name="register" value={true} />
+
+        <button
+          class="btn btn-primary mt-4 w-full max-w-xs"
+          type="submit"
+          on:click={() => (create = true)}
+        >
+          Sign Up
+        </button>
+      </div>
+    {/if}
+
+    {#if errorMessage}
+      <div class="alert alert-error mt-4">
+        <div class="flex-1">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            class="mx-2 h-6 w-6 stroke-current"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+            ></path>
+          </svg>
+          <label>{errorMessage}</label>
+        </div>
+      </div>
+    {/if}
+
+    {#if successMessage}
+      <div class="alert alert-success mt-4">
+        <div class="flex-1">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            class="mx-2 h-6 w-6 stroke-current"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+            ></path>
+          </svg>
+          <label>{successMessage}</label>
+        </div>
+      </div>
+    {/if}
+  {/if}
+
+  {#await coll.listAuthMethods({ $autoCancel: false }) then methods}
+    <div class="space-y-2 pt-4">
+      {#each methods.authProviders as p}
+        <button
+          class="btn btn-outline w-full max-w-xs"
+          type="button"
+          on:click={() => providerLogin(p, coll)}
+        >
+          Sign-in with {p.name}
+        </button>
+      {/each}
+    </div>
+  {:catch}
+    <!-- pocketbase not working -->
+  {/await}
+</form>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\LoginGuard.svelte
+Contents:
+<script lang="ts">
+import { goto } from "$app/navigation";
+import { Admin } from "pocketbase";
+import { authModel } from "../pocketbase";
+import LoginForm from "./LoginForm.svelte";
+export let admin: boolean | undefined = undefined;
+export let slotLogin = false;
+export let destination: string | null = null;
+$: if (destination != null && $authModel) {
+  goto(destination);
+}
+$: authorized =
+  $authModel && //  must be logged in
+  (admin === undefined || // admin or not, doesn't matter
+    (admin === true && $authModel instanceof Admin) || // must be admin
+    (admin === false && !($authModel instanceof Admin))); // must not be admin
+</script>
+
+{#if authorized}
+  <slot />
+{:else if slotLogin || $$slots["login"]}
+  <slot name="login">
+    <LoginForm />
+  </slot>
+{/if}
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\Nav.svelte
+Contents:
+<script lang="ts">
+  import { base } from "$app/paths";
+  import { page } from "$app/stores";
+  import LoginBadge from "$lib/components/LoginBadge.svelte";
+  import { authModel } from "$lib/pocketbase";
+
+  const appLinks = [
+    ["/create/", "Create"],
+    ["/remember/", "Remember"],
+    ["/inspire/", "Inspire"],
+    ["/explore/", "Explore"],
+    ["/reflect/", "Reflect"],
+  ];
+
+  const landingLinks = [
+    ["/#features", "Features"],
+    ["/#how-it-works", "How It Works"],
+    ["/#pricing", "Pricing"],
+    ["/#testimonials", "Testimonials"],
+    ["/#contact", "Contact"],
+  ];
+</script>
+
+<nav>
+  <div class="navbar bg-base-100">
+    <div class="navbar-start">
+      <details class="dropdown">
+        <summary class="btn btn-ghost lg:hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+          </svg>
+        </summary>
+        <ul class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+          {#if $authModel}
+            {#each appLinks as [path, label]}
+              <li>
+                <a href={`${base}${path}`} class:active="{$page.url.pathname === path}">{label}</a>
+              </li>
+            {/each}
+          {:else}
+            {#each landingLinks as [path, label]}
+              <li>
+                <a href={path}>{label}</a>
+              </li>
+            {/each}
+          {/if}
+        </ul>
+      </details>
+      <a href="/" class="btn btn-ghost normal-case text-xl">mind.ai</a>
+    </div>
+    <div class="navbar-center hidden lg:flex">
+      <ul class="menu menu-horizontal p-0">
+        {#if $authModel}
+          {#each appLinks as [path, label]}
+            <li>
+              <a href={`${base}${path}`} class:active="{$page.url.pathname === path}">{label}</a>
+            </li>
+          {/each}
+        {:else}
+          {#each landingLinks as [path, label]}
+            <li>
+                <a href={path}>{label}</a>
+            </li>
+          {/each}
+        {/if}
+      </ul>
+    </div>
+    <div class="navbar-end">
+      <LoginBadge />
+    </div>
+  </div>
+</nav>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\Spinner.svelte
+Contents:
+<script lang="ts" context="module">
+import { writable } from "svelte/store";
+
+// returns a store that:
+// starts out false
+// becomes true when the async function f starts running
+// becomes false when f resolves (or rejects)
+export function activityStore<T>(f: (t: T) => Promise<any>) {
+  const store = writable(false);
+  async function run(data: T) {
+    try {
+      store.set(true);
+      return await f(data);
+    } finally {
+      store.set(false);
+    }
+  }
+  return { ...store, run };
+}
+</script>
+
+<script lang="ts">
+export let active = false;
+</script>
+
+<span class="loader" class:active={active} />
+
+<style lang="scss">
+.loader {
+  width: 1em;
+  height: 1em;
+  border: 0.2em solid var(--links);
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  &.active {
+    border-bottom-color: transparent; // 3/4 border solid, 1/4 transparent
+    animation: rotation 1s linear infinite;
+  }
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+</style>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\Tab.svelte
+Contents:
+<script lang="ts">
+export let key: string | number;
+import { getContext } from "svelte";
+import type { Writable } from "svelte/store";
+const store: Writable<string | number> = getContext("activeTab");
+</script>
+
+<button
+  type="button"
+  class="title"
+  on:click={() => ($store = key)}
+  class:active={$store === key}
+>
+  <slot />
+</button>
+
+<style>
+</style>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\TabContent.svelte
+Contents:
+<script lang="ts">
+export let key: string | number;
+import { getContext } from "svelte";
+import type { Writable } from "svelte/store";
+const store: Writable<string | number> = getContext("activeTab");
+</script>
+
+{#if $store === key}
+  <slot />
+{/if}
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\TabGroup.svelte
+Contents:
+<script lang="ts">
+export let active: string | number = 0;
+import { writable } from "svelte/store";
+import type { Writable } from "svelte/store";
+import { setContext } from "svelte";
+const store: Writable<string | number> = writable(active);
+setContext("activeTab", store);
+</script>
+
+<div class="tabs">
+  <slot name="tabs" />
+</div>
+
+<div class="tab-content">
+  <slot />
+</div>
+
+<style>
+.tabs {
+  border-bottom: 2px solid var(--tab-color-active-bg, white);
+}
+.tab-content {
+  padding: 1em 0;
+}
+</style>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\components\ThemeSwitch.svelte
+Contents:
+<script>
+  import { onMount } from "svelte";
+  
+  let currentTheme = "light";
+  
+  const themes = [
+    "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", "retro", "cyberpunk",
+    "valentine", "halloween", "garden", "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe",
+    "black", "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee",
+    "winter", "dim", "nord", "sunset"
+  ];
+  
+  /**
+     * @param {string} theme
+     */
+  function changeTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    currentTheme = theme;
+    localStorage.setItem("theme", theme);
+  }
+  
+  onMount(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme && themes.includes(savedTheme)) {
+      changeTheme(savedTheme);
+    }
+  });
+  </script>
+  
+  <div class="dropdown dropdown-end">
+    <button class="btn btn-ghost m-1">Theme</button>
+    <ul class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+      {#each themes as theme}
+      <li>
+        <button tabindex="0" class:active={currentTheme === theme} on:click={() => changeTheme(theme)} on:keydown={(event) => event.key === 'Enter' && changeTheme(theme)}>{theme}</button>
+      </li>
+      {/each}
+    </ul>
+  </div>
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\pocketbase\generated-types.ts
+Contents:
+/**
+ * This file was @generated using pocketbase-typegen
+ */
+
+export enum Collections {
+  Images = "images",
+  Posts = "posts",
+  PostsTags = "postsTags",
+  Tags = "tags",
+  Users = "users",
+}
+
+// Alias types for improved usability
+export type IsoDateString = string;
+export type RecordIdString = string;
+
+// System fields
+export type BaseSystemFields = {
+  id: RecordIdString;
+  created: IsoDateString;
+  updated: IsoDateString;
+  collectionId: string;
+  collectionName: Collections;
+  expand?: { [key: string]: any };
+};
+
+export type AuthSystemFields = {
+  email: string;
+  emailVisibility: boolean;
+  username: string;
+  verified: boolean;
+} & BaseSystemFields;
+
+// Record types for each collection
+
+export type ImagesRecord = {
+  file?: string;
+};
+
+export type PostsRecord = {
+  title: string;
+  slug: string;
+  body: string;
+  tags?: RecordIdString;
+  blogSummary?: string;
+  featuredImage?: RecordIdString;
+  prompt?: string;
+  userid?: RecordIdString;
+};
+
+export type PostsTagsRecord = {
+  tags?: RecordIdString;
+  posts?: RecordIdString;
+};
+
+export type TagsRecord = {
+  title?: string;
+};
+
+export type UsersRecord = {
+  name?: string;
+  avatar?: string;
+};
+
+// Response types include system fields and match responses from the PocketBase API
+export type ImagesResponse = ImagesRecord & BaseSystemFields;
+export type PostsResponse = PostsRecord & BaseSystemFields;
+export type PostsTagsResponse = PostsTagsRecord & BaseSystemFields;
+export type TagsResponse = TagsRecord & BaseSystemFields;
+export type UsersResponse = UsersRecord & AuthSystemFields;
+
+export type CollectionRecords = {
+  images: ImagesRecord;
+  posts: PostsRecord;
+  postsTags: PostsTagsRecord;
+  tags: TagsRecord;
+  users: UsersRecord;
+};
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\pocketbase\ImgModal.svelte
+Contents:
+<script lang="ts">
+import type { Record } from "pocketbase";
+import { client } from ".";
+import Dialog from "$lib/components/Dialog.svelte";
+
+export let record: Record;
+export let filename: string;
+export let thumbOnly = false;
+</script>
+
+{#if record && filename}
+  {#await client.getFileUrl(record, filename, { thumb: "100x100" }) then src}
+    <Dialog>
+      <img src={src} alt="todo" slot="trigger" class="thumbnail" />
+      {#if !thumbOnly}
+        {#await client.getFileUrl(record, filename) then src}
+          <img src={src} alt="todo" />
+        {/await}
+      {/if}
+    </Dialog>
+  {/await}
+{/if}
+
+<style lang="scss">
+.thumbnail {
+  cursor: pointer;
+  border-radius: 5px;
+  box-shadow: //
+    0 0 5px 0px black;
+}
+</style>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\pocketbase\index.ts
+Contents:
+import PocketBase, {
+  ListResult,
+  Record as PBRecord,
+  type AuthProviderInfo,
+  RecordService,
+} from "pocketbase";
+import type { Admin } from "pocketbase";
+import { readable, type Readable, type Subscriber } from "svelte/store";
+import { browser } from "$app/environment";
+import { base } from "$app/paths";
+import { invalidateAll } from "$app/navigation";
+
+export const client = new PocketBase(
+  browser ? window.location.origin + "/" + base : undefined
+);
+
+export const authModel = readable<PBRecord | Admin | null>(
+  null,
+  function (set) {
+    client.authStore.onChange((token, model) => {
+      set(model);
+      invalidateAll(); // re-run load functions for current page
+    }, true);
+  }
+);
+
+export async function login(
+  email: string,
+  password: string,
+  register = false,
+  rest: { [key: string]: any } = {}
+) {
+  if (register) {
+    const user = { ...rest, email, password, confirmPassword: password };
+    await client.collection("users").create(user);
+  }
+  await client.collection("users").authWithPassword(email, password);
+}
+
+export function logout() {
+  client.authStore.clear();
+}
+
+/*
+ * Save (create/update) a record (a plain object). Automatically converts to
+ * FormData if needed.
+ */
+export async function save(collection: string, record: any, create = false) {
+  // convert obj to FormData in case one of the fields is instanceof FileList
+  const data = object2formdata(record);
+  if (record.id && !create) {
+    // "create" flag overrides update
+    return await client.collection(collection).update(record.id, data);
+  } else {
+    return await client.collection(collection).create(data);
+  }
+}
+
+export async function savePostWithTags(
+  collection: string,
+  record: any,
+  create = false
+) {
+  // Separate tags from the main record data
+  const { tags: tagsStr, ...postData } = record;
+  const tags = tagsStr
+    .split(",")
+    .map((tag: string) => tag.trim())
+    .filter((tag: any) => tag);
+
+  // Save the post data first
+  const postResult = await save(collection, postData, create);
+  const postId = create ? postResult.id : record.id; // Assuming the ID is returned for new records
+
+  // Now handle the tags
+  await processTags(tags, postId);
+
+  return postResult;
+}
+
+async function processTags(tags: string[], postId: string) {
+  for (const tagName of tags) {
+    let tagRecord = await findOrCreateTag(tagName);
+    await linkTagToPost(tagRecord.id, postId);
+  }
+}
+
+async function findOrCreateTag(tagName: string): Promise<PBRecord> {
+  // Implement the logic to find a tag by name or create it if it doesn't exist
+  // This is a placeholder function
+  return new PBRecord();
+}
+
+async function linkTagToPost(tagId: string, postId: string) {
+  // Implement the logic to create a record in the `taggings` collection linking the tag to the post
+  // This is a placeholder function
+}
+
+// convert obj to FormData in case one of the fields is instanceof FileList
+function object2formdata(obj: {}) {
+  // check if any field's value is an instanceof FileList
+  if (
+    !Object.values(obj).some(
+      (val) => val instanceof FileList || val instanceof File
+    )
+  ) {
+    // if not, just return the original object
+    return obj;
+  }
+  // otherwise, build FormData (multipart/form-data) from obj
+  const fd = new FormData();
+  for (const [key, val] of Object.entries(obj)) {
+    if (val instanceof FileList) {
+      for (const file of val) {
+        fd.append(key, file);
+      }
+    } else if (val instanceof File) {
+      // handle File before "object" so that it doesn't get serialized as JSON
+      fd.append(key, val);
+    } else if (Array.isArray(val)) {
+      // for some reason, multipart/form-data wants arrays to be comma-separated strings
+      fd.append(key, val.join(","));
+    } else if (typeof val === "object") {
+      fd.append(key, JSON.stringify(val));
+    } else {
+      fd.append(key, val as any);
+    }
+  }
+  return fd;
+}
+
+export interface PageStore<T = any> extends Readable<ListResult<T>> {
+  setPage(newpage: number): Promise<void>;
+  next(): Promise<void>;
+  prev(): Promise<void>;
+}
+
+export function watch<T>(
+  idOrName: string,
+  queryParams = {} as any,
+  page = 1,
+  perPage = 20,
+  realtime = browser
+): PageStore<T> {
+  const collection = client.collection(idOrName);
+  let result = new ListResult(page, perPage, 0, 0, [] as T[]);
+  let set: Subscriber<ListResult<T>>;
+  const store = readable<ListResult<T>>(result, (_set) => {
+    set = _set;
+    // fetch first page
+    collection
+      .getList(page, perPage, queryParams)
+      .then((r) => set((result = r as ListResult<T>)));
+    // watch for changes (only if you're in the browser)
+    if (realtime)
+      collection.subscribe("*", ({ action, record }) => {
+        (async function (action: string) {
+          // see https://github.com/pocketbase/pocketbase/discussions/505
+          async function expand(expand: any, record: any) {
+            return expand
+              ? await collection.getOne(record.id, { expand })
+              : record;
+          }
+          switch (action) {
+            case "update":
+              record = await expand(queryParams.expand, record);
+              return result.items.map((item) =>
+                (item as { id: string }).id === record.id ? record : item
+              );
+            case "create":
+              record = await expand(queryParams.expand, record);
+              const index = result.items.findIndex((item: any) => item.id === record.id);
+              // replace existing if found, otherwise append
+              if (index >= 0) {
+                result.items[index] = record as T;
+              } else {
+                result.items.push(record as T);
+              }
+              // The 'else' block is not needed because the 'if' block above always returns
+              // Append the new record to the result items array
+              result.items.push(record as T);
+              break; // Use 'break' to exit the switch case after adding the item
+            case "delete":
+              // Filter out the deleted record from the result items array
+              result.items = result.items.filter((item) => (item as any).id !== record.id);
+              break; // Use 'break' to exit the switch case after filtering the item
+          }
+          return result.items;
+        })(action).then((items) =>
+          set((result = { ...result, items } as ListResult<T>))
+        );
+      });
+  });
+  async function setPage(newpage: number) {
+    const { page, totalPages, perPage } = result;
+    if (page > 0 && page <= totalPages) {
+      set((result = await collection.getList(newpage, perPage, queryParams)));
+    }
+  }
+  return {
+    ...store,
+    setPage,
+    async next() {
+      setPage(result.page + 1);
+    },
+    async prev() {
+      setPage(result.page - 1);
+    },
+  };
+}
+
+export async function providerLogin(
+  provider: AuthProviderInfo,
+  authCollection: RecordService
+) {
+  const authResponse = await authCollection.authWithOAuth2({
+    provider: provider.name,
+    createData: {
+      // emailVisibility: true,
+    },
+  });
+  // update user "record" if "meta" has info it doesn't have
+  const { meta, record } = authResponse;
+  let changes = {} as { [key: string]: any };
+  if (!record.name && meta?.name) {
+    changes.name = meta.name;
+  }
+  if (!record.avatar && meta?.avatarUrl) {
+    const response = await fetch(meta.avatarUrl);
+    if (response.ok) {
+      const type = response.headers.get("content-type") ?? "image/jpeg";
+      changes.avatar = new File([await response.blob()], "avatar", { type });
+    }
+  }
+  if (Object.keys(changes).length) {
+    authResponse.record = await save(authCollection.collectionIdOrName, {
+      ...record,
+      ...changes,
+    });
+  }
+  return authResponse;
+}
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\pocketbase\Paginator.svelte
+Contents:
+<script lang="ts">
+import type { PageStore } from ".";
+
+export let store: PageStore;
+export let showIfSinglePage = false;
+</script>
+
+{#if showIfSinglePage || $store.totalPages > 1}
+  <div class="paginator">
+    <button
+      type="button"
+      on:click={() => store.prev()}
+      disabled={$store.page <= 1}>&laquo;</button
+    >
+    <div>page {$store.page} of {$store.totalPages}</div>
+    <button
+      type="button"
+      on:click={() => store.next()}
+      disabled={$store.page >= $store.totalPages}>&raquo;</button
+    >
+  </div>
+{/if}
+
+<style lang="scss">
+.paginator {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: auto;
+}
+</style>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\pocketbase\pocketbase-types.ts
+Contents:
+/**
+ * This file was @generated using pocketbase-typegen
+ */
+
+export enum Collections {
+  Hooks = "hooks",
+  Posts = "posts",
+  Users = "users",
+}
+
+// Alias types for improved usability
+export type IsoDateString = string;
+export type RecordIdString = string;
+export type HTMLString = string;
+
+// System fields
+export type BaseSystemFields<T = never> = {
+  id: RecordIdString;
+  created: IsoDateString;
+  updated: IsoDateString;
+  collectionId: string;
+  collectionName: Collections;
+  expand?: T;
+};
+
+export type AuthSystemFields<T = never> = {
+  email: string;
+  emailVisibility: boolean;
+  username: string;
+  verified: boolean;
+} & BaseSystemFields<T>;
+
+// Record types for each collection
+
+export enum HooksEventOptions {
+  "insert" = "insert",
+  "update" = "update",
+  "delete" = "delete",
+}
+
+export enum HooksActionTypeOptions {
+  "command" = "command",
+  "post" = "post",
+}
+export type HooksRecord = {
+  collection: string;
+  event: HooksEventOptions;
+  action_type: HooksActionTypeOptions;
+  action: string;
+  action_params?: string;
+  expands?: string;
+  disabled?: boolean;
+};
+
+export type PostsRecord = {
+  title: string;
+  featuredImage?: string;
+  body: string;
+  slug: string;
+  files?: string[];
+  tags?: string;
+  userid?: RecordIdString;
+  prompt?: string;
+  blogSummary?: string;
+};
+
+export type UsersRecord = {
+  name?: string;
+  avatar?: string;
+};
+
+// Response types include system fields and match responses from the PocketBase API
+export type HooksResponse = HooksRecord & BaseSystemFields;
+export type PostsResponse = PostsRecord & BaseSystemFields;
+export type UsersResponse = UsersRecord & AuthSystemFields;
+
+// Types containing all Records and Responses, useful for creating typing helper functions
+
+export type CollectionRecords = {
+  hooks: HooksRecord;
+  posts: PostsRecord;
+  users: UsersRecord;
+};
+
+export type CollectionResponses = {
+  hooks: HooksResponse;
+  posts: PostsResponse;
+  users: UsersResponse;
+};
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\pocketbase\ui.ts
+Contents:
+import { alerts } from "$lib/components/Alerts.svelte";
+
+// wrapper to execute a pocketbase client request and generate alerts on failure
+export async function alertOnFailure(request: () => void) {
+  try {
+    await request();
+  } catch (e: any) {
+    const {
+      message,
+      data: { data = {} },
+    } = e;
+    if (message) alerts.error(message);
+    for (const key in data) {
+      const { message } = data[key];
+      if (message) alerts.error(`${key}: ${message}`);
+    }
+  }
+}
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\lib\utils\api.ts
+Contents:
+// src/lib/utils/api.ts
+async function apiRequest<T>(
+  endpoint: string,
+  method: "GET" | "POST" = "GET",
+  body: any = null
+): Promise<T> {
+  const headers = { "Content-Type": "application/json" };
+  const config: RequestInit = { method, headers };
+
+  if (body) {
+    config.body = JSON.stringify(body);
+  }
+
+  try {
+    const response = await fetch(endpoint, config);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Request failed with status ${response.status}: ${errorText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("API Request failed:", error);
+    throw error;
+  }
+}
+
+export { apiRequest };
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\+layout.svelte
+Contents:
+<script lang="ts" context="module">
+import { beforeNavigate } from "$app/navigation";
+import { metadata } from "$lib/app/stores";
+import { site } from "$lib/config";
+import PocketBase from "pocketbase";
+
+// Initialize PocketBase client
+const pb = new PocketBase(`$(import.meta.env.VITE_APP_BASE_URL)`);
+</script>
+
+<script lang="ts">
+import "../app.scss";
+import Alerts from "$lib/components/Alerts.svelte";
+import Nav from "$lib/components/Nav.svelte";
+
+$: title = $metadata.title ? $metadata.title + " | " + site.name : site.name;
+$: description = $metadata.description ?? site.description;
+$: headline = $metadata.headline ?? $metadata.title;
+
+// Reset metadata on navigation so that the new page inherits nothing from the old page
+beforeNavigate(() => {
+  $metadata = {};
+});
+</script>
+
+<svelte:head>
+  <title>{title}</title>
+  <meta name="description" content={description} />
+</svelte:head>
+
+<div class="flex min-h-screen flex-col">
+  <header>
+    <Nav />
+  </header>
+
+  <main class="flex-grow">
+    <div class="bg-base-100 pt-4">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          {#if headline}
+            <h1
+              class="text-primary text-3xl font-bold tracking-tight sm:text-4xl"
+            >
+              {headline}
+            </h1>
+          {/if}
+          <Alerts />
+        </div>
+        <slot />
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-base-200 py-4">
+    <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+      <p class="text-base-content text-sm">
+        &copy; {new Date().getFullYear()}
+        {site.name}. All rights reserved.
+      </p>
+    </div>
+  </footer>
+</div>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\+layout.ts
+Contents:
+import type { LayoutLoad } from "./$types";
+import { alerts } from "$lib/components/Alerts.svelte";
+
+// turn off SSR - we're JAMstack here
+export const ssr = false;
+
+// Prerendering turned off. Turn it on if you know what you're doing.
+export const prerender = false;
+
+// trailing slashes make relative paths much easier
+export const trailingSlash = "always";
+
+export const load: LayoutLoad = async ({ fetch }) => {
+  const response = await fetch("/_/");
+  if (response.redirected) {
+    alerts.add({
+      message: 'Please visit <a href="/_/">/_ </a> to finalize installation of PocketBase',
+      type: "error",
+      html: true,
+    });
+  }
+  return {}; // Return an empty object or an object with necessary properties
+};
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\+page.svelte
+Contents:
+<script lang="ts">
+import { metadata } from "$lib/app/stores";
+import { fade, fly } from "svelte/transition";
+import Particles from "svelte-particles";
+import { loadSlim } from "tsparticles-slim";
+
+//$metadata.title =
+//  "mind.ai - Transform Your Thoughts into a Flourishing Mind Garden";
+$metadata.description =
+  "Discover how mind.ai empowers you to nurture, organize, and grow your ideas into something beautiful through AI-powered journaling and the Mind Gardens methodology.";
+
+let particlesConfig = {
+  particles: {
+    color: {
+      value: "#ffffff",
+    },
+    links: {
+      enable: true,
+      color: "#ffffff",
+    },
+    move: {
+      enable: true,
+    },
+    number: {
+      value: 20,
+    },
+    size: {
+      value: 3,
+    },
+  },
+  interactivity: {
+    events: {
+      onhover: {
+        enable: true,
+        mode: "repulse",
+      },
+    },
+  },
+};
+
+let onParticlesLoaded = (event: CustomEvent<{ particles?: any }>) => {
+  const particlesContainer = event.detail.particles;
+  // you can use particlesContainer to call all the Container class
+  // (from the core library) methods like play, pause, refresh, start, stop
+};
+
+let particlesInit = async (engine: any) => {
+  await loadSlim(engine);
+};
+</script>
+
+<svelte:head>
+  <title>{$metadata.title}</title>
+  <meta name="description" content={$metadata.description} />
+</svelte:head>
+
+<!-- Particles Background -->
+<Particles
+  id="tsparticles"
+  options={particlesConfig}
+  on:particlesLoaded={onParticlesLoaded}
+  particlesInit={particlesInit}
+/>
+
+<!-- Hero Section -->
+<div
+  class="hero min-h-screen"
+  style="background-image: url(img/treeBrain.png);"
+>
+  <div class="hero-overlay bg-opacity-60">
+
+    <!-- Particles Background -->
+<Particles
+id="tsparticles"
+options={particlesConfig}
+on:particlesLoaded={onParticlesLoaded}
+particlesInit={particlesInit}
+/>
+  </div>
+  <div class="hero-content text-neutral-content text-center">
+    <div class="max-w-lg" transition:fly={{ y: -20, duration: 500 }}>
+      <h1 class="mb-5 text-5xl font-bold">
+        Transform Your Thoughts into a Flourishing Mind Garden with AI
+      </h1>
+      <p class="mb-5">
+        Discover how mind.ai empowers you to nurture, organize, and grow your
+        ideas into something beautiful.
+      </p>
+      <button class="btn btn-primary btn-lg"
+        >Plant Your First Thought Today</button
+      >
+    </div>
+  </div>
+</div>
+
+<!-- Introduction to Mind Gardens Methodology -->
+<div class="bg-base-100 py-16">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-12 text-center" transition:fade={{ duration: 500 }}>
+      <h2 class="mb-4 text-4xl font-bold">Cultivate Your Mental Ecosystem</h2>
+      <p class="text-xl">
+        In the Mind Gardens methodology, each thought or idea is a seed that can
+        grow into insights and creations. mind.ai facilitates this growth
+        through AI-powered journaling, helping you nurture your mental
+        ecosystem.
+      </p>
+    </div>
+    <div class="flex justify-center">
+      <img
+        src="img/mindgarden.png"
+        alt="Mind Garden Infographic"
+        class="max-w-screen-md w-full object-cover rounded-xl shadow-xl"
+        transition:fly={{ y: 20, duration: 500 }}
+      />
+    </div>
+  </div>
+</div>
+
+<!-- Features and Benefits -->
+<div class="bg-base-200 py-16" id="features">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+      <div class="flex items-center justify-center">
+        <img
+          src="img/cave.png"
+          alt="Thought Capture Demo"
+          class="h-96 w-full object-cover"
+        />
+      </div>
+      <div transition:fly={{ x: 20, duration: 500 }}>
+        <h3 class="mb-4 text-3xl font-bold">Effortless Thought Capture</h3>
+        <p class="mb-4">
+          Quickly jot down your ideas and watch them grow visually in your mind
+          garden. The intuitive interface makes it easy to capture and organize
+          your thoughts.
+        </p>
+        <h3 class="mb-4 text-3xl font-bold">Personalized AI Assistance</h3>
+        <p class="mb-4">
+          Our AI learns from your unique thought patterns and suggests prompts
+          to help your ideas flourish. It's like having a personal gardener for
+          your mind.
+        </p>
+        <h3 class="mb-4 text-3xl font-bold">Private and Secure</h3>
+        <p>
+          Your mind garden is your private oasis. We use state-of-the-art
+          encryption to ensure your thoughts remain confidential and secure.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- How It Works -->
+<div class="bg-base-100 py-16" id="how-it-works">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-12 text-center" transition:fade={{ duration: 500 }}>
+      <h2 class="mb-4 text-4xl font-bold">How mind.ai Works</h2>
+      <p class="text-xl">
+        Our AI-powered journaling process is simple and intuitive.
+      </p>
+    </div>
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <div class="card bg-base-200 shadow-xl">
+        <figure class="px-10 pt-10">
+          <img src="img/waterfall.png" alt="Capture Icon" class="rounded-xl" />
+        </figure>
+        <div class="card-body items-center text-center">
+          <h3 class="card-title">1. Capture</h3>
+          <p>Jot down your thoughts, ideas, and experiences in the app.</p>
+        </div>
+      </div>
+      <div class="card bg-base-200 shadow-xl">
+        <figure class="px-10 pt-10">
+          <img src="img/thoughts.png" alt="Nurture Icon" class="rounded-xl" />
+        </figure>
+        <div class="card-body items-center text-center">
+          <h3 class="card-title">2. Nurture</h3>
+          <p>
+            Our AI provides personalized prompts and insights to help your ideas
+            grow.
+          </p>
+        </div>
+      </div>
+      <div class="card bg-base-200 shadow-xl">
+        <figure class="px-10 pt-10">
+          <img src="img/mountain.png" alt="Flourish Icon" class="rounded-xl" />
+        </figure>
+        <div class="card-body items-center text-center">
+          <h3 class="card-title">3. Flourish</h3>
+          <p>Watch your thoughts blossom into a beautiful mind garden.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pricing -->
+<div class="bg-base-200 py-16" id="pricing">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-12 text-center" transition:fade={{ duration: 500 }}>
+      <h2 class="mb-4 text-4xl font-bold">Simple, Transparent Pricing</h2>
+      <p class="text-xl">Choose the plan that best fits your needs.</p>
+    </div>
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <!-- Pricing plans go here -->
+    </div>
+  </div>
+</div>
+
+<!-- Testimonials -->
+<div class="bg-base-100 py-16" id="testimonials">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="mb-12 text-center text-4xl font-bold">What Our Users Say</h2>
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+      <!-- Testimonials go here -->
+    </div>
+  </div>
+</div>
+
+<!-- Contact -->
+<div class="bg-base-200 py-16" id="contact">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-12 text-center" transition:fade={{ duration: 500 }}>
+      <h2 class="mb-4 text-4xl font-bold">Get in Touch</h2>
+      <p class="text-xl">
+        Have a question or want to learn more? We'd love to hear from you!
+      </p>
+    </div>
+    <div class="flex justify-center">
+      <!-- Contact form goes here -->
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer footer-center bg-base-100 text-base-content rounded p-10">
+  <!-- Footer content goes here -->
+</footer>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\auditlog\[coll]\[id]\+page.svelte
+Contents:
+<script lang="ts">
+import type { PageData } from "./$types";
+import Changes from "./Changes.svelte";
+
+export let data: PageData;
+</script>
+
+<table>
+  <thead>
+    <th>when</th>
+    <th>what</th>
+    <th>who</th>
+  </thead>
+  <tbody>
+    {#each data.logs as item}
+      <tr>
+        <td>{item.updated}</td>
+        <td>{item.event}</td>
+        <td>{item.admin || (Array.isArray(item.expand.user) ? item.expand.user[0]?.name : item.expand.user?.name) || item.user}</td>
+      </tr>
+      <tr>
+        <!--<td colspan="3"><Changes auditlog={item} /></td>-->
+      </tr>
+    {:else}
+      <tr>
+        <td colspan="3">No records found.</td>
+      </tr>
+    {/each}
+  </tbody>
+</table>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\auditlog\[coll]\[id]\+page.ts
+Contents:
+import { client } from "$lib/pocketbase";
+import type { PageLoad } from "./$types";
+
+export const load: PageLoad = async function ({ params: { coll, id } }) {
+  const logs = await client.collection("auditlog").getFullList({
+    // TODO: access control
+    filter: `record="${id}" && collection="${coll}"`,
+    expand: "user",
+  });
+  return {
+    logs,
+  };
+};
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\auditlog\[coll]\[id]\Changes.svelte
+Contents:
+<!-- <script lang="ts">
+import type { AuditlogResponse } from "$lib/pocketbase/generated-types";
+
+export let auditlog: AuditlogResponse;
+$: keys = Object.keys(auditlog.original || {});
+</script>
+
+<table>
+  <tbody>
+    {#each keys as key}
+      <tr>
+        <th>{key}</th>
+        <td><pre>{auditlog.original[key]}</pre></td>
+        <td><pre>{auditlog.data[key]}</pre></td>
+      </tr>
+    {/each}
+  </tbody>
+</table>
+
+<style>
+pre {
+  margin: 0;
+  padding: 0;
+}
+</style> -->
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\create\+page.svelte
+Contents:
+<script lang="ts">
+import { goto } from "$app/navigation";
+import { authModel, client, save } from "$lib/pocketbase";
+import type { PageData } from "./$types";
+import { apiRequest } from "$lib/utils/api";
+import { marked } from "marked";
+import {
+  promptFormat,
+  titlePrompt,
+  tagPrompt,
+  blogSummaryPrompt,
+  imagePrompt,
+  introPrompt,
+} from "$lib/utils/prompts";
+import { onMount } from "svelte";
+
+// Initialize states and reactive variables
+let isLoading = {
+  content: false,
+  title: false,
+  tags: false,
+  summary: false,
+  image: false,
+};
+let formSubmitted = false;
+let loadingMessage = "";
+let currentStep = 0;
+let chatGptInts: any[] = [];
+let originalPrompt = "";
+let base64Image;
+let curTags = "";
+let isAuthenticated = false;
+
+interface Tag {
+  id: string;
+  title: string;
+}
+
+interface Post {
+  title: string;
+  slug: string;
+  body: string;
+  tags: string[];
+  blogSummary: string;
+  featuredImage: string;
+  userid: string;
+  prompt: string;
+}
+
+$: post = {
+  title: "",
+  slug: "",
+  body: "",
+  tags: [] as string[],
+  blogSummary: "",
+  featuredImage: "",
+  userid: $authModel?.id || "",
+  prompt: "",
+};
+
+$: chatGptPrompt = "";
+
+const engineId = "stable-diffusion-v1-6";
+const apiHost = "https://api.stability.ai";
+const apiKey = import.meta.env.VITE_STABILITY_API_KEY;
+
+if (!apiKey) {
+  console.error("Missing Stability API key.");
+  throw new Error("Missing Stability API key.");
+}
+
+onMount(async () => {
+  isAuthenticated = !!authModel;
+});
+
+async function ensureTagsExist(tags: string[]): Promise<Tag[]> {
+  const tagObjects: Tag[] = [];
+  for (const title of tags) {
+    const filterExpression = `title = "${title.replace(/"/g, '\\"')}"`;
+    const existingTags = await client
+      .collection("tags")
+      .getList(1, 1, { filter: filterExpression });
+
+    let existingTag =
+      existingTags.items.length > 0 ? existingTags.items[0] : null;
+
+    if (!existingTag) {
+      existingTag = await client.collection("tags").create({ title });
+    }
+
+    if (existingTag) {
+      tagObjects.push({ id: existingTag.id, title: existingTag.title });
+    } else {
+      throw new Error("Failed to create or retrieve tag");
+    }
+  }
+  return tagObjects;
+}
+
+async function uploadImageAndSavePost(
+  base64Image: string,
+  curTags: string
+): Promise<void> {
+  try {
+    // Convert base64 to Blob
+    const imageBlob = await fetch(`data:image/png;base64,${base64Image}`).then(
+      (res) => res.blob()
+    );
+
+    // Check image size
+    if (imageBlob.size > 5242880) {
+      throw new Error("Image size exceeds the maximum limit of 5MB.");
+    }
+
+    // Prepare form data for image upload
+    const formData = new FormData();
+    formData.append("file", imageBlob, "postImage.png");
+
+    // Prepare post data
+    post.userid = $authModel?.id || "";
+
+    // Upload image and create image record
+    const createdImageRecord = await client
+      .collection("images")
+      .create(formData);
+
+    post.featuredImage = createdImageRecord.id;
+
+    // Process tags
+    const tagsArray = curTags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag);
+
+    // Ensure tags exist in the `tags` collection and get their IDs
+    const tagObjects = await ensureTagsExist(tagsArray);
+
+    // Prepare post data
+    const postToCreate = {
+      title: post.title,
+      slug: post.slug,
+      body: post.body,
+      blogSummary: post.blogSummary,
+      featuredImage: createdImageRecord.id,
+      userid: $authModel?.id || "",
+      prompt: post.prompt,
+    };
+
+    // Create post record
+    const createdPost = await save("posts", postToCreate, true);
+
+    // Link tags to the post by creating records in the postsTags table
+    for (const tagObject of tagObjects) {
+      await client.collection("postsTags").create({
+        posts: createdPost.id,
+        tags: tagObject.id,
+      });
+    }
+
+    // Redirect to the new post
+    goto(`${import.meta.env.VITE_APP_SK_URL}/posts/${post.slug}`);
+  } catch (error) {
+    console.error(`Failed to upload image and save post: ${error}`);
+    alertOnFailure(`Failed to upload image and save post: ${error}`);
+  }
+}
+
+function updateProgressBar(step: number) {
+  const progressElement = document.querySelector(
+    ".progress"
+  ) as HTMLProgressElement;
+  if (progressElement) {
+    progressElement.value = step;
+  }
+}
+
+async function generateGptInterpretations(promptString: string) {
+  if (!$authModel?.id) {
+    alert("Please log in to save your post.");
+    return;
+  }
+
+  updateProgressBar(1);
+
+  try {
+    const interpretationsResponse = await generateGptRequest(
+      introPrompt + promptString
+    );
+
+    originalPrompt = promptString;
+
+    chatGptInts = parseInterpretations(interpretationsResponse);
+
+    formSubmitted = true;
+  } catch (error) {
+    alertOnFailure(error);
+  }
+}
+
+function parseInterpretations(response: string): any[] {
+  const rawInterpretations = response.split("\n");
+  const interpretations: any[] = [];
+
+  rawInterpretations.forEach((interpretation: string) => {
+    const parts = interpretation.split(": ");
+
+    if (parts.length === 2) {
+      const [perspectiveName, content] = parts;
+      const trimmedPerspectiveName = perspectiveName.trim();
+      const trimmedContent = content.trim();
+
+      interpretations.push({
+        perspectiveName: trimmedPerspectiveName,
+        content: trimmedContent,
+      });
+    }
+  });
+
+  return interpretations;
+}
+
+async function generateBlogFromChatGPT(userPrompt: string) {
+  if (!$authModel?.id) {
+    alert("Please log in to save your post.");
+    return;
+  }
+
+  currentStep = 0;
+  try {
+    isLoading.content = true;
+    post.userid = $authModel?.id || "";
+    loadingMessage = "Generating post content...";
+    let bodyResponse = await generateGptRequest(
+      `${promptFormat}This is the user's inspiration: '${userPrompt}'`
+    );
+    post.body = bodyResponse;
+    updateProgressBar(10);
+    isLoading.content = false;
+
+    isLoading.title = true;
+    loadingMessage = "Generating post title...";
+    const titleResponse = await generateGptRequest(
+      `${titlePrompt}This is the user's article: '${bodyResponse}'`
+    );
+    post.title = titleResponse.replace(/["']/g, "");
+    updateProgressBar(20);
+    isLoading.title = false;
+
+    post.slug = titleResponse
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/["':]/g, "")
+      .substring(0, 50);
+    post.prompt = userPrompt;
+
+    loadingMessage = "Generating post tags...";
+    curTags = await generateGptRequest(
+      `${tagPrompt}This is the blog article: '${bodyResponse}'`
+    );
+
+    updateProgressBar(30);
+
+    isLoading.summary = true;
+    loadingMessage = "Generating post summary...";
+    const blogSummaryResponse = await generateGptRequest(
+      `${blogSummaryPrompt}This is the blog article: '${bodyResponse}'`
+    );
+    post.blogSummary = blogSummaryResponse;
+    updateProgressBar(40);
+    isLoading.summary = false;
+
+    isLoading.image = true;
+    loadingMessage = "Generating post image...";
+    const base64Image = await generateImageFromSD(userPrompt);
+    updateProgressBar(60);
+    isLoading.image = false;
+
+    loadingMessage = "Saving post...";
+    await uploadImageAndSavePost(base64Image, curTags);
+  } catch (error) {
+    alertOnFailure(error);
+    isLoading.content = false;
+    isLoading.title = false;
+    isLoading.tags = false;
+    isLoading.summary = false;
+    isLoading.image = false;
+  }
+
+  return {
+    title: post.title,
+    slug: post.slug,
+    body: post.body,
+    tags: post.tags,
+    blogSummary: post.blogSummary,
+    featuredImage: post.featuredImage,
+    prompt: userPrompt,
+    userid: post.userid,
+  };
+}
+
+async function generateGptRequest(prompt: string) {
+  const response = await fetch("/api/chatgpt", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt }),
+  });
+  if (!response.ok) throw new Error("Failed to generate text from ChatGPT");
+  const data = await response.json();
+  return data.result;
+}
+
+async function generateImageFromSD(prompt: string): Promise<string> {
+  isLoading.image = true;
+  try {
+    const response = await fetch(
+      `${apiHost}/v1/generation/${engineId}/text-to-image`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          text_prompts: [{ text: prompt }],
+          cfg_scale: 3, // Consider adjusting if you want more or less randomness
+          height: 512, // Smaller dimension for quick generation
+          width: 512, // Smaller dimension for quick generation
+          steps: 30, // Reduced steps for faster processing, adjust based on quality needs
+          samples: 1, // Generating a single image per prompt
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Non-200 response: ${await response.text()}`);
+    }
+
+    const responseJSON = await response.json();
+    const imageBase64 = responseJSON.artifacts[0].base64;
+
+    return imageBase64;
+  } catch (error) {
+    console.error("Error generating image:", error);
+    throw error;
+  } finally {
+    isLoading.image = false;
+  }
+}
+
+function alertOnFailure(error: any) {
+  console.error("Error:", error);
+  alert(error instanceof Error ? error.message : "An unknown error occurred");
+}
+
+function goBack() {
+  formSubmitted = false;
+}
+
+function selectInterpretation(interpretation: string) {
+  chatGptPrompt = originalPrompt + " - " + interpretation;
+
+  isLoading.content = true;
+  loadingMessage = "Generating blog...";
+  generateBlogFromChatGPT(chatGptPrompt)
+    .then(() => {
+      isLoading.content = false;
+    })
+    .catch((error) => {
+      alertOnFailure(error);
+      isLoading.content = false;
+    });
+}
+</script>
+
+<div>
+  {#if isLoading.content || isLoading.title || isLoading.tags || isLoading.summary || isLoading.image}
+    <div class="mt-12 flex flex-col items-center space-y-4">
+      <svg
+        class="h-8 w-8 animate-spin text-gray-800"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+      <p class="text-lg font-medium">{loadingMessage}</p>
+      <progress class="progress progress-primary w-56" value="1" max="100"
+      ></progress>
+      <div class="mt-4">
+        <div class="mt-4">
+          {@html marked(post.body || "")}
+        </div>
+      </div>
+      <div class="mt-4">
+        <h2 class="text-2xl font-bold">{post.title}</h2>
+      </div>
+      <div class="mt-4">
+        <p>{post.slug}</p>
+      </div>
+      <div class="mt-4">
+        <div class="mb-4 flex flex-wrap gap-2">Tags</div>
+      </div>
+      <div class="mt-4">
+        <p>{post.blogSummary}</p>
+      </div>
+
+      <div class="mt-4">
+        <img
+          src={post.featuredImage}
+          alt={post.title}
+          class="h-auto w-full rounded-lg"
+        />
+      </div>
+    </div>
+  {:else if !formSubmitted}
+    <main class="container mx-auto my-12 px-4 sm:px-6 lg:px-8">
+      <form
+        on:submit|preventDefault={() => generateGptInterpretations(chatGptPrompt)}
+      >
+        <div class="bg-base-200 space-y-6 rounded-lg p-6 shadow">
+          <textarea
+            class="textarea textarea-bordered h-40 w-full resize-none"
+            bind:value={chatGptPrompt}
+            rows="10"
+            placeholder="Enter thoughts here"
+          ></textarea>
+          <div class="text-right">
+            <button type="submit" class="btn btn-primary">Generate</button>
+          </div>
+        </div>
+      </form>
+    </main>
+  {:else}
+    <main class="container mx-auto my-12 px-4 sm:px-6 lg:px-8">
+      <section class="space-y-6">
+        {#if chatGptInts.length > 0}
+          <div class="mb-4 text-xl font-semibold">
+            Select an interpretation:
+          </div>
+          <div class="flex flex-wrap gap-2">
+            {#each chatGptInts as interpretation}
+              <button
+                class="btn btn-outline"
+                on:click={() => selectInterpretation(interpretation.content)}
+                >{interpretation.content}</button
+              >
+            {/each}
+          </div>
+        {/if}
+        <button class="btn btn-secondary mt-6" on:click={goBack}>Back</button>
+      </section>
+    </main>
+  {/if}
+</div>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\create\+page.ts
+Contents:
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\explore\+page.svelte
+Contents:
+<script lang="ts">
+import { metadata } from "$lib/app/stores";
+import { goto } from "$app/navigation";
+import { authModel, save } from "$lib/pocketbase";
+import { alertOnFailure } from "$lib/pocketbase/ui";
+import type { PageData } from "./$types";
+import Markdown from "svelte-markdown";
+
+$: test = "";
+$metadata.title = "explore";
+$metadata.description = "explore ai";
+</script>
+
+Coming Soon
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\hello\+page.svelte
+Contents:
+<script lang="ts">
+import type { PageData } from "./$types";
+export let data: PageData;
+</script>
+
+<h1>Hello!</h1>
+<p>Got the following API response from the backend server</p>
+<pre>{JSON.stringify(data)}</pre>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\hello\+page.ts
+Contents:
+import type { PageLoad } from "./$types";
+
+export const load: PageLoad = async function ({ fetch }) {
+  const response = await fetch("/api/hello");
+  const json = await response.json();
+  return {
+    ...json,
+  };
+};
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\inspire\+page.svelte
+Contents:
+<script lang="ts">
+import { metadata } from "$lib/app/stores";
+import { goto } from "$app/navigation";
+import { authModel, save } from "$lib/pocketbase";
+import { alertOnFailure } from "$lib/pocketbase/ui";
+import type { PageData } from "./$types";
+import Markdown from "svelte-markdown";
+import ThemeSwitch from "$lib/components/ThemeSwitch.svelte";
+
+$: test = "";
+$metadata.title = "inspire";
+$metadata.description = "inspire ai";
+</script>
+
+<ThemeSwitch></ThemeSwitch>
+Coming Soon
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\posts\+page.svelte
+Contents:
+<script lang="ts">
+import { metadata } from "$lib/app/stores";
+import Image from "$lib/components/Image.svelte";
+import { authModel, watch } from "$lib/pocketbase";
+import type { PostsResponse } from "$lib/pocketbase/generated-types";
+import { alertOnFailure } from "$lib/pocketbase/ui";
+import { client } from "$lib/pocketbase";
+import Markdown from "svelte-markdown";
+import { goto } from "$app/navigation";
+
+async function deleteAllPosts() {
+  alertOnFailure(async () => {
+    const postsResponse = await client.collection("posts").getList();
+    for (const post of postsResponse.items) {
+      await client.collection("posts").delete(post.id);
+    }
+    // Optionally, refresh the posts list or navigate as needed
+  });
+}
+
+$metadata.title = "";
+$metadata.description = "AI powered note taking";
+const posts = watch<PostsResponse>("posts", {
+  sort: "-updated",
+});
+</script>
+
+{#if $posts.items.length > 0}
+  {#each $posts.items as post}
+    <div
+      class="card flex w-full flex-col justify-between bg-base-300 p-4 shadow-xl"
+    >
+      <div>
+        <figure class="relative w-full">
+          <img
+            src={post.featuredImage}
+            alt={post.title}
+            class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+          />
+        </figure>
+        <div class="m-4 max-w-xl">
+          <div class="prose items-center gap-x-4">
+            <time datetime="2020-03-16" class="text-accent">
+              {new Date(post.updated).toLocaleDateString()}
+            </time>
+          </div>
+          <div class="group relative mt-3">
+            <a
+              href={import.meta.env.VITE_APP_SK_URL + "/posts/" + post.slug}
+              class="prose-lg line-clamp-2 font-bold text-primary"
+            >
+              {post.title}
+            </a>
+            <div
+              class="prose-sm mt-3 line-clamp-6 text-justify text-base-content"
+            >
+              <Markdown source={post.blogSummary || post.body} />
+            </div>
+          </div>
+        </div>
+      </div>
+      {#each $posts.items as post}
+        <!-- ... other post markup ... -->
+        <div class="relative mb-4 flex-col gap-x-4 text-center">
+          {#await client.collection('postsTags').getList(1, 10, { filter: post.id  }) then postTags}
+            {#if postTags.items.length > 0}
+              {#each postTags.items as postTag}
+                {#await client.collection('tags').getOne(postTag.tags) then tag}
+                  <a href="/" class="badge badge-accent badge-outline"
+                    >{tag.title}</a
+                  >
+                {/await}
+              {/each}
+            {:else}
+              <div class="badge badge-accent badge-outline">No tags</div>
+            {/if}
+          {/await}
+        </div>
+        <!-- ... other post markup ... -->
+      {/each}
+      <!-- The rest of your component... -->
+    </div>
+  {/each}
+{/if}
+
+{#if $posts.items.length === 0}
+  <div
+    class="card flex w-full flex-col justify-between bg-base-300 p-4 shadow-xl"
+  >
+    <div>
+      <div class="m-4 max-w-xl">
+        <div class="prose items-center gap-x-4">
+          <div class="text-accent">No posts found</div>
+        </div>
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\posts\+page.ts
+Contents:
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\posts\[slug]\+page.svelte
+Contents:
+<script lang="ts">
+import { base } from "$app/paths";
+import { page } from "$app/stores";
+import { metadata } from "$lib/app/stores";
+import Delete from "$lib/components/Delete.svelte";
+import { client } from "$lib/pocketbase";
+import type { PageData } from "./$types";
+import Markdown from "svelte-markdown";
+export let data: PageData;
+export let featuredImageUrl: string;
+let postsTagsFix: any[];
+$: if (data) {
+  const {
+    post: {
+      userid,
+      id,
+      title,
+      slug,
+      body,
+      blogSummary,
+      featuredImage,
+      prompt,
+      tags,
+    },
+    featuredImageUrl: newFeaturedImageUrl,
+    tags: newPostsTagsFix,
+  } = data;
+  featuredImageUrl = newFeaturedImageUrl;
+  postsTagsFix = newPostsTagsFix;
+  $metadata.title = title;
+}
+console.log("On Load: [featuredImageUrl] ", featuredImageUrl);
+</script>
+
+{#if $page.url.hash === "#delete"}
+  <Delete table="posts" id={data.post.id} />
+{/if}
+
+<div class="prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto p-4">
+  {#if featuredImageUrl}
+    <figure class="my-4">
+      <img
+        src={featuredImageUrl}
+        alt={data.post.title}
+        class="mx-auto rounded-lg shadow-md"
+      />
+      <figcaption class="mt-2 text-center text-sm">
+        {data.post.title}
+      </figcaption>
+    </figure>
+  {/if}
+  <article class="prose lg:prose-lg mx-auto text-justify">
+    <Markdown source={data.post.body} />
+  </article>
+  <!-- Inside your Svelte component -->
+  <div class="mt-8">
+    <h2 class="text-2xl">Tags</h2>
+    {#if Array.isArray(data.tags)}
+      <ul class="flex flex-wrap">
+        {#each data.tags as tag (tag.id)}
+          <div class="badge badge-primary badge-outline p-4 m-2">{tag.title}</div>
+        {/each}
+      </ul>
+    {/if}
+  </div>
+  <div class="mt-8 text-center">
+    <a href={`${base}/auditlog/posts/${data.post.id}`} class="btn btn-primary">
+      Audit Log
+    </a>
+  </div>
+</div>
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\posts\[slug]\+page.ts
+Contents:
+import { client } from "$lib/pocketbase";
+import type { PageLoad } from "./$types";
+
+export const load: PageLoad = async function ({ params }) {
+  const { slug } = params;
+  console.log("slug", slug);
+
+  try {
+    // Disable auto-cancellation for the post request
+    client.autoCancellation(false);
+
+    // Fetch the post by slug
+    const response = await client
+      .collection("posts")
+      .getList(1, 50, { filter: `slug = '${slug}'` });
+    const items = response.items;
+
+    console.log("items", items);
+
+    if (items.length === 0) {
+      throw new Error("Post not found");
+    }
+
+    const post: {
+      userid: any;
+      id: string;
+      title: string;
+      slug: string;
+      body: string;
+      tags: string[];
+      blogSummary: string;
+      featuredImage: string | null;
+      prompt: string;
+    } = items[0] as unknown as {
+      userid: any;
+      id: string;
+      title: string;
+      slug: string;
+      body: string;
+      tags: string[];
+      blogSummary: string;
+      featuredImage: string | null;
+      prompt: string;
+    };
+
+    let featuredImageUrl = "";
+
+    // Check if the post has a featuredImage
+    if (post.featuredImage) {
+      // Assuming post.featuredImage is the ID you need to use to fetch the image from the 'images' collection
+      const image = await client
+        .collection("images")
+        .getOne(post.featuredImage);
+      console.log("image", image);
+
+      if (image && image.file) {
+        // Construct the URL for the image
+        featuredImageUrl = client.getFileUrl(image, image.file);
+        console.log("featuredImageUrl", featuredImageUrl);
+      }
+    }
+
+    // Fetch the tags associated with the post
+    const postTagsRelations = await client.collection("postsTags").getFullList({
+      filter: `posts = '${post.id}'`,
+    });
+    console.log("postTagsRelations", postTagsRelations);
+
+    // Extract the tag IDs from the relations
+    const tagIds = postTagsRelations.map((rel) => rel.tags);
+
+    // ... existing code ...
+
+    // Fetch the tag details for each tag ID
+    const tags = await Promise.all(
+      tagIds.map((tagId) => client.collection("tags").getOne(tagId))
+    );
+    console.log("tags", tags);
+
+    // Remove duplicate tags
+    const uniqueTags = Array.from(
+      new Set(tags.map((tag) => JSON.stringify(tag)))
+    ).map((str) => JSON.parse(str));
+
+    // Return the post, the URL for the featured image, and the unique tags
+    return { post, featuredImageUrl, tags: uniqueTags };
+
+    // ... existing code ...
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    throw error;
+  }
+};
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\posts\[slug]\edit\+page.svelte
+Contents:
+<script lang="ts">
+  import { goto } from "$app/navigation";
+  import { metadata } from "$lib/app/stores";
+  import { authModel, client, save } from "$lib/pocketbase";
+  import { alertOnFailure } from "$lib/pocketbase/ui";
+  import type { PageData } from "./$types";
+  import Markdown from "svelte-markdown";
+  import { onMount } from "svelte";
+  import { promptFormat, titlePrompt, tagPrompt, blogSummaryPrompt } from "$lib/utils/prompts";
+  import { page } from "$app/stores";
+  import Delete from "$lib/components/Delete.svelte";
+  
+  export let data: PageData;
+  
+  $: ({ post } = data);
+  $: $metadata.title = post.title;
+  $: $metadata.description = post.blogSummary || "";
+  $: featuredImageUrl = data.featuredImageUrl;
+  
+  let tagString = "";
+  
+  onMount(async () => {
+    if (data && data.post) {
+      // Fetch the related tags for the post
+      const postsTagsResponse = await client.collection("postsTags").getList(1, 50, {
+        filter: `posts = "${data.post.id}"`,
+      });
+      const tagIds = postsTagsResponse.items.map((postTag) => postTag.tags);
+      const tags = await Promise.all(tagIds.map((tagId) => client.collection("tags").getOne(tagId)));
+      tagString = tags.map((tag) => tag.title).join(", ");
+    }
+  });
+  
+  async function submit(e: SubmitEvent) {
+    e.preventDefault();
+  
+    const tagsArray = tagString.split(",").map((tag) => tag.trim()).filter((tag) => tag.length > 0);
+  
+    const updatedPost = {
+      ...data.post,
+      title: post.title,
+      slug: post.slug,
+      body: post.body,
+      blogSummary: post.blogSummary,
+      prompt: post.prompt,
+      featuredImage: post.featuredImage,
+    };
+  
+    const savedPost = await save("posts", updatedPost);
+  
+    await updatePostsTagsRelationships(savedPost.id, tagsArray);
+  
+    goto(`/posts/${savedPost.slug}`);
+  }
+  
+  async function updatePostsTagsRelationships(postId: string, tagsArray: string[]) {
+    const oldPostsTags = await client.collection("postsTags").getList(1, 50, {
+      filter: `posts = "${postId}"`,
+    });
+    for (const postTag of oldPostsTags.items) {
+      await client.collection("postsTags").delete(postTag.id);
+    }
+  
+    for (const tagTitle of tagsArray) {
+      const existingTags = await client.collection("tags").getList(1, 1, {
+        filter: `title = "${tagTitle}"`,
+      });
+  
+      let tagId;
+      if (existingTags.items.length === 0) {
+        const newTag = await client.collection("tags").create({ title: tagTitle });
+        tagId = newTag.id;
+      } else {
+        tagId = existingTags.items[0].id;
+      }
+  
+      await client.collection("postsTags").create({
+        posts: postId,
+        tags: tagId,
+      });
+    }
+  }
+  
+  async function generateFromChatGPT(userPrompt: string) {
+    post.prompt = userPrompt;
+  
+    const bodyResponse = await generateGptRequest(promptFormat + "This is the user's inspiration: '" + post.prompt + "'");
+    post.body = bodyResponse;
+  
+    const titleResponse = await generateGptRequest(titlePrompt + "This is the user's article: '" + bodyResponse + "'");
+    post.title = titleResponse.replace(/["']/g, "");
+    post.slug = titleResponse.toLowerCase().replace(/\s+/g, "-").replace(/["':]/g, "").substring(0, 50);
+  
+    const tagsResponse = await generateGptRequest(tagPrompt + "This is the blog article: '" + bodyResponse + "'");
+    post.tags = tagsResponse;
+  
+    const blogSummaryResponse = await generateGptRequest(blogSummaryPrompt + "This is the blog article: '" + bodyResponse + "'");
+    post.blogSummary = blogSummaryResponse;
+  
+    const imageResponse = await generateImageFromDalle(titleResponse + "  " + tagsResponse);
+  
+    return {
+      title: post.title,
+      slug: post.slug,
+      body: post.body,
+      blogSummary: post.blogSummary,
+      userid: post.userid,
+      tags: post.tags,
+      featuredImage: post.featuredImage,
+    };
+  }
+  
+  async function generateImageFromDalle(prompt: string) {
+    try {
+      const response = await fetch("/api/dalle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      if (!response.ok) throw new Error("Failed to generate image from Dalle-3");
+      const data = await response.json();
+      post.featuredImage = data.url;
+    } catch (error) {
+      console.error("Error:", error);
+      alert(error instanceof Error ? error.message : "An unknown error occurred");
+    }
+  }
+  
+  async function generateGptRequest(prompt: string) {
+    const response = await fetch("/api/chatgpt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
+    if (!response.ok) throw new Error("Failed to generate text from ChatGPT");
+    const data = await response.json();
+    return data.result;
+  }
+  </script>
+  
+  <main class="container mx-auto my-12 px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-8 lg:grid-cols-3">
+      <section class="space-y-6 lg:col-span-2">
+        <div class="bg-base-200 p-6">
+          <h1 class="mb-4 text-xl font-semibold">Edit Journal Entry</h1>
+          <form on:submit|preventDefault={submit} class="space-y-4">
+            <div class="form-control w-full">
+              <label class="label" for="title">
+                <span class="label-text">Title</span>
+              </label>
+              <input type="text" id="title" name="title" bind:value={post.title} class="input input-bordered w-full" placeholder="Your journal title" />
+            </div>
+  
+            <div class="form-control w-full">
+              <label class="label" for="slug">
+                <span class="label-text">Slug</span>
+              </label>
+              <input type="text" id="slug" name="slug" bind:value={post.slug} class="input input-bordered w-full" placeholder="your-journal-title" />
+            </div>
+  
+            <div class="form-control w-full">
+              <label class="label" for="body">
+                <span class="label-text">Body</span>
+              </label>
+              <article class="prose mx-auto text-justify lg:prose-lg">
+                <Markdown source={post.body} />
+              </article>
+            </div>
+  
+            <div class="form-control w-full">
+              <label class="label" for="tags">
+                <span class="label-text">Tags</span>
+              </label>
+              <input type="text" id="tags" name="tags" bind:value={tagString} class="input input-bordered w-full" placeholder="Tags, comma separated" />
+            </div>
+  
+            <button type="submit" class="btn btn-primary">Update</button>
+          </form>
+        </div>
+  
+        <div class="bg-base-200 p-6">
+          <h2 class="mb-4 text-lg font-semibold">GPT Prompt</h2>
+          <div class="form-control">
+            <textarea class="textarea h-24 w-full" placeholder="Enter your GPT prompt here" bind:value={post.prompt}></textarea>
+            <button class="btn btn-primary mt-4" on:click={() => generateFromChatGPT(post.prompt)}>Generate</button>
+          </div>
+        </div>
+      </section>
+  
+      <aside class="space-y-4">
+        <div class="card bg-base-200">
+          <figure>
+            <img src={featuredImageUrl || 'https://via.placeholder.com/256x256.png?text=AI+Blog'} alt={post.title} />
+          </figure>
+          <div class="card-body">
+            <h3 class="card-title">
+              <a href="/" class="text-lg font-bold">{post.title}</a>
+            </h3>
+            <p>{post.blogSummary || 'No summary available.'}</p>
+            <div class="card-actions justify-end">
+              {#if tagString}
+                {#each tagString.split(',') as tag (tag)}
+                  <div class="badge badge-outline">{tag.trim()}</div>
+                {/each}
+              {:else}
+                <div class="badge badge-outline">No Tags</div>
+              {/if}
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\posts\[slug]\edit\+page.ts
+Contents:
+import { client } from "$lib/pocketbase";
+import type { PostsRecord } from "$lib/pocketbase/generated-types";
+import type { PageLoad } from "./$types";
+import { goto } from "$app/navigation";
+import { metadata } from "$lib/app/stores";
+import { authModel, save } from "$lib/pocketbase";
+import type { PageData } from "./$types";
+
+export const load: PageLoad = async function ({ params }) {
+  const { slug } = params;
+
+  try {
+    const { items } = await client.collection("posts").getList(undefined, undefined, {
+      filter: `slug='${slug}'`,
+    });
+
+    if (items.length === 0) {
+      throw new Error("Post not found");
+    }
+
+    const post: {
+      userid: any;
+      id: string;
+      title: string;
+      slug: string;
+      body: string;
+      tags: string[];
+      blogSummary: string;
+      featuredImage: string | null;
+      prompt: string;
+    } = items[0] as unknown as {
+      userid: any;
+      id: string;
+      title: string;
+      slug: string;
+      body: string;
+      tags: string[];
+      blogSummary: string;
+      featuredImage: string | null;
+      prompt: string;
+    };
+    
+    let featuredImageUrl = "";
+
+    if (post.featuredImage) {
+      const image = await client.collection("images").getOne(post.featuredImage);
+
+      if (image && image.file) {
+        featuredImageUrl = client.getFileUrl(image, image.file);
+      }
+    }
+
+    return { post, featuredImageUrl };
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    throw error;
+  }
+};
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\reflect\+page.svelte
+Contents:
+<script lang="ts">
+import { metadata } from "$lib/app/stores";
+import { goto } from "$app/navigation";
+import { authModel, save } from "$lib/pocketbase";
+import { alertOnFailure } from "$lib/pocketbase/ui";
+import type { PageData } from "./$types";
+import Markdown from "svelte-markdown";
+
+$: test = "";
+$metadata.title = "reflect";
+$metadata.description = "reflect ai";
+</script>
+
+Coming Soon
+
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\remember\+page.svelte
+Contents:
+<script lang="ts">
+  import { metadata } from "$lib/app/stores";
+  import { authModel } from "$lib/pocketbase";
+  import { alertOnFailure } from "$lib/pocketbase/ui";
+  import { client } from "$lib/pocketbase";
+  import Markdown from "svelte-markdown";
+  import { goto } from "$app/navigation";
+  
+  export let data;
+  
+  async function deleteAllPosts() {
+    alertOnFailure(async () => {
+      const postsResponse = await client.collection("posts").getList();
+      for (const post of postsResponse.items) {
+        await client.collection("posts").delete(post.id);
+      }
+      // Optionally, refresh the posts list or navigate as needed
+    });
+  }
+  
+  $metadata.title = "";
+  $metadata.description = "AI powered note taking";
+  
+  async function getFeaturedImageUrl(post: any) {
+    if (post.featuredImage) {
+      const image = await client.collection("images").getOne(post.featuredImage);
+      if (image && image.file) {
+        return client.getFileUrl(image, image.file);
+      }
+    }
+    return "https://via.placeholder.com/800x400.png?text=AI+Blog";
+  }
+</script>
+
+<div class="bg-base-100">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div
+      class="grid grid-cols-1 gap-x-2 gap-y-20 overflow-y-auto p-4 lg:grid-cols-3"
+      style="max-height: calc(100vh - 20rem);"
+    >
+      {#if data.posts.length > 0}
+        {#each data.posts as post}
+          <div class="card flex flex-col justify-between bg-base-300 p-4 shadow-xl">
+            <div>
+              <figure class="relative">
+                {#await getFeaturedImageUrl(post)}
+                  <img
+                    src="https://via.placeholder.com/800x400.png?text=Loading..."
+                    alt="Loading..."
+                    class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+                  />
+                {:then featuredImageUrl}
+                  <img
+                    src={featuredImageUrl}
+                    alt={post.title}
+                    class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+                  />
+                {/await}
+              </figure>
+              <div class="mt-4">
+                <div class="prose items-center gap-x-4">
+                  <time datetime={post.updated} class="text-accent">
+                    {new Date(post.updated).toLocaleDateString()}
+                  </time>
+                </div>
+                <div class="group relative mt-3">
+                  <a
+                    href={`/posts/${post.slug}`}
+                    class="prose-lg font-bold text-primary line-clamp-2"
+                  >
+                    {post.title}
+                  </a>
+                  <div class="prose-sm mt-3 text-base-content line-clamp-6">
+                    <Markdown source={post.blogSummary} />
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                {#each post.tags as tag}
+                  <a href={`/tags/${tag}`} class="badge badge-accent badge-outline">
+                    {tag}
+                  </a>
+                {:else}
+                  <div class="badge badge-accent badge-outline">No tags</div>
+                {/each}
+              </div>
+            </div>
+            
+            <div class="mt-4 flex justify-between">
+              <a class="btn btn-outline" href={`/posts/${post.slug}/edit`}>Edit</a>
+              <a class="btn btn-outline btn-secondary" href={`/posts/${post.slug}#delete`}>Delete</a>
+            </div>
+          </div>
+        {/each}
+      {:else}
+        <div class="col-span-full py-8 text-center">No posts found.</div>
+      {/if}
+    </div>
+
+    {#if $authModel}
+      <div class="my-4 text-right">
+        <button class="btn btn-error ml-2" on:click={deleteAllPosts}>
+          Delete All Posts
+        </button>
+      </div>
+    {:else}
+      <div class="my-4 text-center">
+        <p>Please login to manage posts.</p>
+      </div>
+    {/if}
+  </div>
+</div>
+
+Path: D:\Modible\Software\pocketbase-sveltekit-starter\sk\src\routes\remember\+page.ts
+Contents:
+import type { PageLoad } from "./$types";
+import { client } from "$lib/pocketbase";
+
+export const load: PageLoad = async () => {
+  try {
+    // Fetch posts
+    const postsResponse = await client.collection("posts").getList(1, 50, {
+      sort: "-updated",
+      expand: "featuredImage",
+    });
+
+    // Extract the post IDs from the response
+    const postIds = postsResponse.items.map((post) => post.id);
+
+    // Fetch postsTags records for all posts in a single request
+    const postsTagsResponse = await client.collection("postsTags").getList(1, 100, {
+      filter: `posts.id = "${postIds.join('" || posts.id = "')}"`,
+    });
+
+    // Create a map of post IDs to their corresponding tag IDs
+    const postTagMap = new Map<string, string[]>();
+    postsTagsResponse.items.forEach((postTag) => {
+      const postId = postTag.posts;
+      const tagId = postTag.tags;
+      if (postTagMap.has(postId)) {
+        postTagMap.get(postId)!.push(tagId);
+      } else {
+        postTagMap.set(postId, [tagId]);
+      }
+    });
+
+    // Fetch tag details for all unique tag IDs in a single request
+const uniqueTagIds = [...new Set(postsTagsResponse.items.map((postTag) => postTag.tags))];
+console.log("uniqueTagIds", uniqueTagIds);
+
+const tagsResponse = await client.collection("tags").getList(1, 100, {
+  filter: `id = "${uniqueTagIds.join('" || id = "')}"`,
+});
+console.log("tagsResponse", tagsResponse);
+
+// Create a map of tag IDs to their corresponding titles
+const tagTitleMap = new Map<string, string>();
+tagsResponse.items.forEach((tag) => {
+  console.log("tag", tag);
+  tagTitleMap.set(tag.id, tag.title);
+});
+console.log("tagTitleMap", tagTitleMap);
+
+// Assign tags to each post
+const postsWithTags = postsResponse.items.map((post) => {
+  const tagIds = postTagMap.get(post.id) || [];
+  const flattenedTagIds = tagIds.flat(); // Flatten the tagIds array
+  post.tags = flattenedTagIds.map((tagId) => {
+    const tag = tagsResponse.items.find((t) => t.id === tagId);
+    return tag ? tag.title : "";
+  }).filter(Boolean);
+  return post;
+});
+
+    console.log("postsWithTags", postsWithTags);
+
+    return {
+      posts: postsWithTags,
+    };
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    return {
+      posts: [],
+    };
+  }
+};
+

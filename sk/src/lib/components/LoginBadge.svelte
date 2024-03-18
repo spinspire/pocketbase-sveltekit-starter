@@ -1,95 +1,68 @@
 <script lang="ts">
-import type { Record, Admin } from "pocketbase";
-import { onDestroy } from "svelte";
-import { authModel, client } from "../pocketbase";
-import { alerts } from "./Alerts.svelte";
-import Dialog from "./Dialog.svelte";
-import LoginForm from "./LoginForm.svelte";
+  import type { Record, Admin } from "pocketbase";
+  import { onDestroy } from "svelte";
+  import { authModel, client } from "../pocketbase";
+  import { alerts } from "./Alerts.svelte";
+  import Dialog from "./Dialog.svelte";
+  import LoginForm from "./LoginForm.svelte";
 
-let signup = true;
+  let isDialogOpen = false;
 
-async function logout() {
-  client.authStore.clear();
-}
-
-function getFileUrl(authModel: Record | Admin, avatar: any) {
-  return `${import.meta.env.VITE_APP_SK_URL}/files/${authModel.id}/${avatar}`;
-}
-
-const unsubscribe = client.authStore.onChange((token, model) => {
-  if (model) {
-    const { name, username } = model;
-    alerts.success(`Signed in as ${name || username || "Admin"}`, 5000);
-  } else {
-    alerts.success(`Signed out`, 5000);
+  async function logout() {
+    client.authStore.clear();
+    isDialogOpen = false;
   }
-}, false);
-onDestroy(() => {
-  unsubscribe();
-});
-$: console.log("the authmodel:" + { $authModel });
+
+  function getFileUrl(authModel: Record | Admin, avatar: any) {
+    const baseUrl = import.meta.env.VITE_APP_BASE_URL + "/api/files/_pb_users_auth_";
+    const userId = authModel.id;
+    const fileName = avatar;
+    const token = client.authStore.token;
+
+    return `${baseUrl}/${userId}/${fileName}?token=${token}`;
+  }
+
+  const unsubscribe = client.authStore.onChange((token, model) => {
+    if (model) {
+      const { name, username } = model;
+      alerts.success(`Signed in as ${name || username || "Admin"}`, 5000);
+    } else {
+      alerts.success(`Signed out`, 5000);
+    }
+  }, false);
+
+  onDestroy(() => {
+    unsubscribe();
+  });
 </script>
 
 {#if $authModel}
-  <Dialog>
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div class="badge" slot="trigger">
-      {#if $authModel.avatar}
-        <img
-          src={getFileUrl($authModel, $authModel.avatar)}
-          alt="profile pic"
-        />
-      {/if}
-      <samp
-        >{$authModel?.name || $authModel?.username || $authModel?.email}</samp
-      >
-    </div>
+  <div class="badge" on:click={() => (isDialogOpen = true)}>
+    {#if $authModel.avatar}
+      <img class="inline-block h-10 w-10 rounded-md mx-4"  src={getFileUrl($authModel, $authModel.avatar)} alt="profile pic" />
+    {/if}
+    <samp>{$authModel?.name || $authModel?.username || $authModel?.email}</samp>
+  </div>
+
+  <Dialog bind:open={isDialogOpen}>
     <div class="wrapper">
       <div class="badge">
         {#if $authModel.avatar}
-          <img
-            src={getFileUrl($authModel, $authModel.avatar)}
-            alt="profile pic"
-          />
+          <img class="inline-block h-10 w-10 rounded-md mx-4"  src={getFileUrl($authModel, $authModel.avatar)} alt="profile pic" />
         {/if}
-        <samp
-          >{$authModel?.name ?? $authModel?.username ?? $authModel?.email}</samp
-        >
+        <samp>{$authModel?.name ?? $authModel?.username ?? $authModel?.email}</samp>
       </div>
       <button on:click={logout}>Sign Out</button>
     </div>
   </Dialog>
 {:else}
-  <Dialog>
-    <button slot="trigger">{signup ? "enter" : "Sign In"}</button>
-    <LoginForm signup={signup} />
+  <button class="btn btn-primary" on:click={() => (isDialogOpen = true)}>Sign In</button>
+
+  <Dialog bind:open={isDialogOpen}>
+    <LoginForm />
   </Dialog>
 {/if}
 
 <style lang="scss">
-.badge {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  > img {
-    height: 2em;
-    width: 2em;
-    border-radius: 50%;
-  }
-  > samp {
-    display: inline-block !important;
-    -moz-border-radius: 20px !important;
-    -webkit-border-radius: 20px !important;
-    -khtml-border-radius: 20px !important;
-    border-radius: 20px !important;
-    padding: 0.5rem !important;
-    text-align: center !important;
-    line-height: 1.5rem !important;
-  }
-}
-.wrapper {
-  display: flex;
-  flex-direction: column;
-}
+  /* ... */
 </style>

@@ -1,19 +1,20 @@
 <script lang="ts">
-let dialog: HTMLDialogElement;
-function close(e: any) {
-  if (typeof e?.target?.close === "function") e.target.close();
-}
+  export let open: boolean;
+
+  function handleClose() {
+    open = false;
+  }
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-
-<dialog bind:this={dialog}>
-  <slot name="trigger" />
-  <slot />
+<dialog class="modal" {open} on:close={handleClose}>
+  <div class="modal-box">
+    <div class="modal-action">
+      <button class="btn btn-primary" on:click={handleClose}>Close</button>
+    </div>
+    <slot />
+  </div>
 </dialog>
 
-<style lang="scss">
-dialog {
-  padding: 6rem 8rem;
-}
+<style>
+  /* Add any necessary styles */
 </style>

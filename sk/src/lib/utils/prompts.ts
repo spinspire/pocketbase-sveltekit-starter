@@ -159,22 +159,25 @@ Example Output:
 
 Please generate a summary for the given blog article, strictly adhering to the specified format and requirements. Output only the summary, without any additional text or formatting.`;
 
-export const imagePrompt = `Please analyze the provided text and generate a detailed prompt for creating an accompanying image that captures the essence of the text. The image prompt should:
+export const imagePrompt = `Enhanced Image Prompt Generation Guidelines:
 
-- Describe a visually striking, conceptually relevant image that effectively communicates the main ideas or themes of the text
-- Specify the desired style, composition, colors, and any key elements to be included in the image
-- Provide guidance on the mood, emotion, or atmosphere the image should evoke, in line with the tone of the text
-- Be written in natural language, as if providing instructions to a human artist or designer
-- Consist of 3-5 concise, descriptive sentences that paint a vivid picture of the desired image
-- Be output as plain text, without any additional content or formatting
+"Analyze the provided text to create a comprehensive prompt for designing an image that not only encapsulates the text's core message but also adheres to a specific aesthetic directive. The crafted image prompt should:
+
+Concisely depict a scene or concept that aligns with the main ideas or themes presented in the text, ensuring the visual representation is both impactful and relevant.
+Clearly define a minimalist, modern style, emphasizing a sleek design with a 2-3 color monotone palette to ensure visual consistency and cohesion across images.
+Detail the composition, including any critical elements or symbols that should be featured, to reinforce the text's message through visual means.
+Direct the mood, emotion, or atmosphere to reflect the text's tone, using minimalistic design principles to evoke the intended feelings in the audience.
+Utilize natural language to offer clear, precise instructions tailored for an artist or designer, encapsulating the request in 3-5 descriptive sentences.
+The description must be delivered as plain text, focused solely on the image prompt without additional content or formatting.
+
+Make sure to NOT include faces or hands in the image - call this out specifically!
 
 Example Input:
-"This article explores the concept of minimalism as a lifestyle choice, discussing its benefits for mental clarity, financial freedom, and environmental sustainability. It offers practical tips for decluttering, simplifying one's life, and finding contentment with less."
+'This article explores the concept of minimalism as a lifestyle choice, discussing its benefits for mental clarity, financial freedom, and environmental sustainability. It offers practical tips for decluttering, simplifying one's life, and finding contentment with less.'
 
 Example Output:
-Create a clean, uncluttered image featuring a serene, minimalist living space bathed in natural light. The room should contain only a few carefully chosen, functional pieces of furniture in neutral colors, with a single green plant adding a touch of life. Capture a sense of peace, clarity, and freedom through the use of negative space and a simple, harmonious composition. The image should evoke a feeling of lightness, tranquility, and contentment, inviting the viewer to embrace a simpler, more intentional way of living.
+'Design a sleek, minimalistic image that reflects the essence of adopting a minimalist lifestyle for mental clarity and sustainable living. The scene should be set in a modern, sparsely decorated interior with vast negative space, featuring 2-3 colors such as white, soft gray, and a hint of green from a solitary plant. This space should embody tranquility, simplicity, and the elegance of minimalism, with just a few items of furniture that highlight functionality and aesthetic appeal. Aim to capture a mood of calmness and introspection, encouraging viewers to envisage a life of fewer possessions but greater purpose.'`;
 
-Please generate an image prompt for the given text, strictly adhering to the specified format and requirements. Output only the image prompt, without any additional text or formatting.`;
 
 export const introPrompt = `You are an innovative thought generator, capable of interpreting a given phrase or idea from five distinct perspectives. When presented with a concept, your task is to rephrase it into five unique ideas, each embodying a different viewpoint:
 

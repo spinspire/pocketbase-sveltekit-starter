@@ -323,11 +323,11 @@ async function generateImageFromSD(prompt: string): Promise<string> {
         },
         body: JSON.stringify({
           text_prompts: [{ text: prompt }],
-          cfg_scale: 7,
-          height: 512,
-          width: 512,
-          steps: 30,
-          samples: 1,
+          cfg_scale: 3, // Consider adjusting if you want more or less randomness
+          height: 512, // Smaller dimension for quick generation
+          width: 512, // Smaller dimension for quick generation
+          steps: 30, // Reduced steps for faster processing, adjust based on quality needs
+          samples: 1, // Generating a single image per prompt
         }),
       }
     );

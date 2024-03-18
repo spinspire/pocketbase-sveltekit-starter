@@ -1,3 +1,13 @@
+import type { PocketBase } from "pocketbase"
+
+declare global {
+  namespace App {
+    interface Locals {
+      pb: PocketBase;
+    }
+  }
+}
+
 declare namespace App {
   export interface PageData {
     post?: {
