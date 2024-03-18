@@ -28,7 +28,7 @@ const posts = watch<PostsResponse>("posts", {
 {#if $posts.items.length > 0}
   {#each $posts.items as post}
     <div
-      class="card bg-base-300 flex w-full flex-col justify-between p-4 shadow-xl"
+      class="card flex w-full flex-col justify-between bg-base-300 p-4 shadow-xl"
     >
       <div>
         <figure class="relative w-full">
@@ -47,12 +47,12 @@ const posts = watch<PostsResponse>("posts", {
           <div class="group relative mt-3">
             <a
               href={import.meta.env.VITE_APP_SK_URL + "/posts/" + post.slug}
-              class="text-primary prose-lg line-clamp-2 font-bold"
+              class="prose-lg line-clamp-2 font-bold text-primary"
             >
               {post.title}
             </a>
             <div
-              class="prose-sm text-base-content mt-3 line-clamp-6 text-justify"
+              class="prose-sm mt-3 line-clamp-6 text-justify text-base-content"
             >
               <Markdown source={post.blogSummary || post.body} />
             </div>
@@ -66,13 +66,13 @@ const posts = watch<PostsResponse>("posts", {
             {#if postTags.items.length > 0}
               {#each postTags.items as postTag}
                 {#await client.collection('tags').getOne(postTag.tags) then tag}
-                  <a href="#" class="badge badge-outline badge-accent"
+                  <a href="/" class="badge badge-accent badge-outline"
                     >{tag.title}</a
                   >
                 {/await}
               {/each}
             {:else}
-              <div class="badge badge-outline badge-accent">No tags</div>
+              <div class="badge badge-accent badge-outline">No tags</div>
             {/if}
           {/await}
         </div>
@@ -85,7 +85,7 @@ const posts = watch<PostsResponse>("posts", {
 
 {#if $posts.items.length === 0}
   <div
-    class="card bg-base-300 flex w-full flex-col justify-between p-4 shadow-xl"
+    class="card flex w-full flex-col justify-between bg-base-300 p-4 shadow-xl"
   >
     <div>
       <div class="m-4 max-w-xl">

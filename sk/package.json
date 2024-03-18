@@ -3,22 +3,23 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "prepare": "svelte-kit sync",
     "dev": "vite dev",
     "dev:backend": "cd ../pb && modd",
     "backend": "cd ../pb && pocketbase serve --publicDir=../sk/build",
-    "build": "vite build",
+    "build": "vite build --mode=production",
     "build:backend": "cd ../pb && go build",
     "typegen": "pocketbase-typegen --db ../pb/pb_data/data.db --out ./src/lib/pocketbase/generated-types.ts",
     "test": "playwright test",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "check:types": "svelte-check --tsconfig ./tsconfig.json",
     "lint": "prettier --check .",
+    "lint:fix": "prettier --write .",
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@sveltejs/adapter-auto": "^2.1.1",
-    "@sveltejs/adapter-static": "^2.0.3",
     "@sveltejs/kit": "^1.27.6",
     "@sveltejs/vite-plugin-svelte": "^3.0.2",
     "@tailwindcss/forms": "^0.5.7",
@@ -33,7 +34,6 @@
     "prettier-plugin-svelte": "^3.1.2",
     "prettier-plugin-tailwindcss": "^0.5.9",
     "sass": "^1.69.5",
-    "svelte": "^4.2.8",
     "svelte-check": "^3.6.2",
     "svelte-preprocess": "^5.1.1",
     "tailwindcss": "^3.3.6",
@@ -44,8 +44,11 @@
   "type": "module",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.14.1",
+    "@sveltejs/adapter-auto": "^2.1.1",
+    "@sveltejs/adapter-static": "^2.0.3",
     "marked": "^12.0.1",
     "pocketbase": "^0.15.2",
+    "svelte": "^4.2.8",
     "svelte-markdown": "^0.4.1"
   }
 }

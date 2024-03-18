@@ -4,4 +4,3 @@ export const site = {
   description:
     "Capture your inspiration and ideas with mind. A simple and elegant journaling app that helps you stay organized.",
 };
-

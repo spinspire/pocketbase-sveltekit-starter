@@ -6,6 +6,9 @@ export const load: PageLoad = async function ({ params }) {
   console.log("slug", slug);
 
   try {
+    // Disable auto-cancellation for the post request
+    client.autoCancellation(false);
+
     // Fetch the post by slug
     const response = await client
       .collection("posts")
@@ -56,14 +59,23 @@ export const load: PageLoad = async function ({ params }) {
     // Extract the tag IDs from the relations
     const tagIds = postTagsRelations.map((rel) => rel.tags);
 
+    // ... existing code ...
+
     // Fetch the tag details for each tag ID
     const tags = await Promise.all(
       tagIds.map((tagId) => client.collection("tags").getOne(tagId))
     );
     console.log("tags", tags);
 
-    // Return the post, the URL for the featured image, and the tags
-    return { post, featuredImageUrl, tags };
+    // Remove duplicate tags
+    const uniqueTags = Array.from(
+      new Set(tags.map((tag) => JSON.stringify(tag)))
+    ).map((str) => JSON.parse(str));
+
+    // Return the post, the URL for the featured image, and the unique tags
+    return { post, featuredImageUrl, tags: uniqueTags };
+
+    // ... existing code ...
   } catch (error) {
     console.error("Error fetching post:", error);
     throw error;

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { PageStore } from ".";
+import type { PageStore } from ".";
 
-  export let store: PageStore;
-  export let showIfSinglePage = false;
+export let store: PageStore;
+export let showIfSinglePage = false;
 </script>
 
 {#if showIfSinglePage || $store.totalPages > 1}
@@ -22,10 +22,10 @@
 {/if}
 
 <style lang="scss">
-  .paginator {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin: auto;
-  }
+.paginator {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: auto;
+}
 </style>

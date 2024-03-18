@@ -27,7 +27,7 @@ const unsubscribe = client.authStore.onChange((token, model) => {
 onDestroy(() => {
   unsubscribe();
 });
-$: console.log({ $authModel });
+$: console.log("the authmodel:" + { $authModel });
 </script>
 
 {#if $authModel}

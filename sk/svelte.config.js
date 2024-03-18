@@ -4,19 +4,27 @@ import preprocess from "svelte-preprocess";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-  // Consult https://github.com/sveltejs/svelte-preprocess
-  // for more information about preprocessors
-  preprocess: [preprocess(), vitePreprocess({})],
+  preprocess: [
+    preprocess({
+      postcss: true,
+    }),
+    vitePreprocess(),
+  ],
 
   kit: {
+    adapter: adapter({
+      pages: "build",
+      assets: "build",
+      fallback: "index.html",
+      precompress: true,
+      strict: true,
+    }),
+    paths: {
+      base: process.env.BASE_PATH ?? "",
+    },
     alias: {
       $lib: "src/lib",
     },
-    adapter: adapter({
-      // Prerendering turned off. Turn it on if you know what you're doing.
-      prerender: { entries: [] },
-      fallback: "index.html", // enable SPA mode
-    }),
   },
 };
 

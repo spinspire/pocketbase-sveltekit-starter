@@ -8,15 +8,11 @@ import type { PageData } from "./$types";
 
 export const load: PageLoad = async function ({ params }) {
   const { slug } = params;
-  console.log("slug", slug);
 
   try {
-    // Fetch the post by slug
     const { items } = await client.collection("posts").getList(undefined, undefined, {
       filter: `slug='${slug}'`,
     });
-    
-    console.log("items", items);
 
     if (items.length === 0) {
       throw new Error("Post not found");
@@ -35,22 +31,15 @@ export const load: PageLoad = async function ({ params }) {
     } = items[0];
 
     let featuredImageUrl = "";
-    console.log("tags", post.tags);
 
-    // Check if the post has a featuredImage
     if (post.featuredImage) {
-      // Assuming post.featuredImage is the ID you need to use to fetch the image from the 'images' collection
       const image = await client.collection("images").getOne(post.featuredImage);
-      console.log("image", image);
 
       if (image && image.file) {
-        // Construct the URL for the image
         featuredImageUrl = client.getFileUrl(image, image.file);
-        console.log("featuredImageUrl", featuredImageUrl);
       }
     }
 
-    // Return the post and the URL for the featured image
     return { post, featuredImageUrl };
   } catch (error) {
     console.error("Error fetching post:", error);

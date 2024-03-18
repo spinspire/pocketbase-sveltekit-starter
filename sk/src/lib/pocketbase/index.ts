@@ -24,7 +24,6 @@ export const authModel = readable<PBRecord | Admin | null>(
   }
 );
 
-
 export async function login(
   email: string,
   password: string,
@@ -57,10 +56,17 @@ export async function save(collection: string, record: any, create = false) {
   }
 }
 
-export async function savePostWithTags(collection: string, record: any, create = false) {
+export async function savePostWithTags(
+  collection: string,
+  record: any,
+  create = false
+) {
   // Separate tags from the main record data
   const { tags: tagsStr, ...postData } = record;
-  const tags = tagsStr.split(",").map((tag: string) => tag.trim()).filter((tag: any) => tag);
+  const tags = tagsStr
+    .split(",")
+    .map((tag: string) => tag.trim())
+    .filter((tag: any) => tag);
 
   // Save the post data first
   const postResult = await save(collection, postData, create);
@@ -89,7 +95,6 @@ async function linkTagToPost(tagId: string, postId: string) {
   // Implement the logic to create a record in the `taggings` collection linking the tag to the post
   // This is a placeholder function
 }
-
 
 // convert obj to FormData in case one of the fields is instanceof FileList
 function object2formdata(obj: {}) {
@@ -164,19 +169,26 @@ export function watch<T>(
               );
             case "create":
               record = await expand(queryParams.expand, record);
-              const index = result.items.findIndex((r) => r.id === record.id);
+              const index = result.items.findIndex((item: any) => item.id === record.id);
               // replace existing if found, otherwise append
               if (index >= 0) {
                 result.items[index] = record as T;
-                return result.items;
               } else {
-                return [...result.items, record as T];
+                result.items.push(record as T);
               }
+              // The 'else' block is not needed because the 'if' block above always returns
+              // Append the new record to the result items array
+              result.items.push(record as T);
+              break; // Use 'break' to exit the switch case after adding the item
             case "delete":
-              return result.items.filter((item) => item.id !== record.id);
+              // Filter out the deleted record from the result items array
+              result.items = result.items.filter((item) => (item as any).id !== record.id);
+              break; // Use 'break' to exit the switch case after filtering the item
           }
           return result.items;
-        })(action).then((items) => set((result = { ...result, items } as ListResult<T>)));
+        })(action).then((items) =>
+          set((result = { ...result, items } as ListResult<T>))
+        );
       });
   });
   async function setPage(newpage: number) {

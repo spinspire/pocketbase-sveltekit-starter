@@ -80,7 +80,6 @@ async function ensureTagsExist(tags: string[]): Promise<Tag[]> {
     const existingTags = await client
       .collection("tags")
       .getList(1, 1, { filter: filterExpression });
-    console.log("These are the existing tags: " + existingTags);
 
     let existingTag =
       existingTags.items.length > 0 ? existingTags.items[0] : null;
@@ -96,15 +95,6 @@ async function ensureTagsExist(tags: string[]): Promise<Tag[]> {
     }
   }
   return tagObjects;
-}
-
-async function linkTagsToPost(tagIds: string[], postId: string) {
-  for (const tagId of tagIds) {
-    await client.collection("postsTags").create({
-      posts: postId,
-      tags: tagId,
-    });
-  }
 }
 
 async function uploadImageAndSavePost(
@@ -134,18 +124,16 @@ async function uploadImageAndSavePost(
       .collection("images")
       .create(formData);
 
-    post.featuredImage = createdImageRecord.id; // Assuming this is the correct field for image ID
+    post.featuredImage = createdImageRecord.id;
 
     // Process tags
     const tagsArray = curTags
       .split(",")
       .map((tag) => tag.trim())
       .filter((tag) => tag);
-    console.log("This is the tagsArray: " + tagsArray);
 
     // Ensure tags exist in the `tags` collection and get their IDs
     const tagObjects = await ensureTagsExist(tagsArray);
-    console.log("This is the tags objects" + tagObjects);
 
     // Prepare post data
     const postToCreate = {
@@ -156,7 +144,6 @@ async function uploadImageAndSavePost(
       featuredImage: createdImageRecord.id,
       userid: $authModel?.id || "",
       prompt: post.prompt,
-      // Do not include tags here as they are handled separately
     };
 
     // Create post record
@@ -178,113 +165,50 @@ async function uploadImageAndSavePost(
   }
 }
 
-function userIsAuthenticated() {
-  // Assuming there's a global state or a utility that can check the current user's authentication status
-  return $authModel?.id; // Replace this with your actual authentication check
-}
-
-function showAlert(message: any, type: string) {
-  // Simple example using browser's alert
-  // For a better user experience, replace this with your UI framework's alert system
-  alert(`${type.toUpperCase()}: ${message}`);
-}
-async function generateImageFromDalle(prompt: string) {
-  try {
-    const data = await apiRequest("/api/dalle", "POST", { prompt });
-    post.featuredImage = data.url;
-  } catch (error) {
-    alertOnFailure(error);
-  }
-}
-async function generateImageFromSD(prompt: string): Promise<string> {
-  isLoading.image = true;
-  try {
-    const response = await fetch(
-      `${apiHost}/v1/generation/${engineId}/text-to-image`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          text_prompts: [{ text: prompt }],
-          cfg_scale: 7,
-          height: 512,
-          width: 512,
-          stepswidth: 512,
-          steps: 30,
-          samples: 1,
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Non-200 response: ${await response.text()}`);
-    }
-
-    const responseJSON = await response.json();
-    const imageBase64 = responseJSON.artifacts[0].base64;
-
-    return imageBase64;
-  } catch (error) {
-    console.error("Error generating image:", error);
-    throw error;
-  } finally {
-    isLoading.image = false;
+function updateProgressBar(step: number) {
+  const progressElement = document.querySelector(
+    ".progress"
+  ) as HTMLProgressElement;
+  if (progressElement) {
+    progressElement.value = step;
   }
 }
 
-// Updated Function to Accept a Prompt String
 async function generateGptInterpretations(promptString: string) {
   if (!$authModel?.id) {
     alert("Please log in to save your post.");
     return;
   }
 
-  updateProgressBar(1); // Begin the process with initial progress
+  updateProgressBar(1);
 
   try {
-    // Use the provided `promptString` instead of `post.prompt`
     const interpretationsResponse = await generateGptRequest(
       introPrompt + promptString
     );
 
     originalPrompt = promptString;
 
-    console.log(interpretationsResponse);
-
-    // Assign the array of interpretations directly to `post.interpretations`
     chatGptInts = parseInterpretations(interpretationsResponse);
 
-    console.log(chatGptInts);
     formSubmitted = true;
   } catch (error) {
     alertOnFailure(error);
-  } finally {
   }
 }
 
 function parseInterpretations(response: string): any[] {
-  // Split the response by newline to separate each perspective
   const rawInterpretations = response.split("\n");
-
-  // Create an array to store the interpretations
   const interpretations: any[] = [];
 
-  // Iterate over each raw interpretation
   rawInterpretations.forEach((interpretation: string) => {
-    // Split the interpretation by the first colon to separate the perspective name and content
     const parts = interpretation.split(": ");
 
-    // Check if both parts exist
     if (parts.length === 2) {
       const [perspectiveName, content] = parts;
       const trimmedPerspectiveName = perspectiveName.trim();
       const trimmedContent = content.trim();
 
-      // Store the interpretation in the interpretations array
       interpretations.push({
         perspectiveName: trimmedPerspectiveName,
         content: trimmedContent,
@@ -293,15 +217,6 @@ function parseInterpretations(response: string): any[] {
   });
 
   return interpretations;
-}
-
-function updateProgressBar(step: number) {
-  const progressElement = document.querySelector(
-    ".progress"
-  ) as HTMLProgressElement;
-  if (progressElement) {
-    progressElement.value = step;
-  }
 }
 
 async function generateBlogFromChatGPT(userPrompt: string) {
@@ -361,7 +276,6 @@ async function generateBlogFromChatGPT(userPrompt: string) {
     isLoading.image = false;
 
     loadingMessage = "Saving post...";
-    console.log("This is the curTags: " + curTags);
     await uploadImageAndSavePost(base64Image, curTags);
   } catch (error) {
     alertOnFailure(error);
@@ -384,7 +298,6 @@ async function generateBlogFromChatGPT(userPrompt: string) {
   };
 }
 
-// Note: Implement `generateGptRequest` and `alertOnFailure` as needed.
 async function generateGptRequest(prompt: string) {
   const response = await fetch("/api/chatgpt", {
     method: "POST",
@@ -393,10 +306,48 @@ async function generateGptRequest(prompt: string) {
   });
   if (!response.ok) throw new Error("Failed to generate text from ChatGPT");
   const data = await response.json();
-  return data.result; // Assuming the response has a 'result' field
+  return data.result;
 }
 
-// Helper function for better error handling and user feedback
+async function generateImageFromSD(prompt: string): Promise<string> {
+  isLoading.image = true;
+  try {
+    const response = await fetch(
+      `${apiHost}/v1/generation/${engineId}/text-to-image`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          text_prompts: [{ text: prompt }],
+          cfg_scale: 7,
+          height: 512,
+          width: 512,
+          steps: 30,
+          samples: 1,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Non-200 response: ${await response.text()}`);
+    }
+
+    const responseJSON = await response.json();
+    const imageBase64 = responseJSON.artifacts[0].base64;
+
+    return imageBase64;
+  } catch (error) {
+    console.error("Error generating image:", error);
+    throw error;
+  } finally {
+    isLoading.image = false;
+  }
+}
+
 function alertOnFailure(error: any) {
   console.error("Error:", error);
   alert(error instanceof Error ? error.message : "An unknown error occurred");
@@ -409,18 +360,15 @@ function goBack() {
 function selectInterpretation(interpretation: string) {
   chatGptPrompt = originalPrompt + " - " + interpretation;
 
-  console.log("Captured the final prompt: " + chatGptPrompt);
-
-  // Start loading here
-  isLoading.content = true; // Assuming this is the first step in generating the blog
+  isLoading.content = true;
   loadingMessage = "Generating blog...";
   generateBlogFromChatGPT(chatGptPrompt)
     .then(() => {
-      isLoading.content = false; // Reset or update loading states as necessary when done
+      isLoading.content = false;
     })
     .catch((error) => {
-      alertOnFailure(error); // Handle errors
-      isLoading.content = false; // Ensure loading state is reset on error
+      alertOnFailure(error);
+      isLoading.content = false;
     });
 }
 </script>
@@ -428,7 +376,6 @@ function selectInterpretation(interpretation: string) {
 <div>
   {#if isLoading.content || isLoading.title || isLoading.tags || isLoading.summary || isLoading.image}
     <div class="mt-12 flex flex-col items-center space-y-4">
-      <!-- Simplified SVG Spinner - Removed nested <svg> tags -->
       <svg
         class="h-8 w-8 animate-spin text-gray-800"
         xmlns="http://www.w3.org/2000/svg"
@@ -464,18 +411,7 @@ function selectInterpretation(interpretation: string) {
         <p>{post.slug}</p>
       </div>
       <div class="mt-4">
-        <div class="mb-4 flex flex-wrap gap-2">
-          Tags
-          <!-- {#if post.tags && post.tags.length}
-            {#if typeof post.tags === 'string'}
-              {#each post.tags.split(',') as tag}
-                <a href="/" class="badge badge-outline badge-accent"
-                  >{tag.trim()}</a
-                >
-              {/each}
-            {/if}
-          {/if} -->
-        </div>
+        <div class="mb-4 flex flex-wrap gap-2">Tags</div>
       </div>
       <div class="mt-4">
         <p>{post.blogSummary}</p>

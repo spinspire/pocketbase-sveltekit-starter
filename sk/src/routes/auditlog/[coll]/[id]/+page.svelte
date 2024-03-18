@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { PageData } from "./$types";
-  import Changes from "./Changes.svelte";
+import type { PageData } from "./$types";
+import Changes from "./Changes.svelte";
 
-  export let data: PageData;
+export let data: PageData;
 </script>
 
 <table>
@@ -16,7 +16,7 @@
       <tr>
         <td>{item.updated}</td>
         <td>{item.event}</td>
-        <td>{item.admin || item.expand.user?.name || item.user}</td>
+        <td>{item.admin || (Array.isArray(item.expand.user) ? item.expand.user[0]?.name : item.expand.user?.name) || item.user}</td>
       </tr>
       <tr>
         <td colspan="3"><Changes auditlog={item} /></td>

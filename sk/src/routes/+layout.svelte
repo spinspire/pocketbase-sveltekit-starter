@@ -1,26 +1,23 @@
-<script context="module">
-import "../app.scss";
+<script lang="ts" context="module">
 import { beforeNavigate } from "$app/navigation";
-import { base } from "$app/paths";
 import { metadata } from "$lib/app/stores";
-import Alerts from "$lib/components/Alerts.svelte";
-import Nav from "$lib/components/Nav.svelte";
 import { site } from "$lib/config";
-
-// Import PocketBase SDK
-import PocketBase from 'pocketbase';
+import PocketBase from "pocketbase";
 
 // Initialize PocketBase client
-const pb = new PocketBase('http://127.0.0.1:8090');
+const pb = new PocketBase(`$(import.meta.env.VITE_APP_BASE_URL)`);
 </script>
 
 <script lang="ts">
-import "../app.pcss";
+import "../app.scss";
+import Alerts from "$lib/components/Alerts.svelte";
+import Nav from "$lib/components/Nav.svelte";
 
 $: title = $metadata.title ? $metadata.title + " | " + site.name : site.name;
 $: description = $metadata.description ?? site.description;
 $: headline = $metadata.headline ?? $metadata.title;
-// reset metadata on navigation so that the new page inherits nothing from the old page
+
+// Reset metadata on navigation so that the new page inherits nothing from the old page
 beforeNavigate(() => {
   $metadata = {};
 });
@@ -31,39 +28,35 @@ beforeNavigate(() => {
   <meta name="description" content={description} />
 </svelte:head>
 
-<header>
-  <div class="min-h-full">
-    <Nav></Nav>
-  </div>
-</header>
+<div class="flex min-h-screen flex-col">
+  <header>
+    <Nav />
+  </header>
 
-<main>
-  <div class="bg-base-100 justify-center pt-4">
-    <div class="mx-auto max-w-7xl px-6 lg:px-8 ">
-      <div class="mx-auto max-w-2xl text-center ">
-        <h2 class="text-primary text-3xl font-bold tracking-tight sm:text-4xl">
+  <main class="flex-grow">
+    <div class="bg-base-100 pt-4">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
           {#if headline}
-            {headline}
+            <h1
+              class="text-primary text-3xl font-bold tracking-tight sm:text-4xl"
+            >
+              {headline}
+            </h1>
           {/if}
-        </h2>
-        <!-- <p class="text-secondary mt-2 text-lg leading-8">
-          {#if description}
-            {description}
-          {/if}
-        </p> -->
-        <Alerts></Alerts>
+          <Alerts />
+        </div>
+        <slot />
       </div>
-      <slot />
     </div>
-  </div>
-</main>
+  </main>
 
-<footer>
-<!--   <div>
-    <em>{site.name}</em> by
-    <a href={site.source_url} target="_blank" rel="noreferrer">modible 2024</a>
-  </div> -->
-</footer>
-
-<style>
-</style>
+  <footer class="bg-base-200 py-4">
+    <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+      <p class="text-base-content text-sm">
+        &copy; {new Date().getFullYear()}
+        {site.name}. All rights reserved.
+      </p>
+    </div>
+  </footer>
+</div>

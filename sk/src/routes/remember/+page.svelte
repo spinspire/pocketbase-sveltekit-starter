@@ -1,116 +1,94 @@
 <script lang="ts">
-import { metadata } from "$lib/app/stores";
-import Image from "$lib/components/Image.svelte";
-import { authModel, watch } from "$lib/pocketbase";
-import type { PostsResponse } from "$lib/pocketbase/generated-types";
-import { alertOnFailure } from "$lib/pocketbase/ui";
-import { client } from "$lib/pocketbase";
-import Markdown from "svelte-markdown";
-import { goto } from "$app/navigation";
-
-export let data;
-
-async function deleteAllPosts() {
-  alertOnFailure(async () => {
-    const postsResponse = await client.collection("posts").getList();
-    for (const post of postsResponse.items) {
-      await client.collection("posts").delete(post.id);
-    }
-    // Optionally, refresh the posts list or navigate as needed
-  });
-}
-
-$metadata.title = "";
-$metadata.description = "AI powered note taking";
-const posts = watch<PostsResponse>("posts", {
-  sort: "-updated",
-});
-
-async function getFeaturedImageUrl(post: any) {
-  if (post.featuredImage) {
-    const image = await client.collection("images").getOne(post.featuredImage);
-    if (image && image.file) {
-      return client.getFileUrl(image, image.file);
-    }
+  import { metadata } from "$lib/app/stores";
+  import { authModel } from "$lib/pocketbase";
+  import { alertOnFailure } from "$lib/pocketbase/ui";
+  import { client } from "$lib/pocketbase";
+  import Markdown from "svelte-markdown";
+  import { goto } from "$app/navigation";
+  
+  export let data;
+  
+  async function deleteAllPosts() {
+    alertOnFailure(async () => {
+      const postsResponse = await client.collection("posts").getList();
+      for (const post of postsResponse.items) {
+        await client.collection("posts").delete(post.id);
+      }
+      // Optionally, refresh the posts list or navigate as needed
+    });
   }
-  return "https://via.placeholder.com/800x400.png?text=AI+Blog";
-}
+  
+  $metadata.title = "";
+  $metadata.description = "AI powered note taking";
+  
+  async function getFeaturedImageUrl(post: any) {
+    if (post.featuredImage) {
+      const image = await client.collection("images").getOne(post.featuredImage);
+      if (image && image.file) {
+        return client.getFileUrl(image, image.file);
+      }
+    }
+    return "https://via.placeholder.com/800x400.png?text=AI+Blog";
+  }
 </script>
 
 <div class="bg-base-100">
-  <div class="mx-auto flex max-w-7xl flex-col px-6 lg:px-8">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div
-      class="grid max-w-none flex-grow grid-cols-1 gap-x-2 gap-y-20 overflow-y-auto p-4 lg:max-w-none lg:grid-cols-3"
+      class="grid grid-cols-1 gap-x-2 gap-y-20 overflow-y-auto p-4 lg:grid-cols-3"
       style="max-height: calc(100vh - 20rem);"
     >
-      {#if $posts.items.length > 0}
-        {#each $posts.items as post}
-          <div
-            class="card bg-base-300 flex w-full flex-col justify-between p-4 shadow-xl"
-          >
+      {#if data.posts.length > 0}
+        {#each data.posts as post}
+          <div class="card flex flex-col justify-between bg-base-300 p-4 shadow-xl">
             <div>
-              <figure class="relative w-full">
+              <figure class="relative">
                 {#await getFeaturedImageUrl(post)}
                   <img
                     src="https://via.placeholder.com/800x400.png?text=Loading..."
                     alt="Loading..."
-                    class="t-2xl aspect-[16/9] w-full w-full object-cover object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+                    class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
                   />
                 {:then featuredImageUrl}
                   <img
                     src={featuredImageUrl}
                     alt={post.title}
-                    class="t-2xl aspect-[16/9] w-full w-full object-cover object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+                    class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
                   />
                 {/await}
               </figure>
-              <div class="m-4 max-w-xl">
+              <div class="mt-4">
                 <div class="prose items-center gap-x-4">
-                  <time datetime="2020-03-16" class="text-accent">
+                  <time datetime={post.updated} class="text-accent">
                     {new Date(post.updated).toLocaleDateString()}
                   </time>
                 </div>
                 <div class="group relative mt-3">
                   <a
-                    href={"/posts/" + post.slug}
-                    class="text-primary prose-lg line-clamp-2 font-bold"
-                    >{post.title}</a
+                    href={`/posts/${post.slug}`}
+                    class="prose-lg font-bold text-primary line-clamp-2"
                   >
-                  <div
-                    class="prose-sm text-base-content mt-3 line-clamp-6 text-justify"
-                  >
+                    {post.title}
+                  </a>
+                  <div class="prose-sm mt-3 text-base-content line-clamp-6">
                     <Markdown source={post.blogSummary} />
                   </div>
                 </div>
               </div>
-              <div class="relative mb-4 flex-col gap-x-4 text-center">
-                {#each data.posts as dataposts}
-                  {#if dataposts.id == post.id}
-                    {#if dataposts.tags && dataposts.tags.length}
-                      {#each dataposts.tags as tag}
-                        <a
-                          href={`/tags/${tag}`}
-                          class="badge badge-outline badge-accent">{tag}</a
-                        >
-                      {/each}
-                    {:else}
-                      <div class="badge badge-outline badge-accent">
-                        No tags
-                      </div>
-                    {/if}
-                  {/if}
+              <div class="mt-4 flex flex-wrap gap-2">
+                {#each post.tags as tag}
+                  <a href={`/tags/${tag}`} class="badge badge-accent badge-outline">
+                    {tag}
+                  </a>
+                {:else}
+                  <div class="badge badge-accent badge-outline">No tags</div>
                 {/each}
               </div>
             </div>
-
-            <div class="flex justify-between p-2">
-              <a class="btn btn-outline" href={`/posts/` + post.slug + `/edit`}
-                >Edit</a
-              >
-              <a
-                class="btn btn-outline btn-secondary"
-                href={`/posts/${post.slug}#delete`}>Delete</a
-              >
+            
+            <div class="mt-4 flex justify-between">
+              <a class="btn btn-outline" href={`/posts/${post.slug}/edit`}>Edit</a>
+              <a class="btn btn-outline btn-secondary" href={`/posts/${post.slug}#delete`}>Delete</a>
             </div>
           </div>
         {/each}
@@ -121,9 +99,9 @@ async function getFeaturedImageUrl(post: any) {
 
     {#if $authModel}
       <div class="my-4 text-right">
-        <button class="btn btn-error ml-2" on:click={deleteAllPosts}
-          >Delete All Posts</button
-        >
+        <button class="btn btn-error ml-2" on:click={deleteAllPosts}>
+          Delete All Posts
+        </button>
       </div>
     {:else}
       <div class="my-4 text-center">

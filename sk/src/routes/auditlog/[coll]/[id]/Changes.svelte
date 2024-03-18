@@ -1,8 +1,8 @@
-<script lang="ts">
-  import type { AuditlogResponse } from "$lib/pocketbase/generated-types";
+<!-- <script lang="ts">
+import type { AuditlogResponse } from "$lib/pocketbase/generated-types";
 
-  export let auditlog: AuditlogResponse;
-  $: keys = Object.keys(auditlog.original || {});
+export let auditlog: AuditlogResponse;
+$: keys = Object.keys(auditlog.original || {});
 </script>
 
 <table>
@@ -18,8 +18,8 @@
 </table>
 
 <style>
-  pre {
-    margin: 0;
-    padding: 0;
-  }
-</style>
+pre {
+  margin: 0;
+  padding: 0;
+}
+</style> -->

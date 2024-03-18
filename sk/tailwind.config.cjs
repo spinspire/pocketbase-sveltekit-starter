@@ -47,7 +47,7 @@ const config = {
       "nord",
       "sunset",
     ],
-  }
+  },
 };
 
 module.exports = config;

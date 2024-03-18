@@ -1,64 +1,47 @@
 <script lang="ts">
-import { base } from "$app/paths";
-import { page } from "$app/stores";
-import LoginBadge from "$lib/components/LoginBadge.svelte";
-const links = [
-  ["/create/", "create"],
-  ["/remember/", "remember"],
-  ["/inspire/", "inspire"],
-  ["/explore/", "explore"],
-  ["/reflect/", "reflect"],
-];
-
-</script>
-
-<nav>
-  <div class="navbar bg-base-100">
-    <div class="navbar-start">
-      <div class="dropdown ">
-        <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            ><path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h8m-8 6h16"
-            /></svg
-          >
+  import { base } from "$app/paths";
+  import { page } from "$app/stores";
+  import LoginBadge from "$lib/components/LoginBadge.svelte";
+  
+  const links = [
+    ["/create/", "create"],
+    ["/remember/", "remember"],
+    ["/inspire/", "inspire"],
+    ["/explore/", "explore"],
+    ["/reflect/", "reflect"],
+  ];
+  </script>
+  
+  <nav>
+    <div class="navbar bg-base-100">
+      <div class="navbar-start">
+        <div class="dropdown">
+          <label tabindex="0" class="btn btn-ghost lg:hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+            </svg>
+          </label>
+          <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+            {#each links as [path, label]}
+              <li>
+                <a href={`${base}${path}`} class:active={$page.url.pathname === path}>{label}</a>
+              </li>
+            {/each}
+          </ul>
         </div>
-        <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-        <ul
-          tabindex="0"
-          class="menu menu-sm dropdown-content bg-base-100  z-[1] mt-3 w-52 p-2 shadow"
-        >
+        <a href="/" class="btn btn-ghost normal-case text-xl">mind</a>
+      </div>
+      <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal px-1">
           {#each links as [path, label]}
-            {@const active = $page.url.pathname == path}
-            <li class="px-2">
-              <a href={`${base}${path}`} class:active={active}>{label}</a>
+            <li>
+              <a href={`${base}${path}`} class:active={$page.url.pathname === path}>{label}</a>
             </li>
           {/each}
         </ul>
       </div>
-      <a href="/" class="btn btn-ghost text-xl">mind</a>
+      <div class="navbar-end">
+        <LoginBadge />
+      </div>
     </div>
-    <div class="navbar-center hidden lg:flex">
-      <ul class="menu menu-horizontal px-1">
-        {#each links as [path, label]}
-          {@const active = $page.url.pathname == path}
-          <li><a href={`${base}${path}`} class:active={active}>{label}</a></li>
-        {/each}
-      </ul>
-    </div>
-    <div class="navbar-end">
-      <LoginBadge></LoginBadge>
-    </div>
-  </div>
-</nav>
-
-<style>
-</style>
+  </nav>
