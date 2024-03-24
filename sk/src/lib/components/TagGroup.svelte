@@ -13,6 +13,7 @@
         const postsTagsResponse = await client.collection("postsTags").getList(1, 50, {
           filter: `posts = "${post.id}"`,
         });
+        
         const tagIds = postsTagsResponse.items.map((postTag) => postTag.tags);
         const loadedTags = await Promise.all(tagIds.map((tagId) => client.collection("tags").getOne(tagId)));
         tags = loadedTags.map((tag) => tag.title);

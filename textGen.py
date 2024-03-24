@@ -37,7 +37,7 @@ def parse_directory_to_file(output_file_name):
         '*/.cache*', '*/.local*', '*/.npm*', '*/.env*', '*/.ash_history*',
         '*/docker-compose.override.yml*', '*/pocketbase.exe', '*/pocketbase*.zip', '*/pb_data*', 
         '*/tmp*', '*/.DS_Store*', '*/node_modules*', '*/playwright-report*', '*/build*', 
-        '*/.svelte-kit*', '*/package*', '*/.env*', '*/.env.*', '!*/.env.example*',
+        '*/.svelte-kit*', '*/package*', '*/.env*', '*/.env.*', '!*/.env.example*', '*/.txt',
         '*.pyc', '*.log', '*~', '*.tmp', '*.bak', '*.swp', '*.mod', '*/oldMigrations*',
         '*.dll', '*.exe', '*.png', '*.jpg', '*.jpeg', '*.gif', '*/.git*', '*/pb_migrations*',
         '*.yml', '*.yaml', '.gitignore', '*.sum', 'directory_contents_filtered_debug.txt','textGen.*' # Additional patterns

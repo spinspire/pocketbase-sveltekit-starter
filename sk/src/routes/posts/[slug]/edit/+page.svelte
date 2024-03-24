@@ -31,18 +31,47 @@ let tagString = "";
 
 onMount(async () => {
   if (data && data.post) {
-    // Fetch the related tags for the post
-    const postsTagsResponse = await client
-      .collection("postsTags")
-      .getList(1, 50, {
-        filter: `posts = "${data.post.id}"`,
-      });
-    const tagIds = postsTagsResponse.items.map((postTag) => postTag.tags);
-    const tags = await Promise.all(
-      tagIds.map((tagId) => client.collection("tags").getOne(tagId))
-    );
-    tagString = tags.map((tag) => tag.title).join(", ");
-  }
+  // Fetch the related tags for the post
+  const tagsList: { id: string; title: string }[] = await client
+    .collection("tags")
+    .getFullList() as unknown as { id: string; title: string }[];
+
+  console.log("tagsList", tagsList);
+
+  const tagIds = data.post.tags; // Assuming the tags field in the post collection contains an array of tag IDs
+
+  console.log("tagIds", tagIds);
+
+  const tags = tagIds.map((tagId: string) => {
+    console.log("Processing tagId:", tagId);
+
+    const tag = tagsList.find((tag) => {
+      console.log("Comparing tagId:", tagId, "with tag.id:", tag.id);
+      return tag.id === tagId;
+    });
+
+    if (tag) {
+      console.log("Found tag:", tag);
+      return tag.title;
+    } else {
+      console.log("Tag not found for tagId:", tagId);
+      return "";
+    }
+  });
+
+  console.log("Mapped tags:", tags);
+
+  const filteredTags = tags.filter((tag) => {
+    if (tag === "") {
+      console.log("Filtering out empty tag title");
+    }
+    return tag !== "";
+  });
+
+  console.log("Final tags array:", filteredTags);
+
+  tagString = filteredTags.join(", ");
+}
 });
 
 async function submit(e: SubmitEvent) {
