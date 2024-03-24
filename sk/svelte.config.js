@@ -25,6 +25,9 @@ const config = {
     alias: {
       $lib: "src/lib",
     },
+    prerender: {
+      entries: ['*', '/posts/[slug]'],
+    },
   },
 };
 

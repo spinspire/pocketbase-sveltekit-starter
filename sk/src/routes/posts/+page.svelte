@@ -1,29 +1,43 @@
 <script lang="ts">
-import { metadata } from "$lib/app/stores";
-import Image from "$lib/components/Image.svelte";
-import { authModel, watch } from "$lib/pocketbase";
-import type { PostsResponse } from "$lib/pocketbase/generated-types";
-import { alertOnFailure } from "$lib/pocketbase/ui";
-import { client } from "$lib/pocketbase";
-import Markdown from "svelte-markdown";
-import { goto } from "$app/navigation";
-
-async function deleteAllPosts() {
-  alertOnFailure(async () => {
-    const postsResponse = await client.collection("posts").getList();
-    for (const post of postsResponse.items) {
-      await client.collection("posts").delete(post.id);
-    }
-    // Optionally, refresh the posts list or navigate as needed
+  import { metadata } from "$lib/app/stores";
+  import Image from "$lib/components/Image.svelte";
+  import { authModel, watch } from "$lib/pocketbase";
+  import type { PostsResponse } from "$lib/pocketbase/generated-types";
+  import { alertOnFailure } from "$lib/pocketbase/ui";
+  import { client } from "$lib/pocketbase";
+  import Markdown from "svelte-markdown";
+  import {onMount} from "svelte";
+  import { goto } from "$app/navigation";
+  
+  async function deleteAllPosts() {
+    alertOnFailure(async () => {
+      const postsResponse = await client.collection("posts").getList();
+      for (const post of postsResponse.items) {
+        await client.collection("posts").delete(post.id);
+      }
+      // Optionally, refresh the posts list or navigate as needed
+    });
+  }
+  
+  $metadata.title = "";
+  $metadata.description = "AI powered note taking";
+  const posts = watch<PostsResponse>("posts", {
+    sort: "-updated",
   });
-}
-
-$metadata.title = "";
-$metadata.description = "AI powered note taking";
-const posts = watch<PostsResponse>("posts", {
-  sort: "-updated",
-});
-</script>
+  
+  onMount(async () => {
+    try {
+      const postsResponse = await client.collection("posts").getList(1, 50, {
+        sort: "-updated",
+        expand: "featuredImage,tags",
+      });
+  
+      posts.update(() => postsResponse.items);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
+  });
+  </script>
 
 {#if $posts.items.length > 0}
   {#each $posts.items as post}

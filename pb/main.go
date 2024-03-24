@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	//"io"
+	"context"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,12 +27,12 @@ import (
 	"github.com/pocketbase/pocketbase/plugins/jsvm"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 
+	"errors"
+	"github.com/liushuangls/go-anthropic"
 	//"github.com/pocketbase/pocketbase/forms"
 	//"github.com/pocketbase/pocketbase/models"
-
 	// Create a new form for the record upsert
 	//"github.com/pocketbase/filesystem"
-
 )
 
 type TextToImage struct {
@@ -143,24 +144,72 @@ func goDotEnvVariable(key string) string {
 	return os.Getenv(key)
 }
 
-func chatGptHandler(c echo.Context) error {
-	var requestBody struct {
-		Prompt string `json:"prompt"`
+func servicesHandler(c echo.Context) error {
+	services := []map[string]interface{}{
+		{
+			"name":   "Anthropic",
+			"models": []string{"claude-instant-v1", "claude-instant-v1-100k"},
+		},
+		{
+			"name":   "OpenAI",
+			"models": []string{"gpt-3.5-turbo", "gpt-4"},
+		},
 	}
 
-	log.Println("Received request to /api/chatgpt")
+	return c.JSON(http.StatusOK, services)
+}
+
+func claudeHandler(c echo.Context) error {
+	var requestBody struct {
+		Text  string `json:"text"`
+		Model string `json:"model"`
+	}
 
 	if err := c.Bind(&requestBody); err != nil {
-		// Before returning an error response
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+	}
+
+	client := anthropic.NewClient(goDotEnvVariable("ANTHROPIC_API_KEY"))
+
+	resp, err := client.CreateMessages(context.Background(), anthropic.MessagesRequest{
+		Model: requestBody.Model,
+		Messages: []anthropic.Message{
+			anthropic.NewUserTextMessage(requestBody.Text),
+		},
+		MaxTokens: 1000,
+	})
+	if err != nil {
+		var e *anthropic.APIError
+		if errors.As(err, &e) {
+			fmt.Printf("Messages error, type: %s, message: %s", e.Type, e.Message)
+		} else {
+			fmt.Printf("Messages error: %v\n", err)
+		}
+		return err
+	}
+
+	fmt.Println(resp.Content[0].Text)
+
+	return c.JSON(http.StatusOK, map[string]interface{}{"result": resp.Content[0].Text})
+}
+
+func chatGptHandler(c echo.Context) error {
+	var requestBody struct {
+		Text  string `json:"text"`
+		Model string `json:"model"`
+	}
+
+	log.Println("Received request to /api/openai")
+
+	if err := c.Bind(&requestBody); err != nil {
 		log.Printf("Error in chatGptHandler: %v", err)
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
 	}
 
 	chatGPTAPIKey := goDotEnvVariable("CHATGPT_API_KEY")
 
-	result, err := hooks.DoChatGPT(chatGPTAPIKey, requestBody.Prompt)
+	result, err := hooks.DoChatGPT(chatGPTAPIKey, requestBody.Text, requestBody.Model)
 	if err != nil {
-		// Before returning an error response
 		log.Printf("Error in chatGptHandler: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate text from ChatGPT"})
 	}
@@ -180,7 +229,7 @@ func dalleImageHandler(c echo.Context) error {
 	dalleAPIKey := goDotEnvVariable("CHATGPT_API_KEY") // Ensure this is correctly named. Adjust according to your actual environment variable retrieval function
 	prompt := requestBody.Prompt
 	model := "dall-e-2" // Make sure to use the correct model name
-	size := "256x256"   // Adjust based on what sizes your model supports
+	size := "512x512"   // Adjust based on what sizes your model supports
 
 	b64Data, err := hooks.DoDalle3(dalleAPIKey, prompt, model, size)
 	if err != nil {
@@ -268,7 +317,7 @@ func dreamStudioHandler(c echo.Context) error {
 	}
 
 	// Construct a URL to access the temporary image
-	
+
 	tempFileURL := fmt.Sprintf("http://localhost:8090/%s", strings.TrimPrefix(tempFilePath, "./pb_public/"))
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"imageUrl": tempFileURL})
@@ -321,12 +370,16 @@ func main() {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 
 		// Register all specific routes before the wildcard static file handler
-		e.Router.POST("/api/chatgpt", chatGptHandler)
+		//e.Router.POST("/api/chatgpt", chatGptHandler)
 		e.Router.POST("/api/dalle", dalleImageHandler)
-
+		//e.Router.POST("/api/claude", claudeHandler)
 		// Register the /api/images route with the imagesHandler
 		//e.Router.POST("/api/images", imagesHandler(app))
 		e.Router.POST("/api/dreamstudio", dreamStudioHandler)
+
+		e.Router.GET("/api/services", servicesHandler)
+		e.Router.POST("/api/anthropic", claudeHandler)
+		e.Router.POST("/api/openai", chatGptHandler)
 		// Now register the static file handler
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDirFlag), true))
 

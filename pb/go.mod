@@ -1,6 +1,8 @@
 module pocketbase
 
-go 1.18
+go 1.21.3
+
+toolchain go1.22.0
 
 require (
 	github.com/go-resty/resty/v2 v2.11.0
@@ -9,6 +11,23 @@ require (
 	github.com/pocketbase/dbx v1.10.1
 	github.com/pocketbase/pocketbase v0.20.0-rc3
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3
+)
+
+require (
+	github.com/3JoB/anthropic-sdk-go/v2 v2.1.1 // indirect
+	github.com/3JoB/ulib v1.39.0 // indirect
+	github.com/3JoB/ulid v0.0.2 // indirect
+	github.com/3JoB/unsafeConvert v1.6.0 // indirect
+	github.com/andybalholm/brotli v1.0.6 // indirect
+	github.com/cornelk/hashmap v1.0.8 // indirect
+	github.com/goccy/go-reflect v1.2.0 // indirect
+	github.com/klauspost/compress v1.17.3 // indirect
+	github.com/labstack/gommon v0.4.2 // indirect
+	github.com/liushuangls/go-anthropic v1.5.0 // indirect
+	github.com/mattn/go-ieproxy v0.0.11 // indirect
+	github.com/sugawarayuuta/sonnet v0.0.0-20231004000330-239c7b6e4ce8 // indirect
+	github.com/valyala/fasthttp v1.51.0 // indirect
+	pgregory.net/rand v1.0.2 // indirect
 )
 
 require (
@@ -57,6 +76,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
+	github.com/labstack/echo/v4 v4.11.4
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect

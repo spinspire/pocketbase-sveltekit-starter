@@ -1,9 +1,8 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { authModel, client, save } from "$lib/pocketbase";
-import type { PageData } from "./$types";
-import { apiRequest } from "$lib/utils/api";
 import { marked } from "marked";
+import { alertOnFailure } from "$lib/pocketbase/ui";
 import {
   promptFormat,
   titlePrompt,
@@ -13,6 +12,43 @@ import {
   introPrompt,
 } from "$lib/utils/prompts";
 import { onMount } from "svelte";
+import {
+  generateTextFromChatGPT,
+  generateTextFromClaude,
+  generateImageFromDreamStudio,
+  ensureTagsExist,
+} from "$lib/utils/api";
+
+import type {
+  PostsResponse,
+  PostsRecord,
+  TagsResponse,
+} from "$lib/pocketbase/generated-types";
+
+import { createEventDispatcher } from "svelte";
+
+const dispatch = createEventDispatcher();
+let selectedService = "";
+let selectedModel = "";
+let inputText = "";
+
+const services = [
+  {
+    name: "Anthropic",
+    models: [
+      "claude-3-haiku-20240307",
+      "claude-3-sonnet-20240229",
+      "claude-3-opus-20240229",
+      "claude-2.1",
+      "claude-2.0",
+      "claude-instant-1.2",
+    ],
+  },
+  {
+    name: "OpenAI",
+    models: ["gpt-4-turbo-preview", "gpt-3.5-turbo"],
+  },
+];
 
 // Initialize states and reactive variables
 let isLoading = {
@@ -21,6 +57,7 @@ let isLoading = {
   tags: false,
   summary: false,
   image: false,
+  slug: false,
 };
 let formSubmitted = false;
 let loadingMessage = "";
@@ -31,31 +68,15 @@ let base64Image;
 let curTags = "";
 let isAuthenticated = false;
 
-interface Tag {
-  id: string;
-  title: string;
-}
-
-interface Post {
-  title: string;
-  slug: string;
-  body: string;
-  tags: string[];
-  blogSummary: string;
-  featuredImage: string;
-  userid: string;
-  prompt: string;
-}
-
-$: post = {
+let post: PostsRecord = {
   title: "",
   slug: "",
   body: "",
-  tags: [] as string[],
   blogSummary: "",
   featuredImage: "",
-  userid: $authModel?.id || "",
   prompt: "",
+  userid: "",
+  tags: [] as string[],
 };
 
 $: chatGptPrompt = "";
@@ -63,45 +84,48 @@ $: chatGptPrompt = "";
 const engineId = "stable-diffusion-v1-6";
 const apiHost = "https://api.stability.ai";
 const apiKey = import.meta.env.VITE_STABILITY_API_KEY;
+let responseText = "";
 
 if (!apiKey) {
   console.error("Missing Stability API key.");
   throw new Error("Missing Stability API key.");
 }
 
+async function callAPI() {
+  // Emit an event with the selected service, model, and input text
+  try {
+    console.log("Calling API...");
+    const response = await fetch(`/api/${selectedService.toLowerCase()}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: inputText, model: selectedModel }),
+    });
+    console.log("Response:", response);
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const data = await response.json();
+    console.log("Data:", data);
+    responseText = data.result;
+  } catch (error) {
+    responseText = "Error: " + (error as Error).message;
+  }
+}
+
 onMount(async () => {
   isAuthenticated = !!authModel;
+  client.autoCancellation(false);
 });
-
-async function ensureTagsExist(tags: string[]): Promise<Tag[]> {
-  const tagObjects: Tag[] = [];
-  for (const title of tags) {
-    const filterExpression = `title = "${title.replace(/"/g, '\\"')}"`;
-    const existingTags = await client
-      .collection("tags")
-      .getList(1, 1, { filter: filterExpression });
-
-    let existingTag =
-      existingTags.items.length > 0 ? existingTags.items[0] : null;
-
-    if (!existingTag) {
-      existingTag = await client.collection("tags").create({ title });
-    }
-
-    if (existingTag) {
-      tagObjects.push({ id: existingTag.id, title: existingTag.title });
-    } else {
-      throw new Error("Failed to create or retrieve tag");
-    }
-  }
-  return tagObjects;
-}
 
 async function uploadImageAndSavePost(
   base64Image: string,
   curTags: string
 ): Promise<void> {
   try {
+    console.log("Uploading image and saving post...");
+
     // Convert base64 to Blob
     const imageBlob = await fetch(`data:image/png;base64,${base64Image}`).then(
       (res) => res.blob()
@@ -116,6 +140,8 @@ async function uploadImageAndSavePost(
     const formData = new FormData();
     formData.append("file", imageBlob, "postImage.png");
 
+    console.log("Uploading image...");
+
     // Prepare post data
     post.userid = $authModel?.id || "";
 
@@ -124,7 +150,11 @@ async function uploadImageAndSavePost(
       .collection("images")
       .create(formData);
 
+    console.log("Image uploaded:", createdImageRecord);
+
     post.featuredImage = createdImageRecord.id;
+
+    console.log("CurTags:", curTags);
 
     // Process tags
     const tagsArray = curTags
@@ -132,8 +162,12 @@ async function uploadImageAndSavePost(
       .map((tag) => tag.trim())
       .filter((tag) => tag);
 
+    console.log("Tags array:", tagsArray);
+
     // Ensure tags exist in the `tags` collection and get their IDs
-    const tagObjects = await ensureTagsExist(tagsArray);
+    const tagIds = await ensureTagsExist(tagsArray);
+
+    console.log("Tag IDs:", tagIds);
 
     // Prepare post data
     const postToCreate = {
@@ -144,24 +178,21 @@ async function uploadImageAndSavePost(
       featuredImage: createdImageRecord.id,
       userid: $authModel?.id || "",
       prompt: post.prompt,
+      tags: tagIds,
     };
+
+    console.log("Post to create:", postToCreate);
 
     // Create post record
     const createdPost = await save("posts", postToCreate, true);
 
-    // Link tags to the post by creating records in the postsTags table
-    for (const tagObject of tagObjects) {
-      await client.collection("postsTags").create({
-        posts: createdPost.id,
-        tags: tagObject.id,
-      });
-    }
+    console.log("Post created:", createdPost);
 
     // Redirect to the new post
     goto(`${import.meta.env.VITE_APP_SK_URL}/posts/${post.slug}`);
   } catch (error) {
     console.error(`Failed to upload image and save post: ${error}`);
-    alertOnFailure(`Failed to upload image and save post: ${error}`);
+    alertOnFailure(() => `Failed to upload image and save post: ${error}`);
   }
 }
 
@@ -183,40 +214,61 @@ async function generateGptInterpretations(promptString: string) {
   updateProgressBar(1);
 
   try {
-    const interpretationsResponse = await generateGptRequest(
-      introPrompt + promptString
-    );
+    //const interpretationsResponse = await generateTextFromClaude(
+    //  introPrompt + promptString
+    //);
+
+    const interpretationsResponse = (inputText = introPrompt + promptString);
+
+    await callAPI();
+
+    console.log("Interpretations Response:", interpretationsResponse);
 
     originalPrompt = promptString;
 
-    chatGptInts = parseInterpretations(interpretationsResponse);
+    chatGptInts = parseInterpretations(responseText);
+    console.log(chatGptInts);
 
     formSubmitted = true;
   } catch (error) {
-    alertOnFailure(error);
+    console.error("Error generating interpretations:", error);
+    //alertOnFailure(() => `Failed to generate interpretations: ${error.message}`);
   }
 }
 
-function parseInterpretations(response: string): any[] {
-  const rawInterpretations = response.split("\n");
-  const interpretations: any[] = [];
+function parseInterpretations(completionText: string): string[] {
+  // Check if completionText is undefined or null
+  if (!completionText) {
+    console.error("No completion text found.");
+    return [];
+  }
+  console.log(completionText);
+  // Split based on newline to separate each perspective, trim each, and remove any that are empty or just whitespace
+  const interpretations = completionText
+    .trim()
+    .split("\n")
+    .filter((line) => line.trim().length > 0)
+    .map((line) => line.trim());
 
-  rawInterpretations.forEach((interpretation: string) => {
-    const parts = interpretation.split(": ");
-
-    if (parts.length === 2) {
-      const [perspectiveName, content] = parts;
-      const trimmedPerspectiveName = perspectiveName.trim();
-      const trimmedContent = content.trim();
-
-      interpretations.push({
-        perspectiveName: trimmedPerspectiveName,
-        content: trimmedContent,
-      });
-    }
-  });
-
+  console.log(interpretations);
   return interpretations;
+}
+
+function getCompletions(claudeOutput: string): string {
+  const jsonObject = JSON.parse(claudeOutput);
+
+  // Validate that the jsonObject contains the 'completion' key
+  if (!jsonObject.hasOwnProperty("completion")) {
+    throw new Error("Parsed JSON object does not contain a 'completion' key.");
+  }
+
+  const completionText = jsonObject.completion;
+  // Additional check to ensure completionText is a string
+  if (typeof completionText !== "string") {
+    throw new Error("'completion' key does not contain a string value.");
+  }
+
+  return completionText;
 }
 
 async function generateBlogFromChatGPT(userPrompt: string) {
@@ -230,59 +282,87 @@ async function generateBlogFromChatGPT(userPrompt: string) {
     isLoading.content = true;
     post.userid = $authModel?.id || "";
     loadingMessage = "Generating post content...";
-    let bodyResponse = await generateGptRequest(
-      `${promptFormat}This is the user's inspiration: '${userPrompt}'`
-    );
-    post.body = bodyResponse;
+    inputText = `${promptFormat}'${userPrompt}'`;
+    await callAPI();
+    /* let bodyResponse = await generateTextFromClaude(
+      `${promptFormat}'${userPrompt}'`
+    ); */
+    post.body = responseText;
+    const bodyResponse = post.body;
     updateProgressBar(10);
     isLoading.content = false;
 
     isLoading.title = true;
     loadingMessage = "Generating post title...";
-    const titleResponse = await generateGptRequest(
-      `${titlePrompt}This is the user's article: '${bodyResponse}'`
-    );
-    post.title = titleResponse.replace(/["']/g, "");
+    inputText = `${titlePrompt}'${bodyResponse}'`;
+    await callAPI();
+    /*  const titleResponse = getCompletions(
+      await generateTextFromClaude(`${titlePrompt}'${bodyResponse}'`)
+    ); */
+    post.title = responseText.replace(/["']/g, "");
+    const titleResponse = post.title;
     updateProgressBar(20);
     isLoading.title = false;
 
+    isLoading.slug = true;
     post.slug = titleResponse
       .toLowerCase()
       .replace(/\s+/g, "-")
       .replace(/["':]/g, "")
       .substring(0, 50);
     post.prompt = userPrompt;
+    isLoading.slug = false;
 
     loadingMessage = "Generating post tags...";
-    curTags = await generateGptRequest(
-      `${tagPrompt}This is the blog article: '${bodyResponse}'`
-    );
+    inputText = `${tagPrompt}'${bodyResponse}'`;
+    await callAPI();
+    /* curTags = getCompletions(
+      await generateTextFromClaude(`${tagPrompt}'${bodyResponse}'`)
+    ); */
+    curTags = responseText;
 
     updateProgressBar(30);
+    console.log("Tags:", curTags);
 
     isLoading.summary = true;
     loadingMessage = "Generating post summary...";
-    const blogSummaryResponse = await generateGptRequest(
-      `${blogSummaryPrompt}This is the blog article: '${bodyResponse}'`
-    );
-    post.blogSummary = blogSummaryResponse;
+    inputText = `${blogSummaryPrompt}'${bodyResponse}'`;
+    await callAPI();
+    /* const blogSummaryResponse = getCompletions(
+      await generateTextFromClaude(`${blogSummaryPrompt}'${bodyResponse}'`)
+    ); */
+    post.blogSummary = responseText;
     updateProgressBar(40);
     isLoading.summary = false;
 
+    console.log("Generating post image...");
     isLoading.image = true;
     loadingMessage = "Generating post image...";
-    const base64Image = await generateImageFromSD(userPrompt);
+
+    inputText = `${imagePrompt}'${bodyResponse}'`;
+    await callAPI();
+    const dStudioPrompt = responseText;
+
+    
+
+    const base64Image = await generateImageFromDreamStudio(dStudioPrompt);
+
+    // await generateTextFromClaude(`${imagePrompt}'${bodyResponse}'`)
+
     updateProgressBar(60);
     isLoading.image = false;
 
+    // Save post with image and tags
     loadingMessage = "Saving post...";
     await uploadImageAndSavePost(base64Image, curTags);
+    console.log("Post saved.");
   } catch (error) {
-    alertOnFailure(error);
+    alertOnFailure(() => error);
     isLoading.content = false;
     isLoading.title = false;
-    isLoading.tags = false;
+    isLoading.slug = false;
     isLoading.summary = false;
+    isLoading.image = false;
     isLoading.image = false;
   }
 
@@ -296,61 +376,6 @@ async function generateBlogFromChatGPT(userPrompt: string) {
     prompt: userPrompt,
     userid: post.userid,
   };
-}
-
-async function generateGptRequest(prompt: string) {
-  const response = await fetch("/api/chatgpt", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt }),
-  });
-  if (!response.ok) throw new Error("Failed to generate text from ChatGPT");
-  const data = await response.json();
-  return data.result;
-}
-
-async function generateImageFromSD(prompt: string): Promise<string> {
-  isLoading.image = true;
-  try {
-    const response = await fetch(
-      `${apiHost}/v1/generation/${engineId}/text-to-image`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          text_prompts: [{ text: prompt }],
-          cfg_scale: 3, // Consider adjusting if you want more or less randomness
-          height: 512, // Smaller dimension for quick generation
-          width: 512, // Smaller dimension for quick generation
-          steps: 30, // Reduced steps for faster processing, adjust based on quality needs
-          samples: 1, // Generating a single image per prompt
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Non-200 response: ${await response.text()}`);
-    }
-
-    const responseJSON = await response.json();
-    const imageBase64 = responseJSON.artifacts[0].base64;
-
-    return imageBase64;
-  } catch (error) {
-    console.error("Error generating image:", error);
-    throw error;
-  } finally {
-    isLoading.image = false;
-  }
-}
-
-function alertOnFailure(error: any) {
-  console.error("Error:", error);
-  alert(error instanceof Error ? error.message : "An unknown error occurred");
 }
 
 function goBack() {
@@ -370,62 +395,35 @@ function selectInterpretation(interpretation: string) {
       alertOnFailure(error);
       isLoading.content = false;
     });
+  chatGptInts = [];
 }
 </script>
 
 <div>
-  {#if isLoading.content || isLoading.title || isLoading.tags || isLoading.summary || isLoading.image}
-    <div class="mt-12 flex flex-col items-center space-y-4">
-      <svg
-        class="h-8 w-8 animate-spin text-gray-800"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          class="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          stroke-width="4"
-        ></circle>
-        <path
-          class="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        ></path>
-      </svg>
-      <p class="text-lg font-medium">{loadingMessage}</p>
-      <progress class="progress progress-primary w-56" value="1" max="100"
-      ></progress>
-      <div class="mt-4">
-        <div class="mt-4">
-          {@html marked(post.body || "")}
-        </div>
-      </div>
-      <div class="mt-4">
-        <h2 class="text-2xl font-bold">{post.title}</h2>
-      </div>
-      <div class="mt-4">
-        <p>{post.slug}</p>
-      </div>
-      <div class="mt-4">
-        <div class="mb-4 flex flex-wrap gap-2">Tags</div>
-      </div>
-      <div class="mt-4">
-        <p>{post.blogSummary}</p>
-      </div>
+  <select bind:value={selectedService}>
+    <option value="">Select a service</option>
+    {#each services as service}
+      <option value={service.name}>{service.name}</option>
+    {/each}
+  </select>
 
-      <div class="mt-4">
-        <img
-          src={post.featuredImage}
-          alt={post.title}
-          class="h-auto w-full rounded-lg"
-        />
-      </div>
-    </div>
-  {:else if !formSubmitted}
+  {#if selectedService}
+    <select bind:value={selectedModel}>
+      <option value="">Select a model</option>
+      {#each services.find(s => s.name === selectedService)?.models ?? [] as model}
+        <option value={model}>{model}</option>
+      {/each}
+    </select>
+  {/if}
+
+  <!--   <input type="text" bind:value={inputText} placeholder="Enter text" />
+  <button on:click={callAPI} disabled={!selectedService || !selectedModel}>
+    Submit
+  </button> -->
+</div>
+
+<div>
+  {#if !formSubmitted}
     <main class="container mx-auto my-12 px-4 sm:px-6 lg:px-8">
       <form
         on:submit|preventDefault={() => generateGptInterpretations(chatGptPrompt)}
@@ -443,25 +441,219 @@ function selectInterpretation(interpretation: string) {
         </div>
       </form>
     </main>
-  {:else}
+  {:else if chatGptInts.length > 0}
     <main class="container mx-auto my-12 px-4 sm:px-6 lg:px-8">
       <section class="space-y-6">
-        {#if chatGptInts.length > 0}
-          <div class="mb-4 text-xl font-semibold">
-            Select an interpretation:
-          </div>
-          <div class="flex flex-wrap gap-2">
-            {#each chatGptInts as interpretation}
-              <button
-                class="btn btn-outline"
-                on:click={() => selectInterpretation(interpretation.content)}
-                >{interpretation.content}</button
-              >
-            {/each}
-          </div>
-        {/if}
+        <div class="mb-4 text-xl font-semibold">Select an interpretation:</div>
+        <div class="flex flex-wrap gap-2">
+          {#each chatGptInts as interpretation}
+            <button
+              class="btn btn-outline"
+              on:click={() => selectInterpretation(interpretation)}
+              >{interpretation}</button
+            >
+          {/each}
+        </div>
         <button class="btn btn-secondary mt-6" on:click={goBack}>Back</button>
       </section>
     </main>
+  {:else}
+    <div class="mt-12 flex flex-col items-center space-y-4">
+      {#if isLoading.content}
+        <div>
+          <svg
+            class="h-8 w-8 animate-spin text-gray-800"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <p class="text-lg font-medium">Loading content...</p>
+          <progress class="progress progress-primary w-56" value="1" max="100"
+          ></progress>
+        </div>
+      {:else}
+        <div class="mt-4">
+          {@html marked(post.body || "")}
+        </div>
+      {/if}
+
+      {#if isLoading.title}
+        <div>
+          <svg
+            class="h-8 w-8 animate-spin text-gray-800"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <p class="text-lg font-medium">Loading title...</p>
+          <progress class="progress progress-primary w-56" value="1" max="100"
+          ></progress>
+        </div>
+      {:else}
+        <div class="mt-4">
+          <h2 class="text-2xl font-bold">{post.title}</h2>
+        </div>
+      {/if}
+
+      {#if isLoading.slug}
+        <div>
+          <svg
+            class="h-8 w-8 animate-spin text-gray-800"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <p class="text-lg font-medium">Loading slug...</p>
+          <progress class="progress progress-primary w-56" value="1" max="100"
+          ></progress>
+        </div>
+      {:else}
+        <div class="mt-4">
+          <p>{post.slug}</p>
+        </div>
+      {/if}
+
+      {#if isLoading.tags}
+        <div>
+          <svg
+            class="h-8 w-8 animate-spin text-gray-800"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <p class="text-lg font-medium">Loading tags...</p>
+          <progress class="progress progress-primary w-56" value="1" max="100"
+          ></progress>
+        </div>
+      {:else}
+        <div class="mt-4">
+          <p>{curTags}</p>
+        </div>
+      {/if}
+
+      {#if isLoading.summary}
+        <div>
+          <svg
+            class="h-8 w-8 animate-spin text-gray-800"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <p class="text-lg font-medium">Loading summary...</p>
+          <progress class="progress progress-primary w-56" value="1" max="100"
+          ></progress>
+        </div>
+      {:else}
+        <div class="mt-4">
+          <p>{post.blogSummary}</p>
+        </div>
+      {/if}
+
+      {#if isLoading.image}
+        <div>
+          <svg
+            class="h-8 w-8 animate-spin text-gray-800"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <p class="text-lg font-medium">Loading image...</p>
+          <progress class="progress progress-primary w-56" value="1" max="100"
+          ></progress>
+        </div>
+      {:else}
+        <div class="mt-4">
+          <img
+            src={post.featuredImage}
+            alt={post.title}
+            class="h-auto w-full rounded-lg"
+          />
+        </div>
+      {/if}
+    </div>
   {/if}
 </div>

@@ -106,7 +106,7 @@ Example Output:
    - Online Course: "Creative Applications of Deep Learning with TensorFlow" on Kadenze 🎓
    ...
 
-Usage Note: This prompt format can be adapted and expanded based on the complexity of the idea or concept being explored and the depth of exploration desired. Feel free to customize the output specifications and example to suit your specific needs. Use rich markdown formatting and relevant emojis to make the output visually engaging and easy to navigate.`;
+Usage Note: This prompt format can be adapted and expanded based on the complexity of the idea or concept being explored and the depth of exploration desired. Feel free to customize the output specifications and example to suit your specific needs. Only export blog as if it were cut/paste into a magazine. Do not include any intro text about the output, just respond with the blog. This is the user's inspiration: `; //Use rich markdown formatting and relevant emojis to make the output visually engaging and easy to navigate
 
 export const titlePrompt = `Given the content and key insights of a blog post, craft a concise yet compelling title that encapsulates the essence of the post and captivates the reader's attention. The title should:
 
@@ -123,7 +123,7 @@ Example Input:
 Example Output:
 The Remote Work Revolution: Thriving in a Virtual World
 
-Please generate a title for the given blog post, strictly adhering to the specified format and requirements.`;
+Please generate a title for the given blog post, strictly adhering to the specified format and requirements. The title should be 5-7 words and consise and provacative. Only output 1 (one) title, without any additional text words or comments. This is the user's article: `;
 
 export const tagPrompt = `Please analyze the provided blog article and generate relevant tags based on its main points and themes. The tags should:
 
@@ -140,7 +140,7 @@ Example Input:
 Example Output:
 mindfulness,stress,well-being,meditation,breathing,yoga,tips
 
-Please generate tags for the given blog article, strictly following the specified format and requirements. Output only the tags, without any additional text or formatting.`;
+Please generate tags for the given blog article, strictly following the specified format and requirements. Output only the tags, without any additional text or formatting. This is the blog article: `;
 
 export const blogSummaryPrompt = `Please compose a concise and engaging summary for the provided blog article, designed to accompany the article's title on a Tailwind CSS card. The summary should:
 
@@ -157,7 +157,7 @@ Example Input:
 Example Output:
 🚀 Unlock the secrets to peak productivity with this ultimate guide! 🔓📈 Discover proven techniques like the Eisenhower Matrix, time-blocking, and pomodoro to maximize your time and efficiency. 📅⏰ Whether you're looking to crush your personal goals or excel in your professional life, this article offers practical, actionable insights to help you master the art of productivity. 💪📚 Get ready to take your performance to the next level! 🎯🌟
 
-Please generate a summary for the given blog article, strictly adhering to the specified format and requirements. Output only the summary, without any additional text or formatting.`;
+Please generate a summary for the given blog article, strictly adhering to the specified format and requirements. Output only the summary, without any additional text or formatting. This is the blog article: `;
 
 export const imagePrompt = `Enhanced Image Prompt Generation Guidelines:
 
@@ -176,7 +176,9 @@ Example Input:
 'This article explores the concept of minimalism as a lifestyle choice, discussing its benefits for mental clarity, financial freedom, and environmental sustainability. It offers practical tips for decluttering, simplifying one's life, and finding contentment with less.'
 
 Example Output:
-'Design a sleek, minimalistic image that reflects the essence of adopting a minimalist lifestyle for mental clarity and sustainable living. The scene should be set in a modern, sparsely decorated interior with vast negative space, featuring 2-3 colors such as white, soft gray, and a hint of green from a solitary plant. This space should embody tranquility, simplicity, and the elegance of minimalism, with just a few items of furniture that highlight functionality and aesthetic appeal. Aim to capture a mood of calmness and introspection, encouraging viewers to envisage a life of fewer possessions but greater purpose.'`;
+'Design a sleek, minimalistic image that reflects the essence of adopting a minimalist lifestyle for mental clarity and sustainable living. The scene should be set in a modern, sparsely decorated interior with vast negative space, featuring 2-3 colors such as white, soft gray, and a hint of green from a solitary plant. This space should embody tranquility, simplicity, and the elegance of minimalism, with just a few items of furniture that highlight functionality and aesthetic appeal. Aim to capture a mood of calmness and introspection, encouraging viewers to envisage a life of fewer possessions but greater purpose.'
+
+This is the users text:`;
 
 
 export const introPrompt = `You are an innovative thought generator, capable of interpreting a given phrase or idea from five distinct perspectives. When presented with a concept, your task is to rephrase it into five unique ideas, each embodying a different viewpoint:
@@ -189,7 +191,7 @@ export const introPrompt = `You are an innovative thought generator, capable of 
 
 For each perspective, generate a thought-provoking interpretation of the original concept, offering a deeper understanding of the idea through the lens of that particular mindset.
 
-Please format your response as follows, using only plain text without any additional separators or formatting:
+Please format your response as follows, using only plain text without any additional separators or formatting (seperate each interpretation with a new line):
 
 Optimistic: [Optimistic interpretation]
 Pessimistic: [Pessimistic interpretation] 
@@ -206,5 +208,7 @@ Pessimistic: Social media is eroding the quality of personal interactions, leadi
 Realistic: Social media is a tool that can facilitate or hinder personal relationships, depending on how it is used and the individual's ability to balance online and offline communication.
 Creative: Social media is transforming the landscape of human interaction, giving rise to new forms of self-expression, collaboration, and community-building that transcend traditional boundaries.
 Analytical: The impact of social media on personal relationships is complex and multifaceted, influenced by factors such as platform design, user behavior, and societal norms, requiring ongoing research and analysis to fully understand its implications.
+
+ONLY RESPOND WITH THE FIVE INTERPRETATIONS, NO ADDITIONAL TEXT OR FORMATTING.
 
 Please provide your five perspectives on the following concept:`;

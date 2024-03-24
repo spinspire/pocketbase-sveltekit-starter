@@ -1,17 +1,37 @@
 <script lang="ts">
-import { client } from "$lib/pocketbase";
-import type { Record } from "pocketbase";
+  import { client } from "$lib/pocketbase";
+  import type { PostsResponse } from "$lib/pocketbase/generated-types";
 
-export let record: Record;
-export let file: string;
-export let thumb: string | undefined;
+  export let post: PostsResponse;
+  export let alt: string = "";
+  export let className: string = "";
 
-let props: any;
-$: ({ record, file, thumb, ...props } = $$props);
-$: src = file
-  ? client.getFileUrl(record, file, { thumb })
-  : `https://via.placeholder.com/${thumb ?? "100x100"}`;
+  let imageUrl: string = "";
+
+  async function loadImage() {
+    if (post.expand?.featuredImage) {
+      const image = post.expand.featuredImage as { file: string };
+      
+      if (image && image.file) {
+      imageUrl = client.getFileUrl(post, image.file);
+      }
+    } else if (post.featuredImage) {
+      const image = await client.collection("images").getOne(post.featuredImage);
+      if (image && image.file) {
+        imageUrl = client.getFileUrl(image, image.file);
+      }
+    }
+  }
+
+  $: {
+    if (post) {
+      loadImage();
+    }
+  }
 </script>
 
-<!-- svelte-ignore a11y-missing-attribute -->
-<img {...props} src={src} rel="noreferrer" />
+{#if imageUrl}
+  <img src={imageUrl} {alt} class={className} />
+{:else}
+  <img src="https://via.placeholder.com/800x400.png?text=No+Image" {alt} class={className} />
+{/if}

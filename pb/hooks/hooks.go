@@ -73,14 +73,14 @@ func getHookRows(db *dbx.DB, collection, event string) []dbx.NullStringMap {
 	return hookRowsMap[key]
 }
 
-func DoChatGPT(apiKey, prompt string) (string, error) {
+func DoChatGPT(apiKey, prompt string, model string) (string, error) {
 	client := resty.New()
 
 	response, err := client.R().
 		SetAuthToken(apiKey).
 		SetHeader("Content-Type", "application/json").
 		SetBody(map[string]interface{}{
-			"model":      "gpt-3.5-turbo-0125",
+			"model":      model,
 			"messages":   []interface{}{map[string]interface{}{"role": "system", "content": prompt}},
 			"max_tokens": 800,
 		}).

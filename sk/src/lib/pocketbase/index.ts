@@ -130,6 +130,7 @@ function object2formdata(obj: {}) {
 }
 
 export interface PageStore<T = any> extends Readable<ListResult<T>> {
+  [x: string]: any;
   setPage(newpage: number): Promise<void>;
   next(): Promise<void>;
   prev(): Promise<void>;

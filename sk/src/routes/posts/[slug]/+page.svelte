@@ -1,71 +1,87 @@
 <script lang="ts">
-import { base } from "$app/paths";
+import type { PostsResponse } from "$lib/pocketbase/generated-types";
+import { onMount } from "svelte";
 import { page } from "$app/stores";
 import { metadata } from "$lib/app/stores";
 import Delete from "$lib/components/Delete.svelte";
 import { client } from "$lib/pocketbase";
 import type { PageData } from "./$types";
 import Markdown from "svelte-markdown";
-export let data: PageData;
-export let featuredImageUrl: string;
-let postsTagsFix: any[];
-$: if (data) {
-  const {
-    post: {
-      userid,
-      id,
-      title,
-      slug,
-      body,
-      blogSummary,
-      featuredImage,
-      prompt,
-      tags,
-    },
-    featuredImageUrl: newFeaturedImageUrl,
-    tags: newPostsTagsFix,
-  } = data;
-  featuredImageUrl = newFeaturedImageUrl;
-  postsTagsFix = newPostsTagsFix;
-  $metadata.title = title;
-}
-console.log("On Load: [featuredImageUrl] ", featuredImageUrl);
+import { base } from "$app/paths";
+
+export let featuredImageUrl: string = "";
+export let tags: PostsResponse[] = [];
+let post: PostsResponse | undefined;
+
+import TagGroup from "$lib/components/TagGroup.svelte";
+
+onMount(async () => {
+  //initialize post, featuredImageUrl, and tags
+  // API calls from +page.ts
+  const { slug } = $page.params;
+
+  try {
+    const response = await client.collection("posts").getList(1, 1, {
+      filter: `slug = '${slug}'`,
+      expand: "featuredImage,tags",
+    });
+    const items = response.items;
+
+    if (items.length === 0) {
+      throw new Error("Post not found");
+    }
+    post = items[0] as unknown as PostsResponse;
+    console.log("post", post);
+
+    if (post.featuredImage) {
+      const image = await client
+        .collection("images")
+        .getOne(post.featuredImage);
+      if (image && image.file) {
+        featuredImageUrl = client.getFileUrl(image, image.file);
+      }
+    }
+
+    if (post.expand?.tags) {
+      tags = post.expand.tags;
+    }
+  } catch (error) {
+    console.error("Error fetching post:", error);
+  }
+});
 </script>
 
-{#if $page.url.hash === "#delete"}
-  <Delete table="posts" id={data.post.id} />
-{/if}
-
-<div class="prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto p-4">
-  {#if featuredImageUrl}
-    <figure class="my-4">
-      <img
-        src={featuredImageUrl}
-        alt={data.post.title}
-        class="mx-auto rounded-lg shadow-md"
-      />
-      <figcaption class="mt-2 text-center text-sm">
-        {data.post.title}
-      </figcaption>
-    </figure>
+{#if post !== undefined}
+  {#if $page.url.hash === "#delete"}
+    <Delete table="posts" id={post.id} />
   {/if}
-  <article class="prose lg:prose-lg mx-auto text-justify">
-    <Markdown source={data.post.body} />
-  </article>
-  <!-- Inside your Svelte component -->
-  <div class="mt-8">
-    <h2 class="text-2xl">Tags</h2>
-    {#if Array.isArray(data.tags)}
-      <ul class="flex flex-wrap">
-        {#each data.tags as tag (tag.id)}
-          <div class="badge badge-primary badge-outline p-4 m-2">{tag.title}</div>
-        {/each}
-      </ul>
+
+  <div class="prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto p-4">
+    {#if featuredImageUrl}
+      <figure class="my-4">
+        <img
+          src={featuredImageUrl}
+          alt={post.title}
+          class="mx-auto rounded-lg shadow-md"
+        />
+        <figcaption class="mt-2 text-center text-sm">
+          {post.title}
+        </figcaption>
+      </figure>
     {/if}
+    <article class="prose lg:prose-lg mx-auto text-justify">
+      <Markdown source={post.body} />
+    </article>
+    <!-- Inside your Svelte component -->
+    <div class="mt-8">
+      <h2 class="text-2xl">Tags</h2>
+
+      <TagGroup post={post} />
+    </div>
+    <div class="mt-8 text-center">
+      <a href={`${base}/auditlog/posts/${post.id}`} class="btn btn-primary">
+        Audit Log
+      </a>
+    </div>
   </div>
-  <div class="mt-8 text-center">
-    <a href={`${base}/auditlog/posts/${data.post.id}`} class="btn btn-primary">
-      Audit Log
-    </a>
-  </div>
-</div>
+{/if}
