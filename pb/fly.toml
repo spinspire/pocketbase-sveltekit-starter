@@ -1,0 +1,27 @@
+# fly.toml app configuration file generated for pb1456 on 2024-03-24T17:43:43-05:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'pb1456'
+primary_region = 'atl'
+
+[build]
+  [build.args]
+    GO_VERSION = '1.22'
+
+[env]
+  PORT = '8080'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1

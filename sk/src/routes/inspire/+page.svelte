@@ -5,11 +5,11 @@ import { authModel, save, watch } from "$lib/pocketbase";
 import { alertOnFailure } from "$lib/pocketbase/ui";
 import type { PageData } from "./$types";
 import Markdown from "svelte-markdown";
-import ThemeSwitch from "$lib/components/ThemeSwitch.svelte";
 import TagGroup from "$lib/components/TagGroup.svelte";
 import { client } from "$lib/pocketbase";
 import { onMount, createEventDispatcher } from "svelte";
-import type { PostsResponse } from "$lib/pocketbase/generated-types";
+import type { PostsResponse, Collections } from "$lib/pocketbase/generated-types";
+import PostList from "$lib/components/PostList.svelte";
 
 $: test = "";
 $metadata.title = "inspire";
@@ -18,7 +18,7 @@ $metadata.description = "inspire ai";
 const dispatch = createEventDispatcher();
 let inputText = "";
 let responseText = "";
-let posts: string | any[] = [];
+let posts: PostsResponse[] = [];
 let selectedService = "";
 let selectedModel = "";
 
@@ -66,42 +66,50 @@ onMount(async () => {
       sort: "-updated",
       expand: "featuredImage,tags",
     });
-
     console.log("postsResponse", postsResponse);
 
-    posts = postsResponse.items.map((post) => ({
-      ...post,
-      tags: post.expand.tags
-        ? post.expand.tags.map((tag: { title: any }) => tag.title)
-        : [],
-    }));
-
-    console.log("postsFinal", posts);
+    posts = postsResponse.items.map((post) => {
+      const { expand, ...rest } = post;
+      return {
+        ...rest,
+        title: post.title as string,
+        slug: post.slug as string,
+        body: post.body as string,
+        tags: expand.tags ? expand.tags.map((tag: { title: string }) => tag.title) : [],
+        collectionName: "posts" as Collections,
+      };
+    });
   } catch (error) {
     console.error("Error fetching posts:", error);
   }
 });
 </script>
 
-<ThemeSwitch></ThemeSwitch>
 Coming Soon
 
 <div>
-  <select bind:value={selectedService}>
-    <option value="">Select a service</option>
+  <div>
+  <label class="form-control w-full max-w-xs">
+    <select class="select select-bordered" bind:value={selectedService}>
+    <option value="">Select an AI</option>
     {#each services as service}
       <option value={service.name}>{service.name}</option>
     {/each}
   </select>
+  </label>
 
+  
   {#if selectedService}
-    <select bind:value={selectedModel}>
-      <option value="">Select a model</option>
-      {#each services.find(s => s.name === selectedService)?.models ?? [] as model}
+  <label class="form-control w-full max-w-xs">
+    <select class="select select-bordered" bind:value={selectedService}>
+    <option value="">Select an model</option>
+    {#each services.find(s => s.name === selectedService)?.models ?? [] as model}
         <option value={model}>{model}</option>
       {/each}
-    </select>
+  </select>
+  </label>
   {/if}
+</div>
 
   <input type="text" bind:value={inputText} placeholder="Enter text" />
   <button on:click={callAPI} disabled={!selectedService || !selectedModel}
@@ -114,28 +122,3 @@ Coming Soon
   <div class="response">{responseText}</div>
 </div>
 
-{#each posts as post}
-  <div
-    class="card bg-base-300 flex w-full flex-col justify-between p-4 shadow-xl"
-  >
-    <div>
-      <figure class="relative w-full">
-        <img
-          src={post.featuredImage}
-          alt={post.title}
-          class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
-        />
-      </figure>
-      <div class="m-4 max-w-xl">
-        <div class="prose items-center gap-x-4">
-          <time datetime="2020-03-16" class="text-accent">
-            {new Date(post.updated).toLocaleDateString()}
-          </time>
-          <h2 class="text-2xl font-bold">{post.title}</h2>
-          <Markdown source={post.content} />
-          <TagGroup post={post}></TagGroup>
-        </div>
-      </div>
-    </div>
-  </div>
-{/each}

@@ -17,8 +17,8 @@ async function deleteAllPosts() {
 </script>
 
 <div
-  class="grid grid-cols-1 gap-x-2 gap-y-20 overflow-y-auto p-4 lg:grid-cols-3"
-  style="max-height: calc(100vh - 20rem);"
+  class="grid grid-cols-1 gap-x-2 gap-y-20 overflow-y-auto lg:grid-cols-3"
+  style="max-height: calc(100vh - 15rem);"
 >
   {#if posts.length > 0}
     {#each posts as post}
@@ -31,9 +31,9 @@ async function deleteAllPosts() {
 
 {#if $authModel}
   <div class="my-4 text-right">
-    <button class="btn btn-error ml-2" on:click={deleteAllPosts}>
+    <!-- <button class="btn btn-error ml-2" on:click={deleteAllPosts}>
       Delete All Posts
-    </button>
+    </button> -->
   </div>
 {:else}
   <div class="my-4 text-center">

@@ -12,6 +12,7 @@ const pb = new PocketBase(`$(import.meta.env.VITE_APP_BASE_URL)`);
 import "../app.scss";
 import Alerts from "$lib/components/Alerts.svelte";
 import Nav from "$lib/components/Nav.svelte";
+    import ThemeSwitch from "$lib/components/ThemeSwitch.svelte";
 
 $: title = $metadata.title ? $metadata.title + " | " + site.name : site.name;
 $: description = $metadata.description ?? site.description;
@@ -28,13 +29,13 @@ beforeNavigate(() => {
   <meta name="description" content={description} />
 </svelte:head>
 
-<div class="flex min-h-screen flex-col">
+<div class="flex min-h-screen h-screen flex-col">
   <header>
     <Nav />
   </header>
 
   <main class="flex-grow">
-    <div class="bg-base-100 pt-4">
+    <div class="pt-4">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-2xl text-center">
           {#if headline}
@@ -51,9 +52,10 @@ beforeNavigate(() => {
     </div>
   </main>
 
-  <footer class="bg-base-200 py-4">
+  <footer class="py-4">
     <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-      <p class="text-base-content text-sm">
+      <p class="text-base-content text-sm">        
+        <ThemeSwitch></ThemeSwitch>
         &copy; {new Date().getFullYear()}
         {site.name}. All rights reserved.
       </p>

@@ -8,10 +8,10 @@
 
 <dialog class="modal" {open} on:close={handleClose}>
   <div class="modal-box">
+    <slot />    
     <div class="modal-action">
       <button class="btn btn-primary" on:click={handleClose}>Close</button>
     </div>
-    <slot />
   </div>
 </dialog>
 

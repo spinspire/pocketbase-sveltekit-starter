@@ -106,28 +106,37 @@ Example Output:
    - Online Course: "Creative Applications of Deep Learning with TensorFlow" on Kadenze 🎓
    ...
 
-Usage Note: This prompt format can be adapted and expanded based on the complexity of the idea or concept being explored and the depth of exploration desired. Feel free to customize the output specifications and example to suit your specific needs. Only export blog as if it were cut/paste into a magazine. Do not include any intro text about the output, just respond with the blog. This is the user's inspiration: `; //Use rich markdown formatting and relevant emojis to make the output visually engaging and easy to navigate
+Usage Note: This prompt format can be adapted and expanded based on the complexity of the idea or concept being explored and the depth of exploration desired. 
+Feel free to customize the output specifications and example to suit your specific needs. Only export blog as if it were cut/paste into a magazine. 
 
-export const titlePrompt = `Given the content and key insights of a blog post, craft a concise yet compelling title that encapsulates the essence of the post and captivates the reader's attention. The title should:
+Do not include any intro text about the output, just respond with the blog. Use rich markdown formatting and relevant emojis to make the output visually engaging and easy to navigate. 
 
-- Accurately reflect the post's central themes, arguments, and conclusions
-- Be clear, informative, and engaging, providing a strong indication of the post's value
-- Consist of a single sentence, not exceeding 15 words or 100 characters
-- Follow title case capitalization, with all major words capitalized except for articles, prepositions, and conjunctions
-- Not end with a period or any other punctuation mark
-- Be output as plain text without any formatting or additional content
+This is the user's inspiration: `; 
 
-Example Input:
-"This blog post explores the benefits and challenges of remote work, discussing strategies for maintaining productivity, work-life balance, and team collaboration in a virtual setting."
+export const titlePrompt = `Craft an SEO-Optimized Title for Your Blog Post: Detailed Instructions
 
-Example Output:
-The Remote Work Revolution: Thriving in a Virtual World
+Accurately Reflect Content: Your title should encapsulate the blog's primary themes, insights, and conclusions, integrating relevant keywords for SEO.
+Clear and Engaging: Construct a title that is both informative and enticing, offering a glimpse into the post's value and compelling readers to click.
+Length and Format: Aim for a concise title of 5-7 words, keeping within 50-60 characters to ensure full visibility in search engine results. This aligns with SEO best practices for HTML page titles, maximizing impact and search rankings.
+Title Case and Punctuation: Apply title case capitalization, with all principal words capitalized except for articles, prepositions, and conjunctions. Avoid ending the title with punctuation to maintain clarity and focus.
+Plain Text: Present the title in plain text format, suitable for inclusion in the HTML <title> tag, enhancing both SEO and user click-through rates.
+Example Scenario:
+"Delve into the advantages and challenges of remote work, including strategies for sustaining productivity, balancing work-life dynamics, and ensuring effective team collaboration in a digital workspace."
 
-Please generate a title for the given blog post, strictly adhering to the specified format and requirements. The title should be 5-7 words and consise and provacative. Only output 1 (one) title, without any additional text words or comments. This is the user's article: `;
+Optimized Title Example:
+"Remote Work Success: 5 Essential Strategies"
+
+When formulating your blog article's title, follow these guidelines closely to craft a single, SEO-optimized title. Ensure it meets the specified length and character count for optimal online visibility and engagement, without adding extra text or comments.
+
+ONLY OUTPUT THE TITLE
+
+This is the blog: 
+
+`;
 
 export const tagPrompt = `Please analyze the provided blog article and generate relevant tags based on its main points and themes. The tags should:
 
-- Consist of 3-5 concise, lowercase, single-word tags, can be 2 or 3 words just joined together) that capture the essence of the article
+- Consist of 5 concise, lowercase, single-word tags, can be 2 or 3 words just joined together) that capture the essence of the article
 - They shoud be separated by commas, without any spaces between the commas and words
 - Cover key topics, concepts, or categories mentioned in the article
 - Help readers quickly identify the article's main focus areas and improve searchability
@@ -138,7 +147,7 @@ Example Input:
 "This article discusses the importance of mindfulness in reducing stress and improving overall well-being. It explores various mindfulness techniques, such as meditation, deep breathing, and yoga, and provides practical tips for incorporating these practices into daily life."
 
 Example Output:
-mindfulness,stress,well-being,meditation,breathing,yoga,tips
+mindfulness,stress,well-being,meditation,breathing
 
 Please generate tags for the given blog article, strictly following the specified format and requirements. Output only the tags, without any additional text or formatting. This is the blog article: `;
 

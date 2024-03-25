@@ -1,29 +1,57 @@
-version: '3.5'
+# version: '3.5'
 
+# services:
+#   pb:
+#     image: golang:1.22-alpine
+#     entrypoint: /app/pb/entrypoint.sh
+#     command: "/app/pb/pocketbase serve --http 0.0.0.0:8090 --publicDir ../sk/build"
+#     user: ${UID}:${GID}
+#     expose:
+#       - 8090
+#     working_dir: /app/pb
+#     environment:
+#       - HOME=/app/pb
+#       - AUDITLOG=${AUDITLOG}
+#     volumes:
+#       - ${PWD}/pb:/app/pb
+#       - ${PWD}/sk:/app/sk
+#       - ${HOME}/go/pkg:/go/pkg
+#   sk:
+#     image: node:alpine
+#     user: ${UID}:${GID}
+#     # sveltekit build
+#     command: sh -c "npx pnpm install && pnpm run build"
+#     volumes:
+#       - ${PWD}/sk:/app/sk
+#       - ${PWD}/pb:/app/pb
+#     environment:
+#       - HOME=/app/sk
+#     working_dir: /app/sk
+
+version: '3.5'
 services:
   pb:
-    image: golang:1.20-alpine
+    image: golang:1.22-alpine
     entrypoint: /app/pb/entrypoint.sh
     command: "/app/pb/pocketbase serve --http 0.0.0.0:8090 --publicDir ../sk/build"
-    user: ${UID}:${GID}
+    user: 1000:1000  # Replace with your actual UID:GID
     expose:
       - 8090
     working_dir: /app/pb
     environment:
       - HOME=/app/pb
-      - AUDITLOG=${AUDITLOG}
+      - AUDITLOG=  # Set this if needed, or remove this line
     volumes:
-      - ${PWD}/pb:/app/pb
-      - ${PWD}/sk:/app/sk
-      - ${HOME}/go/pkg:/go/pkg
+      - ./pb:/app/pb
+      - ./sk:/app/sk
+      - ~/go/pkg:/go/pkg  # Adjust this path if needed
   sk:
     image: node:alpine
-    user: ${UID}:${GID}
-    # sveltekit build
+    user: 1000:1000  # Replace with your actual UID:GID
     command: sh -c "npx pnpm install && pnpm run build"
     volumes:
-      - ${PWD}/sk:/app/sk
-      - ${PWD}/pb:/app/pb
+      - ./sk:/app/sk
+      - ./pb:/app/pb
     environment:
       - HOME=/app/sk
     working_dir: /app/sk

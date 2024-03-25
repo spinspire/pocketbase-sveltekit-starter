@@ -13,7 +13,7 @@
       const image = post.expand.featuredImage as { file: string };
       
       if (image && image.file) {
-      imageUrl = client.getFileUrl(post, image.file);
+        imageUrl = client.getFileUrl(post, image.file);
       }
     } else if (post.featuredImage) {
       const image = await client.collection("images").getOne(post.featuredImage);
@@ -23,15 +23,11 @@
     }
   }
 
-  $: {
-    if (post) {
-      loadImage();
-    }
-  }
+  $: post, loadImage(); // Reactive statement that depends on `post`
 </script>
 
 {#if imageUrl}
-  <img src={imageUrl} {alt} class={className} />
+  <img src={imageUrl} alt={alt} class={className} />
 {:else}
-  <img src="https://via.placeholder.com/800x400.png?text=No+Image" {alt} class={className} />
+  <img src="https://via.placeholder.com/800x400.png?text=No+Image" alt={alt} class={className} />
 {/if}

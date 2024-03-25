@@ -54,12 +54,13 @@ let particlesInit = async (engine: any) => {
   <meta name="description" content={$metadata.description} />
 </svelte:head>
 
+
 <!-- Particles Background -->
 <Particles
-  id="tsparticles"
-  options={particlesConfig}
-  on:particlesLoaded={onParticlesLoaded}
-  particlesInit={particlesInit}
+id="tsparticles"
+options={particlesConfig}
+on:particlesLoaded={onParticlesLoaded}
+particlesInit={particlesInit}
 />
 
 <!-- Hero Section -->
@@ -67,18 +68,9 @@ let particlesInit = async (engine: any) => {
   class="hero min-h-screen"
   style="background-image: url(img/treeBrain.png);"
 >
-  <div class="hero-overlay bg-opacity-60">
-
-    <!-- Particles Background -->
-<Particles
-id="tsparticles"
-options={particlesConfig}
-on:particlesLoaded={onParticlesLoaded}
-particlesInit={particlesInit}
-/>
-  </div>
+  <div class="hero-overlay bg-opacity-60"></div>
   <div class="hero-content text-neutral-content text-center">
-    <div class="max-w-lg" transition:fly={{ y: -20, duration: 500 }}>
+    <div class="max-w-md">
       <h1 class="mb-5 text-5xl font-bold">
         Transform Your Thoughts into a Flourishing Mind Garden with AI
       </h1>
@@ -86,9 +78,7 @@ particlesInit={particlesInit}
         Discover how mind.ai empowers you to nurture, organize, and grow your
         ideas into something beautiful.
       </p>
-      <button class="btn btn-primary btn-lg"
-        >Plant Your First Thought Today</button
-      >
+      <button class="btn btn-primary">Plant Your First Thought Today</button>
     </div>
   </div>
 </div>
@@ -109,7 +99,7 @@ particlesInit={particlesInit}
       <img
         src="img/mindgarden.png"
         alt="Mind Garden Infographic"
-        class="max-w-screen-md w-full object-cover rounded-xl shadow-xl"
+        class="w-full max-w-screen-md rounded-xl object-cover shadow-xl"
         transition:fly={{ y: 20, duration: 500 }}
       />
     </div>

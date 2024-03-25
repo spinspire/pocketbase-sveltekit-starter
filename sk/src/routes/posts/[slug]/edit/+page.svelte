@@ -31,47 +31,47 @@ let tagString = "";
 
 onMount(async () => {
   if (data && data.post) {
-  // Fetch the related tags for the post
-  const tagsList: { id: string; title: string }[] = await client
-    .collection("tags")
-    .getFullList() as unknown as { id: string; title: string }[];
+    // Fetch the related tags for the post
+    const tagsList: { id: string; title: string }[] = (await client
+      .collection("tags")
+      .getFullList()) as unknown as { id: string; title: string }[];
 
-  console.log("tagsList", tagsList);
+    console.log("tagsList", tagsList);
 
-  const tagIds = data.post.tags; // Assuming the tags field in the post collection contains an array of tag IDs
+    const tagIds = data.post.tags; // Assuming the tags field in the post collection contains an array of tag IDs
 
-  console.log("tagIds", tagIds);
+    console.log("tagIds", tagIds);
 
-  const tags = tagIds.map((tagId: string) => {
-    console.log("Processing tagId:", tagId);
+    const tags = tagIds.map((tagId: string) => {
+      console.log("Processing tagId:", tagId);
 
-    const tag = tagsList.find((tag) => {
-      console.log("Comparing tagId:", tagId, "with tag.id:", tag.id);
-      return tag.id === tagId;
+      const tag = tagsList.find((tag) => {
+        console.log("Comparing tagId:", tagId, "with tag.id:", tag.id);
+        return tag.id === tagId;
+      });
+
+      if (tag) {
+        console.log("Found tag:", tag);
+        return tag.title;
+      } else {
+        console.log("Tag not found for tagId:", tagId);
+        return "";
+      }
     });
 
-    if (tag) {
-      console.log("Found tag:", tag);
-      return tag.title;
-    } else {
-      console.log("Tag not found for tagId:", tagId);
-      return "";
-    }
-  });
+    console.log("Mapped tags:", tags);
 
-  console.log("Mapped tags:", tags);
+    const filteredTags = tags.filter((tag) => {
+      if (tag === "") {
+        console.log("Filtering out empty tag title");
+      }
+      return tag !== "";
+    });
 
-  const filteredTags = tags.filter((tag) => {
-    if (tag === "") {
-      console.log("Filtering out empty tag title");
-    }
-    return tag !== "";
-  });
+    console.log("Final tags array:", filteredTags);
 
-  console.log("Final tags array:", filteredTags);
-
-  tagString = filteredTags.join(", ");
-}
+    tagString = filteredTags.join(", ");
+  }
 });
 
 async function submit(e: SubmitEvent) {
@@ -157,7 +157,21 @@ async function generateFromChatGPT(userPrompt: string) {
 <main class="container mx-auto my-12 px-4 sm:px-6 lg:px-8">
   <div class="grid gap-8 lg:grid-cols-3">
     <section class="space-y-6 lg:col-span-2">
-      <div class="bg-base-200 p-6">
+      <div class="border p-6">
+        <h2 class="mb-4 text-lg font-semibold">GPT Prompt</h2>
+        <div class="form-control">
+          <textarea
+            class="textarea h-24 w-full"
+            placeholder="Enter your GPT prompt here"
+            bind:value={post.prompt}
+          ></textarea>
+          <button
+            class="btn btn-primary mt-4"
+            on:click={() => generateFromChatGPT(post.prompt)}>Generate</button
+          >
+        </div>
+      </div>
+      <div class="border p-6">
         <h1 class="mb-4 text-xl font-semibold">Edit Journal Entry</h1>
         <form on:submit|preventDefault={submit} class="space-y-4">
           <div class="form-control w-full">
@@ -214,25 +228,10 @@ async function generateFromChatGPT(userPrompt: string) {
           <button type="submit" class="btn btn-primary">Update</button>
         </form>
       </div>
-
-      <div class="bg-base-200 p-6">
-        <h2 class="mb-4 text-lg font-semibold">GPT Prompt</h2>
-        <div class="form-control">
-          <textarea
-            class="textarea h-24 w-full"
-            placeholder="Enter your GPT prompt here"
-            bind:value={post.prompt}
-          ></textarea>
-          <button
-            class="btn btn-primary mt-4"
-            on:click={() => generateFromChatGPT(post.prompt)}>Generate</button
-          >
-        </div>
-      </div>
     </section>
 
     <aside class="space-y-4">
-      <div class="card bg-base-200">
+      <div class="card border">
         <figure>
           <img
             src={featuredImageUrl || 'https://via.placeholder.com/256x256.png?text=AI+Blog'}

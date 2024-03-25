@@ -65,7 +65,7 @@ function handleSubmit(event: { detail: { selectedService: any; selectedModel: an
 </script>
 
 
-<div class="bg-base-100">
+<div>
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     {#if Array.isArray(posts)}
       <PostList {posts} />

@@ -1,19 +1,20 @@
-# fly.toml app configuration file generated for pocketbase-sveltekit-starter-small-sun-6530 on 2024-03-15T07:53:53-05:00
+# fly.toml app configuration file generated for pocketbase-sveltekit-starter-restless-river-3259 on 2024-03-24T11:59:12-05:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'pocketbase-sveltekit-starter-small-sun-6530'
+app = 'pocketbase-sveltekit-starter-restless-river-3259'
 primary_region = 'atl'
 
 [build]
+  dockerfile = 'Dockerfile'
 
 [http_service]
   internal_port = 8090
   force_https = true
-  auto_stop_machines = true
-  auto_start_machines = true
-  min_machines_running = 0
+  auto_stop_machines = false
+  auto_start_machines = false
+  min_machines_running = 1
   processes = ['app']
 
 [[vm]]
