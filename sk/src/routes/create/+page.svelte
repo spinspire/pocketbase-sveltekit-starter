@@ -24,8 +24,8 @@ import type {
   TagsResponse,
 } from "$lib/pocketbase/generated-types";
 import { createEventDispatcher } from "svelte";
-import ServiceSelecto from "$lib/components/ServiceSelector.svelte";
-import services from "$lib/components/ServiceSelector.svelte";
+import ServiceSelector from "$lib/components/ServiceSelector.svelte";
+import { availableServices } from "$lib/utils/api";
 import InterpretationList from "$lib/components/InterpretationList.svelte";
 import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
 import PostContent from "$lib/components/PostContent.svelte";
@@ -36,8 +36,8 @@ const dispatch = createEventDispatcher();
 let inputText = "";
 
 
-let selectedService = services[0]?.name || "";
-let selectedModel = services[0]?.models?.[0] || "";
+let selectedService = availableServices[0]?.name;
+let selectedModel = availableServices[0]?.models?.[0];
 // Initialize states and reactive variables
 let isLoading = {
   content: false,

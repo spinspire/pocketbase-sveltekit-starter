@@ -29,11 +29,13 @@ let selectedBullets: string[] = [];
 
 // Subscribe to the store to get the current value
 let serviceModelSelection: ServiceModelSelection | null;
-$: serviceModelSelection = $serviceModelSelectionStore;
-// Reactive statement to update selectedService and selectedModel when the store changes
+
 $: if ($serviceModelSelectionStore) {
   selectedService = $serviceModelSelectionStore.selectedService;
   selectedModel = $serviceModelSelectionStore.selectedModel;
+} else {
+  selectedService = availableServices[0].name;
+  selectedModel = availableServices[0].models[0];
 }
 
 function toggleBullet(bullet: string) {

@@ -1,10 +1,10 @@
 <script lang="ts">
-    export let selectedService: string;
-    export let selectedModel: string;
-  
-    import { writable } from "svelte/store";
+  export let selectedService: string;
+  export let selectedModel: string;
+
+  import { writable } from "svelte/store";
     import { availableServices } from "$lib/utils/api";
-  </script>
+</script>
   
   <div class="flex bg-primary items-center ">
     <select

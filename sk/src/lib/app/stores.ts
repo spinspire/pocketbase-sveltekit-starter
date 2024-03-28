@@ -9,4 +9,7 @@ export interface Metadata {
 
 export const metadata = writable<Metadata>({});
 
-export const serviceModelSelectionStore = writable<ServiceModelSelection | null>(null);
+export const serviceModelSelectionStore = writable({
+  selectedService: null,
+  selectedModel: null
+});

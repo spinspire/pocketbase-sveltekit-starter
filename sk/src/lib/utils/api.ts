@@ -78,26 +78,36 @@ export async function apiRequest<T>(
 }
 
 export async function ensureTagsExist(tags: string[]): Promise<string[]> {
-  const existingTags = await client.collection("tags").getFullList({
-    filter: tags.map((tag) => `title = "${tag}"`).join(" || "),
-  });
+      const existingTags = await client.collection("tags").getFullList({
+      filter: tags.map((tag) => `title = "${tag}"`).join(" || "),
+    });
 
-  const existingTagTitles = existingTags.map((tag) => tag.title);
-  const newTagTitles = tags.filter((tag) => !existingTagTitles.includes(tag));
+    const existingTagTitles = existingTags.map((tag) => tag.title);
+    const newTagTitles = tags.filter((tag) => !existingTagTitles.includes(tag));
 
-  const newTags = await Promise.all(
-    newTagTitles.map((title) => client.collection("tags").create({ title }))
-  );
+    console.log("New tags", newTagTitles);
 
-  return [...existingTags, ...newTags].map((tag) => tag.id);
-}
+    
+
+    
+    client.autoCancellation(false);
+    // Create new tags with retries
+    const newTags = await Promise.all(
+      newTagTitles.map((title) => client.collection("tags").create({ title }))
+    );
+    client.autoCancellation(true);
+
+    console.log("Created new tags", newTags);
+
+    return [...existingTags, ...newTags].map((tag) => tag.id);
+  }
 
 export async function getTagsForPost(slug: string): Promise<string> {
   try {
     console.log("Fetching tags for post", slug);
     const postsResponse = await client.collection("posts").getFirstListItem(`slug = "${slug}"`, {
-      expand: "tags",
-    });
+        expand: "tags",
+      });
     if (!postsResponse) {
       return "";
     }
@@ -124,7 +134,7 @@ export async function generateTextFromClaude(prompt: string): Promise<string> {
       }),
     });
     console.log("Response from Claude", response);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

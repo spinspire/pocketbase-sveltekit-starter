@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation";
-import { client, save } from "$lib/pocketbase";
+import { authModel, client, save } from "$lib/pocketbase";
 import type { PostsResponse, PostsRecord } from "$lib/pocketbase/generated-types";
 import { ensureTagsExist, generateImageFromDreamStudio } from "$lib/utils/api";
 import { alertOnFailure } from "$lib/pocketbase/ui";
@@ -51,10 +51,11 @@ export async function generateBlog(
   authModel: any,
   serviceModelSelection: ServiceModelSelection
 ): Promise<void> {
-  if (!authModel?.id) {
+  /* if (!authModel?.id) {
+    console.error("User is not logged in.");
     alert("Please log in to save your post.");
     return;
-  }
+  } */
 
   let post: PostData = {
     title: "",
