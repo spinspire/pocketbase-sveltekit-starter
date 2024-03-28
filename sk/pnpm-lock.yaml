@@ -14,6 +14,9 @@ dependencies:
   '@sveltejs/adapter-static':
     specifier: ^2.0.3
     version: 2.0.3(@sveltejs/kit@1.27.6)
+  '@tsparticles/engine':
+    specifier: ^3.3.0
+    version: 3.3.0
   marked:
     specifier: ^12.0.1
     version: 12.0.1
@@ -573,6 +576,11 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /@tsparticles/engine@3.3.0:
+    resolution: {integrity: sha512-Sr24epYquTelGrUbMaknXTscib8IMQJrbmShJnEemU+wpZNIPtAh09sQgGtq1pUxrGQRUSQIgaybYuXcNgk8rg==}
+    requiresBuild: true
+    dev: false
 
   /@types/cookie@0.5.1:
     resolution: {integrity: sha512-COUnqfB2+ckwXXSFInsFdOAWQzCCx+a5hq2ruyj+Vjund94RJQd4LG2u9hnvJrTgunKAaax7ancBYlDrNYxA0g==}

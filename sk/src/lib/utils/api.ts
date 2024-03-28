@@ -30,6 +30,24 @@ if (!DALLE_KEY) {
   throw new Error("Missing DALLE_API_KEY");
 }
 
+export const availableServices = [
+  {
+    name: "Anthropic",
+    models: [
+      "claude-3-haiku-20240307",
+      "claude-3-sonnet-20240229",
+      "claude-3-opus-20240229",
+      "claude-2.1",
+      "claude-2.0",
+      "claude-instant-1.2",
+    ],
+  },
+  {
+    name: "OpenAI",
+    models: ["gpt-4-turbo-preview", "gpt-3.5-turbo"],
+  },
+];
+
 export async function apiRequest<T>(
   endpoint: string,
   method: "GET" | "POST" = "GET",

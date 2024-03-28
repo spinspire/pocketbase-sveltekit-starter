@@ -76,19 +76,7 @@
       {#each $posts.items as post}
         <!-- ... other post markup ... -->
         <div class="relative mb-4 flex-col gap-x-4 text-center">
-          {#await client.collection('postsTags').getList(1, 10, { filter: post.id  }) then postTags}
-            {#if postTags.items.length > 0}
-              {#each postTags.items as postTag}
-                {#await client.collection('tags').getOne(postTag.tags) then tag}
-                  <a href="/" class="badge badge-accent badge-outline"
-                    >{tag.title}</a
-                  >
-                {/await}
-              {/each}
-            {:else}
-              <div class="badge badge-accent badge-outline">No tags</div>
-            {/if}
-          {/await}
+          
         </div>
         <!-- ... other post markup ... -->
       {/each}

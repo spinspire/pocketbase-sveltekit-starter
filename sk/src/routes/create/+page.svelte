@@ -24,32 +24,18 @@ import type {
   TagsResponse,
 } from "$lib/pocketbase/generated-types";
 import { createEventDispatcher } from "svelte";
-import ServiceSelector from "$lib/components/ServiceSelector.svelte";
+import ServiceSelecto from "$lib/components/ServiceSelector.svelte";
+import services from "$lib/components/ServiceSelector.svelte";
 import InterpretationList from "$lib/components/InterpretationList.svelte";
 import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
 import PostContent from "$lib/components/PostContent.svelte";
 import TagGroup from "$lib/components/TagGroup.svelte";
 import { fly } from "svelte/transition";
+import { serviceModelSelectionStore } from '$lib/app/stores';
 const dispatch = createEventDispatcher();
 let inputText = "";
-interface Service {
-  name: string;
-  models: string[];
-}
-const services: Service[] = [
-  {
-    name: "Anthropic",
-    models: [
-      "claude-3-haiku-20240307",
-      "claude-3-sonnet-20240229",
-      "claude-3-opus-20240229",
-      "claude-2.1",
-      "claude-2.0",
-      "claude-instant-1.2",
-    ],
-  },
-  { name: "OpenAI", models: ["gpt-4-turbo-preview", "gpt-3.5-turbo"] },
-];
+
+
 let selectedService = services[0]?.name || "";
 let selectedModel = services[0]?.models?.[0] || "";
 // Initialize states and reactive variables
@@ -156,7 +142,11 @@ async function uploadImageAndSavePost(
     };
     console.log("Post to create:", postToCreate);
     loadingMessage = "Saving final post...";
-    createdPost = (await save("posts", postToCreate, true)) as unknown as PostsResponse;
+    createdPost = (await save(
+      "posts",
+      postToCreate,
+      true
+    )) as unknown as PostsResponse;
     console.log("Post created:", createdPost);
     goto(`${import.meta.env.VITE_APP_SK_URL}/posts/${post.slug}`);
   } catch (error) {
@@ -175,6 +165,7 @@ function updateProgressBar(step: number) {
     progressElement.value = step;
   }
 }
+
 async function generateGptInterpretations(promptString: string) {
   if (!$authModel?.id) {
     alert("Please log in to save your post.");
@@ -182,6 +173,10 @@ async function generateGptInterpretations(promptString: string) {
   }
   currentStep = 1;
   try {
+    // Show loading screen
+    isLoading.content = true;
+    loadingMessage = "Generating interpretations...";
+
     const interpretationsResponse = (inputText = introPrompt + promptString);
     await callAPI();
     console.log("Interpretations Response:", interpretationsResponse);
@@ -191,8 +186,12 @@ async function generateGptInterpretations(promptString: string) {
     formSubmitted = true;
   } catch (error) {
     console.error("Error generating interpretations:", error);
+  } finally {
+    // Hide loading screen
+    isLoading.content = false;
   }
 }
+
 function parseInterpretations(completionText: string) {
   if (!completionText) {
     console.error("No completion text found.");
@@ -206,6 +205,7 @@ function parseInterpretations(completionText: string) {
     Realistic: "/img/realistic.png",
     Creative: "/img/creative.png",
     Analytical: "/img/analytical.png",
+    "Devil's Advocate": "/img/advocate.png",
   };
 
   // Split the input text into lines and process each line to extract the required details
@@ -222,7 +222,8 @@ function parseInterpretations(completionText: string) {
       return {
         title,
         text,
-        imageUrl: imageUrls[title as keyof typeof imageUrls] || "default-image.jpg", // Fallback to a default image if the title does not match
+        imageUrl:
+          imageUrls[title as keyof typeof imageUrls] || "default-image.jpg", // Fallback to a default image if the title does not match
       };
     });
 
@@ -241,12 +242,14 @@ function getCompletions(claudeOutput: string): string {
   }
   return completionText;
 }
+
 async function generateBlogFromChatGPT(userPrompt: string) {
   if (!$authModel?.id) {
     alert("Please log in to save your post.");
     return;
   }
   currentStep = 0;
+
   const generateContent = async (
     prompt: string,
     property: keyof typeof post
@@ -257,34 +260,48 @@ async function generateBlogFromChatGPT(userPrompt: string) {
     if (property === "tags") {
       currentTags = responseText;
     } else {
-      post[property] = responseText.replace(/["']/g, "") as never;
+      post[property] = responseText.replace(/\["'\]/g, "") as never;
     }
     currentStep += 10;
   };
+
   try {
     post.userid = $authModel?.id || "";
+
+    // Generate body
     await generateContent(`${promptFormat}'${userPrompt}'`, "body");
+
+    // Generate title
     await generateContent(`${titlePrompt}'${post.body}'`, "title");
+
+    // Generate tags
     await generateContent(`${tagPrompt}'${post.body}'`, "tags");
+
+    // Generate blog summary
     await generateContent(`${blogSummaryPrompt}'${post.body}'`, "blogSummary");
+
+    console.log("Title:", post.title);
     console.log("Tags:", currentTags);
     post.slug = post.title
       .toLowerCase()
       .replace(/\s+/g, "-")
-      .replace(/["':]/g, "")
+      .replace(/\["':\]/g, "")
       .substring(0, 50);
     post.prompt = userPrompt;
+
     loadingMessage = "Generating image...";
     inputText = `${imagePrompt}'${post.body}'`;
     await callAPI();
     const base64Image = await generateImageFromDreamStudio(responseText);
     currentStep = 60;
+
     console.log("Post:", post);
     loadingMessage = "Saving post...";
     if (post.tags) {
       await uploadImageAndSavePost(base64Image, currentTags);
       console.log("Post saved.");
     }
+
     return {
       title: post.title,
       slug: post.slug,
@@ -306,6 +323,8 @@ async function generateBlogFromChatGPT(userPrompt: string) {
     isLoading.image = false;
   }
 }
+
+
 function handleInterpretationSelect(
   event: CustomEvent<{ interpretation: string }>
 ) {
@@ -338,29 +357,34 @@ function selectInterpretation(interpretation: string) {
 
 <div>
   {#if !formSubmitted}
-    <main
-      class="container mx-auto my-12 px-4 sm:px-6 lg:px-8"
-      in:fly={{ y: 50, duration: 500 }}
-    >
-      <form
-        on:submit|preventDefault={() => generateGptInterpretations(chatGptPrompt)}
-        class="bg-base-200 space-y-6 rounded-lg p-6 shadow"
+    {#if isLoading.content}
+      <LoadingIndicator message="Loading interpretations..." />
+    {:else}
+      <main
+        class="container mx-auto my-12 px-4 sm:px-6 lg:px-8"
+        in:fly={{ y: 50, duration: 500 }}
       >
-        <ServiceSelector
-          bind:selectedService={selectedService}
-          bind:selectedModel={selectedModel}
-        />
-        <textarea
-          class="textarea textarea-bordered h-40 w-full resize-none"
-          bind:value={chatGptPrompt}
-          rows="10"
-          placeholder="Enter thoughts here"
-        ></textarea>
-        <div class="text-right">
-          <button type="submit" class="btn btn-primary">Generate</button>
-        </div>
-      </form>
-    </main>
+        <form
+          on:submit|preventDefault={() => generateGptInterpretations(chatGptPrompt)}
+          class="bg-base-200 space-y-6 rounded-lg p-6 shadow"
+        >
+          <ServiceSelector
+            bind:selectedService={selectedService}
+            bind:selectedModel={selectedModel}
+          />
+
+          <input
+            type="text"
+            class="input input-ghost w-full max-w-xs"
+            bind:value={chatGptPrompt}
+            placeholder="Enter thoughts here"
+          />
+          <div class="text-right">
+            <button type="submit" class="btn btn-primary">Generate</button>
+          </div>
+        </form>
+      </main>
+    {/if}
   {:else if chatGptInts.length > 0 && !isGeneratingBlog}
     <main
       class="container mx-auto my-12 px-4 sm:px-6 lg:px-8"
@@ -406,10 +430,8 @@ function selectInterpretation(interpretation: string) {
             <h2 class="text-2xl">Tags</h2>
             {#if isLoading.tags}
               <LoadingIndicator message="Loading tags..." />
-            {:else}
-              {#if createdPost}
-                <TagGroup post={createdPost} />
-              {/if}
+            {:else if createdPost}
+              <TagGroup post={createdPost} />
             {/if}
           </div>
         </div>

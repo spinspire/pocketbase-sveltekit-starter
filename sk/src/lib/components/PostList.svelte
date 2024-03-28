@@ -18,7 +18,7 @@ async function deleteAllPosts() {
 
 <div
   class="grid grid-cols-1 gap-x-2 gap-y-20 overflow-y-auto lg:grid-cols-3"
-  style="max-height: calc(100vh - 15rem);"
+  style="max-height: calc(100vh - 220px);"
 >
   {#if posts.length > 0}
     {#each posts as post}

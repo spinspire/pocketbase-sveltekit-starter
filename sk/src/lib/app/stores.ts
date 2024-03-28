@@ -1,4 +1,5 @@
 import { writable } from "svelte/store";
+import type { ServiceModelSelection } from "$lib/services/generateBlog"; // Replace "path/to/ServiceModelSelection" with the actual path to the module
 
 export interface Metadata {
   title?: string;
@@ -7,3 +8,5 @@ export interface Metadata {
 }
 
 export const metadata = writable<Metadata>({});
+
+export const serviceModelSelectionStore = writable<ServiceModelSelection | null>(null);

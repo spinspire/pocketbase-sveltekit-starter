@@ -55,6 +55,7 @@
       <div class="card-actions mt-4 justify-between">
         <a class="btn btn-outline" href={`/posts/${post.slug}/edit`}>Edit</a>
         
+        <a class="btn btn-outline" href={`/posts/${post.slug}/inspire`}>Inspire</a>
         <a class="btn btn-outline btn-secondary" href={`/posts/${post.slug}#delete`}>Delete</a>
       </div>
     </div>

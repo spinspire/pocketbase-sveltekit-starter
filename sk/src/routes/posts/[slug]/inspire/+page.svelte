@@ -1,0 +1,196 @@
+<script lang="ts">
+import type { PostsResponse } from "$lib/pocketbase/generated-types";
+import { onMount } from "svelte";
+import { page } from "$app/stores";
+import { metadata } from "$lib/app/stores";
+import Delete from "$lib/components/Delete.svelte";
+import { authModel, client, save } from "$lib/pocketbase";
+import type { PageData } from "./$types";
+import Markdown from "svelte-markdown";
+import { base } from "$app/paths";
+import TagGroup from "$lib/components/TagGroup.svelte";
+
+import { serviceModelSelectionStore } from "$lib/app/stores";
+import ServiceSelector from "$lib/components/ServiceSelector.svelte";
+import { availableServices } from "$lib/utils/api";
+import { generateBlog } from "$lib/services/generateBlog";
+import type { ServiceModelSelection } from "$lib/services/generateBlog";
+
+export let featuredImageUrl: string = "";
+export let tags: PostsResponse[] = [];
+
+let selectedService: string = availableServices[0].name;
+let selectedModel: string = availableServices[0].models[0];
+
+console.log("selectedService", selectedService);
+console.log("selectedModel", selectedModel);
+let post: PostsResponse | undefined;
+let selectedBullets: string[] = [];
+
+// Subscribe to the store to get the current value
+let serviceModelSelection: ServiceModelSelection | null;
+$: serviceModelSelection = $serviceModelSelectionStore;
+// Reactive statement to update selectedService and selectedModel when the store changes
+$: if ($serviceModelSelectionStore) {
+  selectedService = $serviceModelSelectionStore.selectedService;
+  selectedModel = $serviceModelSelectionStore.selectedModel;
+}
+
+function toggleBullet(bullet: string) {
+  if (selectedBullets.includes(bullet)) {
+    selectedBullets = selectedBullets.filter((b) => b !== bullet);
+  } else {
+    selectedBullets = [...selectedBullets, bullet];
+  }
+}
+
+function parseBulletPoints(
+  text: string
+): { heading: string; bullets: string[] }[] {
+  const sections: { heading: string; bullets: string[] }[] = [];
+  const lines = text.split("\n");
+
+  let currentHeading = "";
+  let currentBullets: string[] = [];
+
+  for (const line of lines) {
+    if (line.startsWith("#")) {
+      if (currentHeading && currentBullets.length > 0) {
+        sections.push({ heading: currentHeading, bullets: currentBullets });
+      }
+      currentHeading = line.replace(/^#+\s*/, "").trim();
+      currentBullets = [];
+    } else if (line.match(/^\s*[-*]\s+(.+)/)) {
+      const bullet = line.replace(/^\s*[-*]\s+/, "").trim();
+      currentBullets.push(bullet);
+    }
+  }
+
+  if (currentHeading && currentBullets.length > 0) {
+    sections.push({ heading: currentHeading, bullets: currentBullets });
+  }
+
+  return sections;
+}
+
+$: if (post) {
+  processedBody = post.body.replace(/^(#+)\s+(.*)/gm, (match, p1, p2) => {
+    const level = p1.length;
+    const fontSize = `text-${4 - level + 1}xl`;
+    const classes = `${fontSize} font-bold mb-4`;
+    return `<h${level} class="${classes}">${p2}</h${level}>`;
+  });
+}
+
+onMount(async () => {
+  const { slug } = $page.params;
+  try {
+    const response = await client.collection("posts").getList(1, 1, {
+      filter: `slug = '${slug}'`,
+      expand: "featuredImage,tags",
+    });
+    const items = response.items;
+    if (items.length === 0) {
+      throw new Error("Post not found");
+    }
+    post = items[0] as unknown as PostsResponse;
+    console.log("post", post);
+    if (post.featuredImage) {
+      const image = await client
+        .collection("images")
+        .getOne(post.featuredImage);
+      if (image && image.file) {
+        featuredImageUrl = client.getFileUrl(image, image.file);
+      }
+    }
+    if (post.expand?.tags) {
+      tags = post.expand.tags;
+    }
+  } catch (error) {
+    console.error("Error fetching post:", error);
+  }
+});
+
+let processedBody = "";
+</script>
+
+<main class="prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto p-4">
+  <ServiceSelector
+    bind:selectedService={selectedService}
+    bind:selectedModel={selectedModel}
+  />
+  {#if post}
+    {#if featuredImageUrl}
+      <figure class="my-4">
+        <img
+          src={featuredImageUrl}
+          alt={post.title}
+          class="mx-auto rounded-lg shadow-md"
+        />
+        <figcaption class="mt-2 text-center text-sm">{post.title}</figcaption>
+      </figure>
+    {/if}
+
+    <h1 class="mb-4 text-4xl font-bold">{post.title}</h1>
+
+    <section class="mt-8">
+      <button
+        class="btn btn-block mt-2 text-center"
+        on:click={() => selectedBullets = []}
+      >
+        Clear Selection
+      </button>
+      <div class="mt-8">
+        {#each parseBulletPoints(post.body) as section}
+          <h2 class="text-2xl font-bold">{section.heading}</h2>
+          {#if section.bullets.length > 0}
+            <ul class="list-disc pl-6">
+              {#each section.bullets as bullet (bullet)}
+                <li class="mb-2">
+                  <button
+                    class={`bullet-point flex cursor-pointer items-baseline px-4 py-2 text-left transition duration-200 ease-in-out ${selectedBullets.includes(bullet) ? 'bg-primary text-primary-content' : ''}`}
+                    on:click={() => toggleBullet(bullet)}
+                    aria-label={`Bullet point: ${bullet}`}
+                    type="button"
+                  >
+                    {bullet}
+                  </button>
+                </li>
+              {/each}
+            </ul>
+          {:else}
+            <p>No key takeaways found in this section.</p>
+          {/if}
+        {/each}
+      </div>
+    </section>
+    <div class="align-right mt-8">
+      <button
+        class="btn btn-block mt-2 text-center"
+        on:click={() => {
+        if ($serviceModelSelectionStore) {
+          generateBlog(selectedBullets.join("\n"), authModel, $serviceModelSelectionStore);
+        } else {
+          console.error('Service model selection is not set');
+        }
+      }}
+      >
+        Generate Inspiration
+      </button>
+    </div>
+
+    <div class="">
+      <h2 class="w-screen text-2xl">Tags</h2>
+      <TagGroup post={post} />
+    </div>
+
+    <div class="mt-8 text-center">
+      <a href={`${base}/auditlog/posts/${post.id}`} class="btn btn-primary">
+        Audit Log
+      </a>
+    </div>
+  {/if}
+</main>
+
+<style>
+</style>

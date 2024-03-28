@@ -69,7 +69,7 @@ onMount(async () => {
         </figcaption>
       </figure>
     {/if}
-    <article class="prose lg:prose-lg mx-auto text-justify">
+    <article class="prose lg:prose-lg mx-auto ">
       <Markdown source={post.body} />
     </article>
     <!-- Inside your Svelte component -->
