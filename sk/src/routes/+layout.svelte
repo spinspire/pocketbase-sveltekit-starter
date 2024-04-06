@@ -12,7 +12,6 @@ const pb = new PocketBase(`$(import.meta.env.VITE_APP_BASE_URL)`);
 import "../app.scss";
 import Alerts from "$lib/components/Alerts.svelte";
 import Nav from "$lib/components/Nav.svelte";
-    import ThemeSwitch from "$lib/components/ThemeSwitch.svelte";
 
 $: title = $metadata.title ? $metadata.title + " | " + site.name : site.name;
 $: description = $metadata.description ?? site.description;
@@ -54,8 +53,7 @@ beforeNavigate(() => {
 
   <footer class="py-4">
     <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-      <p class="text-base-content text-sm">        
-        <ThemeSwitch></ThemeSwitch>
+      <p class="text-base-content text-sm">      
         &copy; {new Date().getFullYear()}
         {site.name}. All rights reserved.
       </p>

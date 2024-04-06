@@ -5,6 +5,7 @@
 export enum Collections {
 	Images = "images",
 	Posts = "posts",
+	Subpost = "subpost",
 	Tags = "tags",
 	Users = "users",
 }
@@ -47,6 +48,13 @@ export type PostsRecord = {
 	tags?: RecordIdString[]
 }
 
+export type SubpostRecord = {
+	title: string
+	content: string
+	post: RecordIdString
+	slug: string
+}
+
 export type TagsRecord = {
 	title: string
 }
@@ -59,12 +67,14 @@ export type UsersRecord = {
 // Response types include system fields and match responses from the PocketBase API
 export type ImagesResponse = ImagesRecord & BaseSystemFields
 export type PostsResponse = PostsRecord & BaseSystemFields
+export type SubpostResponse = SubpostRecord & BaseSystemFields
 export type TagsResponse = TagsRecord & BaseSystemFields
 export type UsersResponse = UsersRecord & AuthSystemFields
 
 export type CollectionRecords = {
 	images: ImagesRecord
 	posts: PostsRecord
+	subpost: SubpostRecord
 	tags: TagsRecord
 	users: UsersRecord
 }

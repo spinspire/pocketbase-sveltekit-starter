@@ -9,33 +9,39 @@ import type { PageData } from "./$types";
 import Markdown from "svelte-markdown";
 import { base } from "$app/paths";
 import TagGroup from "$lib/components/TagGroup.svelte";
-
 import { serviceModelSelectionStore } from "$lib/app/stores";
 import ServiceSelector from "$lib/components/ServiceSelector.svelte";
 import { availableServices } from "$lib/utils/api";
-import { generateBlog } from "$lib/services/generateBlog";
+import { generateBlog, generateBlogResponse } from "$lib/services/generateBlog";
 import type { ServiceModelSelection } from "$lib/services/generateBlog";
-
 export let featuredImageUrl: string = "";
 export let tags: PostsResponse[] = [];
-
-let selectedService: string = availableServices[0].name;
-let selectedModel: string = availableServices[0].models[0];
-
-console.log("selectedService", selectedService);
-console.log("selectedModel", selectedModel);
+let selectedService = availableServices[0].name;
+let selectedModel = availableServices[0].models[0];
 let post: PostsResponse | undefined;
 let selectedBullets: string[] = [];
 
-// Subscribe to the store to get the current value
-let serviceModelSelection: ServiceModelSelection | null;
+let processedBody = "";
 
-$: if ($serviceModelSelectionStore) {
-  selectedService = $serviceModelSelectionStore.selectedService;
-  selectedModel = $serviceModelSelectionStore.selectedModel;
-} else {
-  selectedService = availableServices[0].name;
-  selectedModel = availableServices[0].models[0];
+const getSeedPrompt = () => {
+  let seedPrompt = selectedBullets.join("/n ");
+  return seedPrompt;
+};
+
+function handleServiceChange(event: CustomEvent<string>) {
+  selectedService = event.detail;
+  serviceModelSelectionStore.update((store) => ({
+    ...store,
+    selectedService: selectedService,
+  }));
+}
+
+function handleModelChange(event: CustomEvent<string>) {
+  selectedModel = event.detail;
+  serviceModelSelectionStore.update((store) => ({
+    ...store,
+    selectedModel: selectedModel,
+  }));
 }
 
 function toggleBullet(bullet: string) {
@@ -112,14 +118,14 @@ onMount(async () => {
     console.error("Error fetching post:", error);
   }
 });
-
-let processedBody = "";
 </script>
 
 <main class="prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto p-4">
   <ServiceSelector
     bind:selectedService={selectedService}
     bind:selectedModel={selectedModel}
+    on:serviceChange={handleServiceChange}
+    on:modelChange={handleModelChange}
   />
   {#if post}
     {#if featuredImageUrl}
@@ -170,8 +176,8 @@ let processedBody = "";
       <button
         class="btn btn-block mt-2 text-center"
         on:click={() => {
-        if ($serviceModelSelectionStore) {
-          generateBlog(selectedBullets.join("\n"), authModel, $serviceModelSelectionStore);
+        if ($serviceModelSelectionStore && post) {
+          generateBlogResponse(getSeedPrompt(), post.id, authModel);
         } else {
           console.error('Service model selection is not set');
         }

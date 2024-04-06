@@ -7,7 +7,7 @@ import type {
 } from "$lib/pocketbase/generated-types";
 export let post: PostsResponse;
 
-let tags: string[] = [];
+export let tags: string[] = [];
 
 async function loadTags() {
   if (post.expand?.tags) {

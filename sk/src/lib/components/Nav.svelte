@@ -9,9 +9,10 @@ let isOpen = false;
 const appLinks = [
   ["/create/", "Create"],
   ["/remember/", "Remember"],
+  //,
   ["/inspire/", "Inspire"],
-  ["/explore/", "Explore"],
-  ["/reflect/", "Reflect"],
+  //["/explore/", "Explore"],
+  //["/reflect/", "Reflect"],
 ];
 const landingLinks = [
   ["/#features", "Features"],
@@ -31,8 +32,19 @@ function closeMenu() {
 <nav>
   <div class="navbar">
     <div class="navbar-start">
-      <div class="dropdown" on:mouseleave={closeMenu} role="button" aria-haspopup="true" aria-expanded={isOpen} tabindex={0}>
-        <button class="btn btn-ghost lg:hidden" on:click={toggleMenu} tabindex="0">
+      <div
+        class="dropdown"
+        on:mouseleave={closeMenu}
+        role="button"
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        tabindex={0}
+      >
+        <button
+          class="btn btn-ghost lg:hidden"
+          on:click={toggleMenu}
+          tabindex="0"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5"
@@ -68,6 +80,7 @@ function closeMenu() {
                 <li><a href={path} on:click={closeMenu}>{label}</a></li>
               {/each}
             {/if}
+            <ThemeSwitch />
           </ul>
         {/if}
       </div>
@@ -84,6 +97,9 @@ function closeMenu() {
               >
             </li>
           {/each}
+          <li class="p-4">
+            <ThemeSwitch />
+          </li>
         {:else}
           {#each landingLinks as [path, label]}
             <li class="p-4"><a href={path}>{label}</a></li>
