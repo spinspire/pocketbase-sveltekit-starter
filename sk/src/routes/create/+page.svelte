@@ -24,20 +24,21 @@ import type {
   TagsResponse,
 } from "$lib/pocketbase/generated-types";
 import { createEventDispatcher } from "svelte";
-import ServiceSelecto from "$lib/components/ServiceSelector.svelte";
-import services from "$lib/components/ServiceSelector.svelte";
+import ServiceSelector from "$lib/components/ServiceSelector.svelte";
+import { availableServices } from "$lib/utils/api";
 import InterpretationList from "$lib/components/InterpretationList.svelte";
 import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
 import PostContent from "$lib/components/PostContent.svelte";
 import TagGroup from "$lib/components/TagGroup.svelte";
 import { fly } from "svelte/transition";
-import { serviceModelSelectionStore } from '$lib/app/stores';
+import { serviceModelSelectionStore } from "$lib/app/stores";
+import PostList from "$lib/components/PostList.svelte";
+import ImageWall from "$lib/components/ImageWall.svelte";
 const dispatch = createEventDispatcher();
 let inputText = "";
 
-
-let selectedService = services[0]?.name || "";
-let selectedModel = services[0]?.models?.[0] || "";
+let selectedService = availableServices[0]?.name;
+let selectedModel = availableServices[0]?.models?.[0];
 // Initialize states and reactive variables
 let isLoading = {
   content: false,
@@ -66,6 +67,7 @@ let post: PostsRecord = {
   userid: "",
   tags: [] as string[],
 };
+let posts: string | any[] = [];
 $: chatGptPrompt = "";
 const engineId = "stable-diffusion-v1-6";
 const apiHost = "https://api.stability.ai";
@@ -324,7 +326,6 @@ async function generateBlogFromChatGPT(userPrompt: string) {
   }
 }
 
-
 function handleInterpretationSelect(
   event: CustomEvent<{ interpretation: string }>
 ) {
@@ -375,7 +376,7 @@ function selectInterpretation(interpretation: string) {
 
           <input
             type="text"
-            class="input input-ghost w-full max-w-xs"
+            class="input input-bordered bg-base-100 w-full"
             bind:value={chatGptPrompt}
             placeholder="Enter thoughts here"
           />
@@ -384,6 +385,7 @@ function selectInterpretation(interpretation: string) {
           </div>
         </form>
       </main>
+      <ImageWall></ImageWall>
     {/if}
   {:else if chatGptInts.length > 0 && !isGeneratingBlog}
     <main

@@ -1,6 +1,11 @@
 import { goto } from "$app/navigation";
-import { client, save } from "$lib/pocketbase";
-import type { PostsResponse, PostsRecord } from "$lib/pocketbase/generated-types";
+import { authModel, client, save } from "$lib/pocketbase";
+import { metadata } from "$lib/app/stores";
+import type {
+  PostsResponse,
+  PostsRecord,
+  SubpostRecord,
+} from "$lib/pocketbase/generated-types";
 import { ensureTagsExist, generateImageFromDreamStudio } from "$lib/utils/api";
 import { alertOnFailure } from "$lib/pocketbase/ui";
 import {
@@ -9,7 +14,12 @@ import {
   tagPrompt,
   blogSummaryPrompt,
   imagePrompt,
+  blogResponsePrompt,
+  tagTreePrompt,
 } from "$lib/utils/prompts";
+import { serviceModelSelectionStore } from "$lib/app/stores";
+import { get } from "svelte/store";
+import { availableServices } from "$lib/utils/api";
 
 // Define the structure of the post data
 interface PostData {
@@ -30,7 +40,24 @@ export interface ServiceModelSelection {
 }
 
 // Function to call the API
-async function callAPI(selectedService: string, selectedModel: string, inputText: string): Promise<string> {
+async function callAPI(
+  selectedService: string,
+  selectedModel: string,
+  inputText: string
+): Promise<string> {
+  if (!selectedService || !selectedModel) {
+    console.log("Selected service: ", selectedService);
+    console.log("Selected model: ", selectedModel);
+
+    // Select the first service and first model as default
+    const defaultService = availableServices[0];
+    selectedService = defaultService.name;
+    selectedModel = defaultService.models[0];
+
+    console.log("Default service selected: ", selectedService);
+    console.log("Default model selected: ", selectedModel);
+  }
+
   const response = await fetch(`/api/${selectedService.toLowerCase()}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -48,13 +75,13 @@ async function callAPI(selectedService: string, selectedModel: string, inputText
 // Main function to generate and save the blog post
 export async function generateBlog(
   userInput: string,
-  authModel: any,
-  serviceModelSelection: ServiceModelSelection
+  authModel: any
 ): Promise<void> {
-  if (!authModel?.id) {
+  /* if (!authModel?.id) {
+    console.error("User is not logged in.");
     alert("Please log in to save your post.");
     return;
-  }
+  } */
 
   let post: PostData = {
     title: "",
@@ -68,43 +95,176 @@ export async function generateBlog(
   };
 
   try {
+    const { selectedService, selectedModel } = get(serviceModelSelectionStore);
 
     // Generate content
-    post.body = await callAPI(serviceModelSelection.selectedService, serviceModelSelection.selectedModel, `${promptFormat}'${userInput}'`);
-    post.title = await callAPI(serviceModelSelection.selectedService, serviceModelSelection.selectedModel, `${titlePrompt}'${post.body}'`);
-    const tagString = await callAPI(serviceModelSelection.selectedService, serviceModelSelection.selectedModel, `${tagPrompt}'${post.body}'`);
-    post.blogSummary = await callAPI(serviceModelSelection.selectedService, serviceModelSelection.selectedModel, `${blogSummaryPrompt}'${post.body}'`);
+    post.body = await callAPI(
+      selectedService,
+      selectedModel,
+      `${promptFormat}'${userInput}'`
+    );
+    post.title = await callAPI(
+      selectedService,
+      selectedModel,
+      `${titlePrompt}'${post.body}'`
+    );
+    const tagString = await callAPI(
+      selectedService,
+      selectedModel,
+      `${tagPrompt}'${post.body}'`
+    );
+    post.blogSummary = await callAPI(
+      selectedService,
+      selectedModel,
+      `${blogSummaryPrompt}'${post.body}'`
+    );
 
     // Generate slug
-    post.slug = post.title.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]+/g, "").substring(0, 50);
+    post.slug = post.title
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "")
+      .substring(0, 50);
     post.prompt = userInput;
 
     // Generate image
-    const imageResponseText = await callAPI(serviceModelSelection.selectedService, serviceModelSelection.selectedModel, `${imagePrompt}'${post.body}'`);
+    const imageResponseText = await callAPI(
+      selectedService,
+      selectedModel,
+      `${imagePrompt}'${post.body}'`
+    );
     const base64Image = await generateImageFromDreamStudio(imageResponseText);
 
     // Upload image and save post
-    const imageBlob = await fetch(`data:image/png;base64,${base64Image}`).then((res) => res.blob());
+    const imageBlob = await fetch(`data:image/png;base64,${base64Image}`).then(
+      (res) => res.blob()
+    );
     if (imageBlob.size > 5242880) {
       throw new Error("Image size exceeds the maximum limit of 5MB.");
     }
     const formData = new FormData();
     formData.append("file", imageBlob, "postImage.png");
-    const createdImageRecord = await client.collection("images").create(formData);
+    const createdImageRecord = await client
+      .collection("images")
+      .create(formData);
     post.featuredImage = createdImageRecord.id;
 
     // Save tags
-    const tagsArray = tagString.split(",").map((tag) => tag.trim()).filter((tag) => tag);
+    const tagsArray = tagString
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag);
     const tagIds = await ensureTagsExist(tagsArray);
     post.tags = tagIds;
 
     // Create the post
-    const createdPost = await save("posts", post as PostsRecord, true) as unknown as PostsResponse;
+    const createdPost = (await save(
+      "posts",
+      post as PostsRecord,
+      true
+    )) as unknown as PostsResponse;
 
     // Redirect to the newly created post
     goto(`${import.meta.env.VITE_APP_SK_URL}/posts/${createdPost.slug}`);
   } catch (error) {
     alertOnFailure(() => `Failed to generate and save post: ${error}`);
     throw error;
+  }
+}
+
+// Main function to generate and save the blog response (subpost)
+export async function generateBlogResponse(
+  userInput: string,
+  parentPostId: string,
+  authModel: any
+): Promise<void> {
+  /* if (!authModel?.id) {
+    console.error("User is not logged in.");
+    alert("Please log in to save your subpost.");
+    return;
+  } */
+
+  let subpost: SubpostRecord = {
+    title: "",
+    content: "",
+    post: parentPostId,
+    slug: "",
+  };
+
+  try {
+    const { selectedService, selectedModel } = get(serviceModelSelectionStore);
+
+    // Generate content and title concurrently
+    const [content, title] = await Promise.all([
+      callAPI(
+        selectedService,
+        selectedModel,
+        `${blogResponsePrompt} + "  " + '${userInput}'`
+      ),
+      callAPI(selectedService, selectedModel, `${titlePrompt}'${userInput}'`),
+    ]);
+    // Generate slug
+    subpost.slug = title
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "")
+      .substring(0, 50);
+
+    subpost.content = content;
+    subpost.title = title;
+    // Create the subpost
+    await save("subpost", subpost as SubpostRecord, true);
+
+    // Redirect to the parent post
+    const parentPost = await client.collection("posts").getOne(parentPostId);
+    goto(`${import.meta.env.VITE_APP_SK_URL}/posts/${parentPost.slug}`);
+  } catch (error) {
+    alertOnFailure(() => `Failed to generate and save subpost: ${error}`);
+    throw error;
+  }
+}
+
+export async function generateTagTree(
+  tags: string,
+  authModel: any
+): Promise<string> {
+  try {
+    let tempName = availableServices[1].name;
+    let tempMode = availableServices[1].models[1];
+
+    const {} = get(serviceModelSelectionStore);
+
+    // Generate content
+    const [rawTagTree] = await Promise.all([
+      await callAPI(tempName, tempMode, `${tagTreePrompt}'${tags}'`),
+    ]);
+
+    // Clean the generated tagTree
+    //const cleanedTagTree = cleanTagTree(rawTagTree);
+
+    // Parse the cleaned tagTree as JSON
+    //const parsedTagTree = JSON.parse(cleanedTagTree);
+    return rawTagTree;
+  } catch (error) {
+    alertOnFailure(() => `Failed to generate and save post: ${error}`);
+    throw error;
+  }
+}
+
+function cleanTagTree(rawTagTree: string): string {
+  // Remove intro and exit text
+  const cleanedTagTree = rawTagTree
+    .replace(/^[\s\S]*?{/, "{")
+    .replace(/}[\s\S]*?$/, "}");
+
+  // Validate and format the JSON
+  try {
+    console.log("cleanedTagTree: ", cleanedTagTree);
+    const parsedTagTree = JSON.parse(cleanedTagTree);
+    console.log("parsedTagTree: ", parsedTagTree);
+    const formattedTagTree = JSON.stringify(parsedTagTree, null, 2);
+    return formattedTagTree;
+  } catch (error: any) {
+    throw new Error(`Invalid JSON: ${error.message}`);
   }
 }

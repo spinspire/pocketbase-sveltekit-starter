@@ -172,6 +172,113 @@ Do not include any intro text about the output, just respond with the mind map o
 
 This is the user's input: `;
 
+export const tagTreePrompt = `
+Task: Generate a hierarchical tag structure from a given list of tags
+
+Input:
+- A list of tags as strings in an array
+
+Output:
+[
+  {
+    "name": "Node 1",
+    "children": [
+      {
+        "name": "Child 1",
+        "children": [
+          {
+            "name": "Grandchild 1"
+          },
+          {
+            "name": "Grandchild 2"
+          }
+        ]
+      },
+      {
+        "name": "Child 2"
+      }
+    ]
+  },
+  {
+    "name": "Node 2",
+    "children": [
+      {
+        "name": "Child 3"
+      },
+      {
+        "name": "Child 4"
+      }
+    ]
+  }
+]
+
+Rules:
+1. The hierarchical tag structure should have a maximum depth of 5 levels.
+2. Each node in the hierarchy should have at most 5 children.
+3. The top 3-5 levels of the hierarchy can be AI-generated headings to categorize the tags.
+4. The given tags should be used to complete the lower levels of the hierarchy.
+5. Related tags should be grouped together under appropriate parent nodes.
+6. The hierarchy should be designed to allow users to easily navigate and discover blogs based on the tags.
+7. Broader terms should be placed higher in the hierarchy, while more specific terms should be placed lower.
+8. If there are any tags that don't fit into the generated categories, they should be placed under an "Others" or "Uncategorized" node.
+9. The output should be a valid JSON object in the specified format.
+
+Steps:
+1. Analyze the given list of tags and identify common themes or categories.
+2. Generate 3-5 levels of AI-generated headings to categorize the tags based on their themes or categories.
+3. Assign the tags to appropriate parent nodes in the hierarchy, ensuring that no node has more than 5 children.
+4. Place broader terms higher in the hierarchy and more specific terms lower.
+5. Group related tags together under the same parent node.
+6. If there are any tags that don't fit into the generated categories, create an "Others" or "Uncategorized" node and place them there.
+7. Review the generated hierarchy to ensure it allows for easy navigation and discovery of blogs based on the tags.
+8. Output the hierarchical tag structure as a valid JSON object in the specified format.
+
+Example input:
+[
+  "ai",
+  "machine-learning",
+  "deep-learning",
+  "natural-language-processing",
+  "robotics",
+  "computer-vision",
+  "blockchain",
+  "cryptocurrency",
+  "web3",
+  "smart-contracts",
+  "decentralized-finance",
+  "health",
+  "fitness",
+  "nutrition",
+  "mental-health",
+  "productivity",
+  "time-management",
+  "goal-setting",
+  "motivation",
+  "leadership"
+]
+
+Please generate the hierarchical tag structure for the given list of tags, following the specified format and rules. 
+
+DO NOT INCLUDE ANY INTRODUCTORY TEXT, JUST RESPOND WITH THE JSON OBJECT.
+
+This is the list of tags: `;
+
+export const blogResponsePrompt = `
+###Instruction###
+Given a list of key topics, questions, and ideas provided below, generate a detailed and comprehensive blog post. The blog post should:
+1. Introduce the main theme based on the provided list.
+2. Address each point in the list by providing in-depth analysis, context, or explanation as relevant.
+3. Expand on the provided points with additional information, insights, or examples to create a full narrative.
+4. Ensure the blog is structured logically, with a clear introduction, body (covering all provided points), and conclusion.
+5. Write in an engaging and informative tone, suitable for readers who may be new to the subject or looking to deepen their understanding.
+
+###Input Text###
+- [User-provided list of phrases, questions, and ideas seperated by '/n']
+
+Please parse the input text to identify the key topics and structure the blog post accordingly.
+This is the input text:  
+`;
+
 export const titlePrompt = `Your job is to craft an SEO-Optimized title for the provided blog post. The title should be concise, engaging, and accurately reflect the content of the blog. Follow the guidelines below to create an effective title:
 
 Accurately Reflect Content: Your title should encapsulate the blog's primary themes, insights, and conclusions, integrating relevant keywords for SEO.
@@ -192,18 +299,18 @@ This is the blog:
 
 export const tagPrompt = `Please analyze the provided blog article and generate relevant tags based on its main points and themes. The tags should:
 
-- Consist of 5 concise, lowercase, single-word tags (can be 2 or 3 words just joined together) that capture the essence of the article
+- Generate of 3 concise, lowercase tags (can be 2 words joined together) that capture the essence of the article
 - They should be separated by commas, without any spaces between the commas and words
 - Cover key topics, concepts, or categories mentioned in the article
 - Help readers quickly identify the article's main focus areas and improve searchability
 - Only use alphabets, no special characters or numbers
-- Be output as plain text, strictly adhering to the specified format: 'tag1,tag2,tag3,tag4,tag5'
+- Output as plain text, strictly adhering to the specified format: 'tag1,tag2,tag3'
 
 Example Input:
 "This article discusses the importance of mindfulness in reducing stress and improving overall well-being. It explores various mindfulness techniques, such as meditation, deep breathing, and yoga, and provides practical tips for incorporating these practices into daily life."
 
 Example Output:
-mindfulness,stress,wellbeing,meditation,breathing
+mindfulness,stress,wellbeing
 
 Please generate tags for the given blog article, strictly following the specified format and requirements. Output only the tags, without any additional text or formatting. This is the blog article: `;
 

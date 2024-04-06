@@ -3,7 +3,7 @@
   export let message = "Loading...";
 </script>
 
-<div class="flex flex-col items-center justify-center h-72 min-h-[calc(100vh-200px)] bg-gray-100">
+<div class="flex flex-col items-center justify-center h-72 min-h-[calc(100vh-200px)]">
   <div class="text-center">
     <svg class="h-8 w-8 animate-spin text-gray-800 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

@@ -68,7 +68,12 @@ function handleSubmit(event: { detail: { selectedService: any; selectedModel: an
 <div>
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     {#if Array.isArray(posts)}
+    <div
+  class="grid grid-cols-1 gap-x-2 gap-y-20 overflow-y-auto lg:grid-cols-3"
+  style="max-height: calc(100vh - 220px);"
+>
       <PostList {posts} />
+    </div>
     {:else}
       <p>Error: Posts data is not available.</p>
     {/if}
