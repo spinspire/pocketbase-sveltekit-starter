@@ -7,7 +7,19 @@ import { alertOnFailure } from "$lib/pocketbase/ui";
 import { client } from "$lib/pocketbase";
 import Markdown from "svelte-markdown";
 import { onMount } from "svelte";
+import { postsStore } from "$lib/stores/postStore";
+import { fetchPosts } from "$lib/services/postService";
 import { goto } from "$app/navigation";
+
+async function getFeaturedImageUrl(post: any) {
+    if (post.featuredImage) {
+      const image = await client.collection("images").getOne(post.featuredImage);
+      if (image && image.file) {
+        return client.getFileUrl(image, image.file);
+      }
+    }
+    return "https://via.placeholder.com/800x400.png?text=AI+Blog";
+  }
 
 async function deleteAllPosts() {
   alertOnFailure(async () => {
@@ -22,47 +34,46 @@ async function deleteAllPosts() {
 $metadata.title = "";
 $metadata.description = "AI powered note taking";
 
-
-const posts = watch<PostsResponse>("posts", {
-  sort: "-updated",
-});
+let posts: PostsResponse[] = [];
 
 onMount(async () => {
-  try {
-    const postsResponse = await client.collection("posts").getList(1, 50, {
-      sort: "-updated",
-      expand: "featuredImage,tags",
-    });
+  await fetchPosts();
+});
 
-    posts.update(() => postsResponse.items);
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-  }
+postsStore.subscribe((value) => {
+  posts = value;
 });
 </script>
 
-{#if $posts.items.length > 0}
-  {#each $posts.items as post}
+{#each posts as post (post.id)}
     <div
       class="card bg-base-300 flex w-full flex-col justify-between p-4 shadow-xl"
     >
       <div>
-        <figure class="relative w-full">
-          <img
-            src={post.featuredImage}
-            alt={post.title}
-            class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
-          />
+        <figure>
+          {#await getFeaturedImageUrl(post)}
+            <img
+              src="https://via.placeholder.com/800x400.png?text=Loading..."
+              alt="Loading..."
+              class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+            />
+          {:then featuredImageUrl}
+            <img
+              src={featuredImageUrl}
+              alt={post.title}
+              class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+            />
+          {/await}
         </figure>
         <div class="m-4 max-w-xl">
           <div class="prose items-center gap-x-4">
-            <time datetime="2020-03-16" class="text-accent">
+            <!-- <time datetime="2020-03-16" class="text-accent">
               {new Date(post.updated).toLocaleDateString()}
-            </time>
+            </time> -->
           </div>
           <div class="group relative mt-3">
             <a
-              href={import.meta.env.VITE_APP_SK_URL + "/posts/" + post.slug}
+              href={`/posts/${post.slug}`}
               class="prose-lg text-primary line-clamp-2 font-bold"
             >
               {post.title}
@@ -75,17 +86,10 @@ onMount(async () => {
           </div>
         </div>
       </div>
-      {#each $posts.items as post}
-        <!-- ... other post markup ... -->
-        <div class="relative mb-4 flex-col gap-x-4 text-center"></div>
-        <!-- ... other post markup ... -->
-      {/each}
-      <!-- The rest of your component... -->
     </div>
   {/each}
-{/if}
 
-{#if $posts.items.length === 0}
+{#if posts.length === 0}
   <div
     class="card bg-base-300 flex w-full flex-col justify-between p-4 shadow-xl"
   >

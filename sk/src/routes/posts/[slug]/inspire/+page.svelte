@@ -14,14 +14,26 @@ import ServiceSelector from "$lib/components/ServiceSelector.svelte";
 import { availableServices } from "$lib/utils/api";
 import { generateBlog, generateBlogResponse } from "$lib/services/generateBlog";
 import type { ServiceModelSelection } from "$lib/services/generateBlog";
+import { postsStore } from "$lib/stores/postStore";
+  import { fetchPostBySlug } from "$lib/services/postService";
 export let featuredImageUrl: string = "";
-export let tags: PostsResponse[] = [];
 let selectedService = availableServices[0].name;
 let selectedModel = availableServices[0].models[0];
 let post: PostsResponse | undefined;
 let selectedBullets: string[] = [];
 
 let processedBody = "";
+
+
+$: slug = $page.params.slug;
+
+  onMount(async () => {
+    post = $postsStore.find((p) => p.slug === slug);
+    if (!post) {
+      await fetchPostBySlug(slug);
+      post = $postsStore.find((p) => p.slug === slug);
+    }
+  });
 
 const getSeedPrompt = () => {
   let seedPrompt = selectedBullets.join("/n ");
@@ -89,35 +101,6 @@ $: if (post) {
     return `<h${level} class="${classes}">${p2}</h${level}>`;
   });
 }
-
-onMount(async () => {
-  const { slug } = $page.params;
-  try {
-    const response = await client.collection("posts").getList(1, 1, {
-      filter: `slug = '${slug}'`,
-      expand: "featuredImage,tags",
-    });
-    const items = response.items;
-    if (items.length === 0) {
-      throw new Error("Post not found");
-    }
-    post = items[0] as unknown as PostsResponse;
-    console.log("post", post);
-    if (post.featuredImage) {
-      const image = await client
-        .collection("images")
-        .getOne(post.featuredImage);
-      if (image && image.file) {
-        featuredImageUrl = client.getFileUrl(image, image.file);
-      }
-    }
-    if (post.expand?.tags) {
-      tags = post.expand.tags;
-    }
-  } catch (error) {
-    console.error("Error fetching post:", error);
-  }
-});
 </script>
 
 <main class="prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto p-4">
@@ -156,7 +139,7 @@ onMount(async () => {
               {#each section.bullets as bullet (bullet)}
                 <li class="mb-2">
                   <button
-                    class={`bullet-point flex cursor-pointer items-baseline px-4 py-2 text-left transition duration-200 ease-in-out ${selectedBullets.includes(bullet) ? 'bg-primary text-primary-content' : ''}`}
+                    class={`bullet-point flex cursor-pointer items-baseline px-4 py-2 text-left hover:bg-primary transition duration-200 ease-in-out ${selectedBullets.includes(bullet) ? 'bg-primary text-primary-content' : ''}`}
                     on:click={() => toggleBullet(bullet)}
                     aria-label={`Bullet point: ${bullet}`}
                     type="button"

@@ -34,6 +34,9 @@ import { fly } from "svelte/transition";
 import { serviceModelSelectionStore } from "$lib/app/stores";
 import PostList from "$lib/components/PostList.svelte";
 import ImageWall from "$lib/components/ImageWall.svelte";
+
+import { createPost } from "$lib/services/postService";
+
 const dispatch = createEventDispatcher();
 let inputText = "";
 
@@ -299,25 +302,13 @@ async function generateBlogFromChatGPT(userPrompt: string) {
 
     console.log("Post:", post);
     loadingMessage = "Saving post...";
-    if (post.tags) {
-      await uploadImageAndSavePost(base64Image, currentTags);
-      console.log("Post saved.");
-    }
+    await createPost(post);
 
-    return {
-      title: post.title,
-      slug: post.slug,
-      body: post.body,
-      tags: post.tags,
-      blogSummary: post.blogSummary,
-      featuredImage: post.featuredImage,
-      prompt: userPrompt,
-      userid: post.userid,
-    };
-  } catch (error) {
-    alertOnFailure(() => error);
-    throw error;
-  } finally {
+      goto(`${import.meta.env.VITE_APP_SK_URL}/posts/${post.slug}/inspire`);
+    } catch (error) {
+      alertOnFailure(() => error);
+      throw error;
+    } finally {
     isLoading.content = false;
     isLoading.title = false;
     isLoading.slug = false;

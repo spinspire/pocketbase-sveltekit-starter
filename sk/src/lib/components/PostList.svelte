@@ -1,38 +1,51 @@
 <script lang="ts">
-import type { PostsResponse } from "$lib/pocketbase/generated-types";
-import PostCard from "./PostCard.svelte";
-export let posts: PostsResponse[];
-import { client, authModel } from "$lib/pocketbase";
-import { alertOnFailure } from "$lib/pocketbase/ui";
+  import { onMount } from "svelte";
+  import type { PostsResponse } from "$lib/pocketbase/generated-types";
+  import { postsStore } from "$lib/stores/postStore";
+  import { fetchPosts } from "$lib/services/postService";
+  import PostCard from "./PostCard.svelte";
 
-async function deleteAllPosts() {
-  alertOnFailure(async () => {
-    const postsResponse = await client.collection("posts").getList();
-    for (const post of postsResponse.items) {
-      await client.collection("posts").delete(post.id);
-    }
-    // Optionally, refresh the posts list or navigate as needed
+  let posts: PostsResponse[] = [];
+
+  onMount(async () => {
+    await fetchPosts(page, perPage);
   });
-}
+
+  postsStore.subscribe((value) => {
+    posts = value;
+  });
+
+  let page = 1;
+  let perPage = 20;
+  let loading = false;
+  let reachedEnd = false;
+
+  async function loadMore() {
+    if (!loading && !reachedEnd) {
+      loading = true;
+      page++;
+      await fetchPosts(page, perPage);
+      loading = false;
+    }
+  }
+
+  function handleIntersect(entries: IntersectionObserverEntry[]) {
+    if (entries[0].isIntersecting && !loading) {
+      loadMore();
+    }
+  }
 </script>
 
+{#each posts as post (post.id)}
+    <PostCard {post} />
+  {/each}
 
-  {#if posts.length > 0}
-    {#each posts as post}
-      <PostCard post={post} />
-    {/each}
-  {:else}
-    <div class="col-span-full py-8 text-center">No posts found.</div>
+  {#if loading}
+    <p>Loading...</p>
   {/if}
 
-<!-- {#if $authModel}
-  <div class="my-4 text-right">
-     <button class="btn btn-error ml-2" on:click={deleteAllPosts}>
-      Delete All Posts
-    </button> 
-  </div>
-{:else}
-  <div class="my-4 text-center">
-    <p>Please login to manage posts.</p>
-  </div>
-{/if} -->
+  {#if !loading && posts.length === 0}
+    <p>No posts found.</p>
+  {/if}
+
+  <div use:inview={handleIntersect}></div>
