@@ -1,17 +1,20 @@
 <script lang="ts">
-  import type { PostsResponse } from "$lib/pocketbase/generated-types";
-  import Markdown from "svelte-markdown";
-  import TagGroup from "$lib/components/TagGroup.svelte";
-  import Delete from "./Delete.svelte";
-  
-  export let post: PostsResponse;
+import type { PostsResponse } from "$lib/pocketbase/generated-types";
+import Markdown from "svelte-markdown";
+import TagGroup from "$lib/components/TagGroup.svelte";
+import Delete from "./Delete.svelte";
+import { client } from "$lib/pocketbase";
+export let post: PostsResponse;
 </script>
 
 <div class="card bg-base-100 shadow-xl">
   <figure>
-    {#if post.featuredImage}
+    <!-- PostCard.svelte -->
+    {#if post.expand?.featuredImage}
+      {@const imageRecord = post.expand.featuredImage}
+      {@const imageUrl = imageRecord && imageRecord.file ? client.getFileUrl(imageRecord, imageRecord.file) : ''}
       <img
-        src={post.featuredImage}
+        src={imageUrl}
         alt={post.title}
         class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
       />
@@ -43,8 +46,12 @@
     <TagGroup post={post} />
     <div class="card-actions mt-4 justify-between">
       <a class="btn btn-outline" href={`/posts/${post.slug}/edit`}>Edit</a>
-      <a class="btn btn-outline" href={`/posts/${post.slug}/inspire`}>Inspire</a>
-      <a class="btn btn-outline btn-secondary" href={`/posts/${post.slug}#delete`}>Delete</a>
+      <a class="btn btn-outline" href={`/posts/${post.slug}/inspire`}>Inspire</a
+      >
+      <a
+        class="btn btn-outline btn-secondary"
+        href={`/posts/${post.slug}#delete`}>Delete</a
+      >
     </div>
   </div>
 </div>

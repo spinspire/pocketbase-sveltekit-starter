@@ -78,41 +78,41 @@ export async function apiRequest<T>(
 }
 
 export async function ensureTagsExist(tags: string[]): Promise<string[]> {
-      const existingTags = await client.collection("tags").getFullList({
-      filter: tags.map((tag) => `title = "${tag}"`).join(" || "),
-    });
+  const existingTags = await client.collection("tags").getFullList({
+    filter: tags.map((tag) => `title = "${tag}"`).join(" || "),
+  });
 
-    const existingTagTitles = existingTags.map((tag) => tag.title);
-    const newTagTitles = tags.filter((tag) => !existingTagTitles.includes(tag));
+  const existingTagTitles = existingTags.map((tag) => tag.title);
+  const newTagTitles = tags.filter((tag) => !existingTagTitles.includes(tag));
 
-    console.log("New tags", newTagTitles);
+  console.log("New tags", newTagTitles);
 
-    
+  client.autoCancellation(false);
+  // Create new tags with retries
+  const newTags = await Promise.all(
+    newTagTitles.map((title) => client.collection("tags").create({ title }))
+  );
+  client.autoCancellation(true);
 
-    
-    client.autoCancellation(false);
-    // Create new tags with retries
-    const newTags = await Promise.all(
-      newTagTitles.map((title) => client.collection("tags").create({ title }))
-    );
-    client.autoCancellation(true);
+  console.log("Created new tags", newTags);
 
-    console.log("Created new tags", newTags);
-
-    return [...existingTags, ...newTags].map((tag) => tag.id);
-  }
+  return [...existingTags, ...newTags].map((tag) => tag.id);
+}
 
 export async function getTagsForPost(slug: string): Promise<string> {
   try {
     console.log("Fetching tags for post", slug);
-    const postsResponse = await client.collection("posts").getFirstListItem(`slug = "${slug}"`, {
+    const postsResponse = await client
+      .collection("posts")
+      .getFirstListItem(`slug = "${slug}"`, {
         expand: "tags",
       });
     if (!postsResponse) {
       return "";
     }
 
-    const tags = postsResponse.expand?.tags?.map((tag: { title: any; }) => tag.title) || [];
+    const tags =
+      postsResponse.expand?.tags?.map((tag: { title: any }) => tag.title) || [];
     console.log("Tags for post", slug, tags);
     return tags.join(", ");
   } catch (error) {

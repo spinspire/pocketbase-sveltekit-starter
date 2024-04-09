@@ -289,7 +289,7 @@ Plain Text: Present the title in plain text format, suitable for inclusion in th
 
 When formulating your blog article's title, follow these guidelines closely to craft a single, SEO-optimized title. Ensure it meets the specified length and character count for optimal online visibility and engagement, without adding extra text or comments.
 
-No apostrophes or special characters in the title.
+No apostrophes, No parentheses, or special characters in the title.
 Must be 50 - 60 total characters long.
 ONLY OUTPUT THE TITLE
 

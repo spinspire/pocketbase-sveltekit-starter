@@ -29,6 +29,9 @@ dependencies:
   svelte:
     specifier: ^4.2.8
     version: 4.2.8
+  svelte-inview:
+    specifier: ^4.0.2
+    version: 4.0.2(svelte@4.2.8)
   svelte-markdown:
     specifier: ^0.4.1
     version: 0.4.1(svelte@4.2.8)
@@ -2487,6 +2490,14 @@ packages:
       svelte: ^3.19.0 || ^4.0.0
     dependencies:
       svelte: 4.2.8
+
+  /svelte-inview@4.0.2(svelte@4.2.8):
+    resolution: {integrity: sha512-saJp2QRCUEBletGPnI3utxROHqruDGRPfPhtdpNYQwD97P2oCKiVIlZE3tFNEiC7h3nCvU+8czaKWcH1o/axrA==}
+    peerDependencies:
+      svelte: ^3.0.0 || ^4.0.0
+    dependencies:
+      svelte: 4.2.8
+    dev: false
 
   /svelte-markdown@0.4.1(svelte@4.2.8):
     resolution: {integrity: sha512-pOlLY6EruKJaWI9my/2bKX8PdTeP5CM0s4VMmwmC2prlOkjAf+AOmTM4wW/l19Y6WZ87YmP8+ZCJCCwBChWjYw==}

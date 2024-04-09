@@ -3,10 +3,9 @@ import { goto } from "$app/navigation";
 import { page } from "$app/stores";
 import { onMount } from "svelte";
 import { postsStore } from "$lib/stores/postStore";
-import { updatePost } from "$lib/services/postService";
+import { updatePost, fetchPostBySlug } from "$lib/services/postService";
 import type { PostsResponse } from "$lib/pocketbase/generated-types";
 import Markdown from "svelte-markdown";
-import { fetchPostBySlug } from "$lib/services/postService";
 import {
   generateTextFromChatGPT,
   generateImageFromDalle,
@@ -18,21 +17,27 @@ import {
   tagPrompt,
   blogSummaryPrompt,
 } from "$lib/utils/prompts";
-
 let post: PostsResponse | undefined;
 let tagString = "";
-
 $: slug = $page.params.slug;
+console.log("Received slug:", slug);
+// Check the received slug value
 onMount(async () => {
-  post = $postsStore.find((p) => p.slug === slug);
-  if (!post) {
-    await fetchPostBySlug(slug);
-    post = $postsStore.find((p) => p.slug === slug);
-  }
-  if (post) {
-    tagString = post.tags ? post.tags.join(", ") : "";
+  try {
+    post = await fetchPostBySlug(slug);
+    if (!post) {
+      console.log("Post not found");
+      // Handle the case when the post is not found
+      // For example, you can redirect to a 404 page or show an error message
+    } else {
+      tagString = post.tags ? post.tags.join(", ") : "";
+    }
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    // Handle the error case // For example, you can show an error message to the user
   }
 });
+// Rest of the code for editing and updating the post
 
 async function submit(e: SubmitEvent) {
   e.preventDefault();
@@ -72,9 +77,7 @@ async function generateFromChatGPT(userPrompt: string) {
   if (userPrompt.length === 0) {
     alert("Please enter a prompt to generate from.");
     return;
-  }
-
-  else if (!post) return;
+  } else if (!post) return;
 
   post.prompt = userPrompt;
 

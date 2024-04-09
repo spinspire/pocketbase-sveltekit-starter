@@ -15,25 +15,30 @@ import { availableServices } from "$lib/utils/api";
 import { generateBlog, generateBlogResponse } from "$lib/services/generateBlog";
 import type { ServiceModelSelection } from "$lib/services/generateBlog";
 import { postsStore } from "$lib/stores/postStore";
-  import { fetchPostBySlug } from "$lib/services/postService";
+import { fetchPostBySlug } from "$lib/services/postService";
 export let featuredImageUrl: string = "";
 let selectedService = availableServices[0].name;
 let selectedModel = availableServices[0].models[0];
 let post: PostsResponse | undefined;
 let selectedBullets: string[] = [];
-
 let processedBody = "";
-
-
 $: slug = $page.params.slug;
-
-  onMount(async () => {
-    post = $postsStore.find((p) => p.slug === slug);
+// Check the received slug value
+onMount(async () => {
+  try {
+    post = await fetchPostBySlug(slug);
+    console.log("Received slug:", slug);
     if (!post) {
-      await fetchPostBySlug(slug);
-      post = $postsStore.find((p) => p.slug === slug);
+      console.log("Post not found");
+      // Handle the case when the post is not found
+      // For example, you can redirect to a 404 page or show an error message
     }
-  });
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    // Handle the error case
+    // For example, you can show an error message to the user
+  }
+});
 
 const getSeedPrompt = () => {
   let seedPrompt = selectedBullets.join("/n ");
@@ -111,16 +116,24 @@ $: if (post) {
     on:modelChange={handleModelChange}
   />
   {#if post}
-    {#if featuredImageUrl}
-      <figure class="my-4">
+    <figure>
+      <!-- PostCard.svelte -->
+      {#if post.expand?.featuredImage}
+        {@const imageRecord = post.expand.featuredImage}
+        {@const imageUrl = imageRecord && imageRecord.file ? client.getFileUrl(imageRecord, imageRecord.file) : ''}
         <img
-          src={featuredImageUrl}
+          src={imageUrl}
           alt={post.title}
-          class="mx-auto rounded-lg shadow-md"
+          class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
         />
-        <figcaption class="mt-2 text-center text-sm">{post.title}</figcaption>
-      </figure>
-    {/if}
+      {:else}
+        <img
+          src="https://via.placeholder.com/800x400.png?text=AI+Blog"
+          alt="Placeholder"
+          class="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+        />
+      {/if}
+    </figure>
 
     <h1 class="mb-4 text-4xl font-bold">{post.title}</h1>
 
@@ -139,7 +152,7 @@ $: if (post) {
               {#each section.bullets as bullet (bullet)}
                 <li class="mb-2">
                   <button
-                    class={`bullet-point flex cursor-pointer items-baseline px-4 py-2 text-left hover:bg-primary transition duration-200 ease-in-out ${selectedBullets.includes(bullet) ? 'bg-primary text-primary-content' : ''}`}
+                    class={`bullet-point hover:bg-primary flex cursor-pointer items-baseline px-4 py-2 text-left transition duration-200 ease-in-out ${selectedBullets.includes(bullet) ? 'bg-primary text-primary-content' : ''}`}
                     on:click={() => toggleBullet(bullet)}
                     aria-label={`Bullet point: ${bullet}`}
                     type="button"

@@ -1,7 +1,6 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { authModel, client, save } from "$lib/pocketbase";
-import { marked } from "marked";
+import { authModel, client } from "$lib/pocketbase";
 import { alertOnFailure } from "$lib/pocketbase/ui";
 import {
   promptFormat,
@@ -21,7 +20,6 @@ import {
 import type {
   PostsResponse,
   PostsRecord,
-  TagsResponse,
 } from "$lib/pocketbase/generated-types";
 import { createEventDispatcher } from "svelte";
 import ServiceSelector from "$lib/components/ServiceSelector.svelte";
@@ -36,6 +34,7 @@ import PostList from "$lib/components/PostList.svelte";
 import ImageWall from "$lib/components/ImageWall.svelte";
 
 import { createPost } from "$lib/services/postService";
+import { generateBlog } from "$lib/services/generateBlog";
 
 const dispatch = createEventDispatcher();
 let inputText = "";
@@ -103,62 +102,6 @@ onMount(async () => {
   isAuthenticated = !!$authModel;
   client.autoCancellation(false);
 });
-async function uploadImageAndSavePost(
-  base64Image: string,
-  currentTags: string
-): Promise<void> {
-  try {
-    console.log("Uploading image and saving post...");
-    const imageBlob = await fetch(`data:image/png;base64,${base64Image}`).then(
-      (res) => res.blob()
-    );
-    if (imageBlob.size > 5242880) {
-      throw new Error("Image size exceeds the maximum limit of 5MB.");
-    }
-    loadingMessage = "Uploading image...";
-    const formData = new FormData();
-    formData.append("file", imageBlob, "postImage.png");
-    console.log("Uploading image...");
-    post.userid = $authModel?.id || "";
-    loadingMessage = "Saving post...";
-    const createdImageRecord = await client
-      .collection("images")
-      .create(formData);
-    console.log("Image uploaded:", createdImageRecord);
-    post.featuredImage = createdImageRecord.id;
-    console.log("Current Tags:", currentTags);
-    const tagsArray = currentTags
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter((tag) => tag);
-    console.log("Tags array:", tagsArray);
-    loadingMessage = "Saving tags...";
-    const tagIds = await ensureTagsExist(tagsArray);
-    console.log("Tag IDs:", tagIds);
-    const postToCreate = {
-      title: post.title,
-      slug: post.slug,
-      body: post.body,
-      blogSummary: post.blogSummary,
-      featuredImage: createdImageRecord.id,
-      userid: $authModel?.id || "",
-      prompt: post.prompt,
-      tags: tagIds,
-    };
-    console.log("Post to create:", postToCreate);
-    loadingMessage = "Saving final post...";
-    createdPost = (await save(
-      "posts",
-      postToCreate,
-      true
-    )) as unknown as PostsResponse;
-    console.log("Post created:", createdPost);
-    goto(`${import.meta.env.VITE_APP_SK_URL}/posts/${post.slug}`);
-  } catch (error) {
-    console.error(`Failed to upload image and save post: ${error}`);
-    alertOnFailure(() => `Failed to upload image and save post: ${error}`);
-  }
-}
 $: {
   updateProgressBar(currentStep);
 }
@@ -248,96 +191,30 @@ function getCompletions(claudeOutput: string): string {
   return completionText;
 }
 
-async function generateBlogFromChatGPT(userPrompt: string) {
-  if (!$authModel?.id) {
-    alert("Please log in to save your post.");
-    return;
-  }
-  currentStep = 0;
-
-  const generateContent = async (
-    prompt: string,
-    property: keyof typeof post
-  ) => {
-    loadingMessage = `Generating ${property}...`;
-    inputText = prompt;
-    await callAPI();
-    if (property === "tags") {
-      currentTags = responseText;
-    } else {
-      post[property] = responseText.replace(/\["'\]/g, "") as never;
-    }
-    currentStep += 10;
-  };
-
-  try {
-    post.userid = $authModel?.id || "";
-
-    // Generate body
-    await generateContent(`${promptFormat}'${userPrompt}'`, "body");
-
-    // Generate title
-    await generateContent(`${titlePrompt}'${post.body}'`, "title");
-
-    // Generate tags
-    await generateContent(`${tagPrompt}'${post.body}'`, "tags");
-
-    // Generate blog summary
-    await generateContent(`${blogSummaryPrompt}'${post.body}'`, "blogSummary");
-
-    console.log("Title:", post.title);
-    console.log("Tags:", currentTags);
-    post.slug = post.title
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/\["':\]/g, "")
-      .substring(0, 50);
-    post.prompt = userPrompt;
-
-    loadingMessage = "Generating image...";
-    inputText = `${imagePrompt}'${post.body}'`;
-    await callAPI();
-    const base64Image = await generateImageFromDreamStudio(responseText);
-    currentStep = 60;
-
-    console.log("Post:", post);
-    loadingMessage = "Saving post...";
-    await createPost(post);
-
-      goto(`${import.meta.env.VITE_APP_SK_URL}/posts/${post.slug}/inspire`);
-    } catch (error) {
-      alertOnFailure(() => error);
-      throw error;
-    } finally {
-    isLoading.content = false;
-    isLoading.title = false;
-    isLoading.slug = false;
-    isLoading.summary = false;
-    isLoading.image = false;
-  }
-}
-
 function handleInterpretationSelect(
   event: CustomEvent<{ interpretation: string }>
 ) {
   const interpretation = event.detail.interpretation;
   selectInterpretation(interpretation);
 }
+
 function goBack() {
   formSubmitted = false;
 }
+
 let isGeneratingBlog = false;
+
 function selectInterpretation(interpretation: string) {
   chatGptPrompt = originalPrompt + " - " + interpretation;
   isGeneratingBlog = true;
   chatGptInts = [];
-  // Clear the chatGptInts array before generating the blog
   isLoading.content = true;
   loadingMessage = "Generating blog...";
-  generateBlogFromChatGPT(chatGptPrompt)
-    .then(() => {
+  generateBlog(chatGptPrompt, engineId, authModel)
+    .then((generatedPost) => {
       isLoading.content = false;
       isGeneratingBlog = false;
+      dispatch("blogGenerated", generatedPost);
     })
     .catch((error) => {
       alertOnFailure(error);
@@ -364,7 +241,6 @@ function selectInterpretation(interpretation: string) {
             bind:selectedService={selectedService}
             bind:selectedModel={selectedModel}
           />
-
           <input
             type="text"
             class="input input-bordered bg-base-100 w-full"
@@ -410,7 +286,6 @@ function selectInterpretation(interpretation: string) {
               </figcaption>
             </figure>
           {/if}
-
           <article class="prose lg:prose-lg mx-auto text-justify">
             {#if isLoading.content}
               <LoadingIndicator message="Loading content..." />

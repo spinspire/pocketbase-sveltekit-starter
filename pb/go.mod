@@ -14,7 +14,15 @@ require (
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3
 )
 
-require github.com/stretchr/testify v1.8.4 // indirect
+require (
+	github.com/admpub/fsnotify v1.7.0 // indirect
+	github.com/francoispqt/gojay v1.2.13 // indirect
+	github.com/hashicorp/go-version v1.6.0 // indirect
+	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
+)
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7 // indirect
@@ -73,6 +81,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
+	github.com/webx-top/com v1.2.13
 	go.opencensus.io v0.24.0 // indirect
 	gocloud.dev v0.36.0 // indirect
 	golang.org/x/crypto v0.19.0 // indirect

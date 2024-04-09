@@ -3,7 +3,6 @@ import { authModel, client, save } from "$lib/pocketbase";
 import { metadata } from "$lib/app/stores";
 import type {
   PostsResponse,
-  PostsRecord,
   SubpostRecord,
 } from "$lib/pocketbase/generated-types";
 import { ensureTagsExist, generateImageFromDreamStudio } from "$lib/utils/api";
@@ -20,6 +19,7 @@ import {
 import { serviceModelSelectionStore } from "$lib/app/stores";
 import { get } from "svelte/store";
 import { availableServices } from "$lib/utils/api";
+import { createPost } from "$lib/services/postService";
 
 // Define the structure of the post data
 interface PostData {
@@ -75,6 +75,7 @@ async function callAPI(
 // Main function to generate and save the blog post
 export async function generateBlog(
   userInput: string,
+  engineId: string,
   authModel: any
 ): Promise<void> {
   /* if (!authModel?.id) {
@@ -127,28 +128,6 @@ export async function generateBlog(
       .substring(0, 50);
     post.prompt = userInput;
 
-    // Generate image
-    const imageResponseText = await callAPI(
-      selectedService,
-      selectedModel,
-      `${imagePrompt}'${post.body}'`
-    );
-    const base64Image = await generateImageFromDreamStudio(imageResponseText);
-
-    // Upload image and save post
-    const imageBlob = await fetch(`data:image/png;base64,${base64Image}`).then(
-      (res) => res.blob()
-    );
-    if (imageBlob.size > 5242880) {
-      throw new Error("Image size exceeds the maximum limit of 5MB.");
-    }
-    const formData = new FormData();
-    formData.append("file", imageBlob, "postImage.png");
-    const createdImageRecord = await client
-      .collection("images")
-      .create(formData);
-    post.featuredImage = createdImageRecord.id;
-
     // Save tags
     const tagsArray = tagString
       .split(",")
@@ -157,19 +136,37 @@ export async function generateBlog(
     const tagIds = await ensureTagsExist(tagsArray);
     post.tags = tagIds;
 
-    // Create the post
-    const createdPost = (await save(
-      "posts",
-      post as PostsRecord,
-      true
-    )) as unknown as PostsResponse;
+    // Generate image
+    const imageResponseText = await callAPI(
+      selectedService,
+      selectedModel,
+      `${imagePrompt}'${post.body}'`
+    );
+    
+    // Create the post using the createPost function from postsService
+    const createdPost = await createPost(post as Partial<PostsResponse>, imageResponseText, engineId);
 
-    // Redirect to the newly created post
-    goto(`${import.meta.env.VITE_APP_SK_URL}/posts/${createdPost.slug}`);
+
+    if (createdPost !== undefined) {
+      // Redirect to the newly created post
+      goto(
+        `${import.meta.env.VITE_APP_SK_URL}/posts/${
+          (createdPost as PostsResponse).slug
+        }/inspire`
+      );
+    } else {
+      throw new Error("Failed to create the post.");
+    }
   } catch (error) {
     alertOnFailure(() => `Failed to generate and save post: ${error}`);
     throw error;
   }
+}
+
+function isBase64Image(str: string) {
+  const base64ImagePattern =
+    /^data:image\/(?:png|jpeg|gif);base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+  return base64ImagePattern.test(str);
 }
 
 // Main function to generate and save the blog response (subpost)

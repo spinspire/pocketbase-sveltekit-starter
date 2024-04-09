@@ -30,7 +30,7 @@
   }
 </script>
 
-<div class="flex bg-primary items-center text-base-content">
+<div class="flex bg-primary items-center text-primary-content">
   <select class="select select-ghost w-full max-w-xs" bind:value={selectedService} on:change={handleServiceChange}>
     {#each availableServices as service}
       <option value={service.name}>{service.name}</option>
