@@ -1,22 +1,8 @@
 <script lang="ts">
-import { goto } from "$app/navigation";
 import { authModel, client } from "$lib/pocketbase";
 import { alertOnFailure } from "$lib/pocketbase/ui";
-import {
-  promptFormat,
-  titlePrompt,
-  tagPrompt,
-  blogSummaryPrompt,
-  imagePrompt,
-  introPrompt,
-} from "$lib/utils/prompts";
+import { introPrompt } from "$lib/utils/prompts";
 import { onMount } from "svelte";
-import {
-  generateTextFromChatGPT,
-  generateTextFromClaude,
-  generateImageFromDreamStudio,
-  ensureTagsExist,
-} from "$lib/utils/api";
 import type {
   PostsResponse,
   PostsRecord,
@@ -29,12 +15,10 @@ import LoadingIndicator from "$lib/components/LoadingIndicator.svelte";
 import PostContent from "$lib/components/PostContent.svelte";
 import TagGroup from "$lib/components/TagGroup.svelte";
 import { fly } from "svelte/transition";
-import { serviceModelSelectionStore } from "$lib/app/stores";
-import PostList from "$lib/components/PostList.svelte";
 import ImageWall from "$lib/components/ImageWall.svelte";
-
-import { createPost } from "$lib/services/postService";
 import { generateBlog } from "$lib/services/generateBlog";
+
+import { serviceModelSelectionStore } from "$lib/app/stores";
 
 const dispatch = createEventDispatcher();
 let inputText = "";
@@ -55,8 +39,6 @@ let loadingMessage = "";
 let currentStep = 0;
 let chatGptInts: any[] = [];
 let originalPrompt = "";
-let base64Image;
-let currentTags = "";
 let createdPost: PostsResponse | undefined;
 let isAuthenticated = false;
 let post: PostsRecord = {
@@ -70,6 +52,7 @@ let post: PostsRecord = {
   tags: [] as string[],
 };
 let posts: string | any[] = [];
+let isGeneratingBlog = false;
 $: chatGptPrompt = "";
 const engineId = "stable-diffusion-v1-6";
 const apiHost = "https://api.stability.ai";
@@ -79,6 +62,7 @@ if (!apiKey) {
   console.error("Missing Stability API key.");
   throw new Error("Missing Stability API key.");
 }
+
 async function callAPI() {
   try {
     console.log("Calling API...");
@@ -98,13 +82,16 @@ async function callAPI() {
     responseText = "Error: " + (error as Error).message;
   }
 }
+
 onMount(async () => {
   isAuthenticated = !!$authModel;
   client.autoCancellation(false);
 });
+
 $: {
   updateProgressBar(currentStep);
 }
+
 function updateProgressBar(step: number) {
   const progressElement = document.querySelector(
     ".progress"
@@ -124,7 +111,6 @@ async function generateGptInterpretations(promptString: string) {
     // Show loading screen
     isLoading.content = true;
     loadingMessage = "Generating interpretations...";
-
     const interpretationsResponse = (inputText = introPrompt + promptString);
     await callAPI();
     console.log("Interpretations Response:", interpretationsResponse);
@@ -179,18 +165,6 @@ function parseInterpretations(completionText: string) {
   return interpretations;
 }
 
-function getCompletions(claudeOutput: string): string {
-  const jsonObject = JSON.parse(claudeOutput);
-  if (!jsonObject.hasOwnProperty("completion")) {
-    throw new Error("Parsed JSON object does not contain a 'completion' key.");
-  }
-  const completionText = jsonObject.completion;
-  if (typeof completionText !== "string") {
-    throw new Error("'completion' key does not contain a string value.");
-  }
-  return completionText;
-}
-
 function handleInterpretationSelect(
   event: CustomEvent<{ interpretation: string }>
 ) {
@@ -201,8 +175,6 @@ function handleInterpretationSelect(
 function goBack() {
   formSubmitted = false;
 }
-
-let isGeneratingBlog = false;
 
 function selectInterpretation(interpretation: string) {
   chatGptPrompt = originalPrompt + " - " + interpretation;
@@ -250,9 +222,11 @@ function selectInterpretation(interpretation: string) {
           <div class="text-right">
             <button type="submit" class="btn btn-primary">Generate</button>
           </div>
+          <div class="border-accent border border-4">
+            <ImageWall></ImageWall>
+          </div>
         </form>
       </main>
-      <ImageWall></ImageWall>
     {/if}
   {:else if chatGptInts.length > 0 && !isGeneratingBlog}
     <main

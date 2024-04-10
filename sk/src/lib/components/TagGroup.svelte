@@ -16,7 +16,7 @@ $: {
       {#if i < 2}
         <a
           href={`/tags/${tag}`}
-          class="tag bg-primary text-primary-content hover:bg-primary-focus mb-2 mr-2 inline-block cursor-pointer rounded-full px-2 py-1 text-sm font-semibold"
+          class="tag bg-primary-content text-accent hover:bg-primary-focus mb-2 mr-2 inline-block cursor-pointer px-2 py-1 text-sm"
           in:scale={{ delay: i * 100, duration: 500 }}
           out:fade={{ duration: 300 }}
         >
