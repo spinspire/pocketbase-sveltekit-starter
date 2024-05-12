@@ -6,12 +6,14 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <span on:click={(e) => dialog.showModal()}>
   <slot name="trigger">
     <button>Open Dialog</button>
   </slot>
 </span>
 <!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <dialog bind:this={dialog} on:click={close}>
   <slot />
 </dialog>

@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   pb:
-    image: golang:1.20-alpine
+    image: golang:1.22-alpine
     entrypoint: /app/pb/entrypoint.sh
     command: "/app/pb/pocketbase serve --http 0.0.0.0:8090 --publicDir ../sk/build"
     user: ${UID}:${GID}
@@ -17,7 +17,7 @@ services:
       - ${PWD}/sk:/app/sk
       - ${HOME}/go/pkg:/go/pkg
   sk:
-    image: node:alpine
+    image: node:22-alpine
     user: ${UID}:${GID}
     # sveltekit build
     command: sh -c "npx pnpm install && npm run build"

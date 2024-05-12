@@ -1,10 +1,10 @@
-import PocketBase, {
+import PocketBase, { type AuthProviderInfo, RecordService } from "pocketbase";
+import type {
+  AdminModel,
+  AuthModel,
   ListResult,
-  Record as PBRecord,
-  type AuthProviderInfo,
-  RecordService,
+  RecordModel,
 } from "pocketbase";
-import type { Admin } from "pocketbase";
 import { readable, type Readable, type Subscriber } from "svelte/store";
 import { browser } from "$app/environment";
 import { base } from "$app/paths";
@@ -14,7 +14,7 @@ export const client = new PocketBase(
   browser ? window.location.origin + "/" + base : undefined
 );
 
-export const authModel = readable<PBRecord | Admin | null>(
+export const authModel = readable<AuthModel | AdminModel | null>(
   null,
   function (set) {
     client.authStore.onChange((token, model) => {
@@ -95,7 +95,7 @@ export interface PageStore<T = any> extends Readable<ListResult<T>> {
   prev(): Promise<void>;
 }
 
-export function watch<T>(
+export function watch<T extends RecordModel>(
   idOrName: string,
   queryParams = {} as any,
   page = 1,
@@ -103,22 +103,28 @@ export function watch<T>(
   realtime = browser
 ): PageStore<T> {
   const collection = client.collection(idOrName);
-  let result = new ListResult(page, perPage, 0, 0, [] as T[]);
+  let result = {
+    page,
+    perPage,
+    totalItems: 0,
+    totalPages: 0,
+    items: [] as T[],
+  } as ListResult<T>;
   let set: Subscriber<ListResult<T>>;
   const store = readable<ListResult<T>>(result, (_set) => {
     set = _set;
     // fetch first page
     collection
-      .getList(page, perPage, queryParams)
+      .getList<T>(page, perPage, queryParams)
       .then((r) => set((result = r)));
     // watch for changes (only if you're in the browser)
     if (realtime)
-      collection.subscribe("*", ({ action, record }) => {
+      collection.subscribe<T>("*", ({ action, record }) => {
         (async function (action: string) {
           // see https://github.com/pocketbase/pocketbase/discussions/505
-          async function expand(expand: any, record: any) {
+          async function expand(expand: any, record: T) {
             return expand
-              ? await collection.getOne(record.id, { expand })
+              ? await collection.getOne<T>(record.id, { expand })
               : record;
           }
           switch (action) {
