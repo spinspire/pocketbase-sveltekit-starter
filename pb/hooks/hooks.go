@@ -51,13 +51,13 @@ var hookRowsMap map[string][]dbx.NullStringMap
 
 func loadHookRows(db *dbx.DB) {
 	if hookRowsMap != nil {
-		return // already loaded
+		return // already loaded (cached)
 	}
 	hookRowsMap = make(map[string][]dbx.NullStringMap)
 	var rows []dbx.NullStringMap
 	db.Select("*").
 		From("hooks").
-		Where(dbx.HashExp{"disabled": false}). // pick rows not disabled only
+		Where(dbx.HashExp{"disabled": false}). // exclude "disabled" rows
 		All(&rows)
 	for _, row := range rows {
 		collection := row["collection"].String

@@ -21,7 +21,7 @@ See https://pocketbase.io/docs/use-as-framework/ for details.
 
 ## Architecture
 
-> **Note:** For optimal set up, ensure you are using Linux (bare-metal, VM, WSL) or Docker. For other operating systems, you may run into issues, or need additional configuration.
+> **Note:** For optimal setup, ensure you are using Linux (bare-metal, VM, WSL) or Docker. For other operating systems, you may run into issues, or need additional configuration.
 > A docker-compose setup is included with the project, which can be used on any OS.
 
 ### TBD: For Windows users
