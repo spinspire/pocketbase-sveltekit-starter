@@ -2,9 +2,9 @@ version: '3.5'
 
 services:
   pb:
-    image: golang:1.22-alpine
+    image: alpine:latest
     entrypoint: /app/pb/entrypoint.sh
-    command: "/app/pb/pocketbase serve --http 0.0.0.0:8090 --publicDir ../sk/build"
+    command: "/app/pb/pocketbase serve --dev --http 0.0.0.0:8090 --publicDir ../sk/build"
     user: ${UID}:${GID}
     expose:
       - 8090

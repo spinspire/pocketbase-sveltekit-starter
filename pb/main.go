@@ -7,9 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"pocketbase/auditlog"
-	hooks "pocketbase/hooks"
-
+	"github.com/dop251/goja"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
@@ -30,19 +28,79 @@ func defaultPublicDir() string {
 func main() {
 	app := pocketbase.New()
 
-	var publicDirFlag string
-
-	// add "--publicDir" option flag
+	var hooksDir string
 	app.RootCmd.PersistentFlags().StringVar(
-		&publicDirFlag,
+		&hooksDir,
+		"hooksDir",
+		"",
+		"the directory with the JS app hooks",
+	)
+
+	var hooksWatch bool
+	app.RootCmd.PersistentFlags().BoolVar(
+		&hooksWatch,
+		"hooksWatch",
+		true,
+		"auto restart the app on pb_hooks file change",
+	)
+
+	var hooksPool int
+	app.RootCmd.PersistentFlags().IntVar(
+		&hooksPool,
+		"hooksPool",
+		25,
+		"the total prewarm goja.Runtime instances for the JS app hooks execution",
+	)
+
+	var migrationsDir string
+	app.RootCmd.PersistentFlags().StringVar(
+		&migrationsDir,
+		"migrationsDir",
+		"pb_migrations",
+		"the directory with the user defined migrations",
+	)
+
+	var automigrate bool
+	app.RootCmd.PersistentFlags().BoolVar(
+		&automigrate,
+		"automigrate",
+		true,
+		"enable/disable auto migrations",
+	)
+
+	var publicDir string
+	app.RootCmd.PersistentFlags().StringVar(
+		&publicDir,
 		"publicDir",
 		defaultPublicDir(),
 		"the directory to serve static files",
 	)
 
+	var indexFallback bool
+	app.RootCmd.PersistentFlags().BoolVar(
+		&indexFallback,
+		"indexFallback",
+		true,
+		"fallback the request to index.html on missing static path (eg. when pretty urls are used with SPA)",
+	)
+
+	var queryTimeout int
+	app.RootCmd.PersistentFlags().IntVar(
+		&queryTimeout,
+		"queryTimeout",
+		30,
+		"the default SELECT queries timeout in seconds",
+	)
+
+	app.RootCmd.ParseFlags(os.Args[1:])
+
 	// load js files to allow loading external JavaScript migrations
 	jsvm.MustRegister(app, jsvm.Config{
-		HooksWatch: true, // make this false for production
+		MigrationsDir: migrationsDir,
+		HooksWatch:    true, // make this false for production
+		OnInit: func(vm *goja.Runtime) {
+			vm.Set("foo", "this var was injected into JSVM by Go")
+		},
 	})
 
 	// register the `migrate` command
@@ -51,21 +109,30 @@ func main() {
 		Automigrate:  true,
 	})
 
-	// call this only if you want to auditlog tables named in AUDITLOG env var
-	auditlog.Register(app)
+	/*
+	 * Use this only if you want to do audit logging of tables named in AUDITLOG
+	 * env var (e.g. AUDITLOG=users,posts) impelemented in Go.
+	 * Keep in mind that there is already a JSVM implementation of this feature in ./pb_hooks dir.
+	 */
+	// auditlog.Register(app)
 
-	// call this only if you want to use the configurable "hooks" functionality
-	hooks.PocketBaseInit(app)
+	/*
+	 * Use this only if you want to use the "hooks" implemented in Go.
+	 * It's probably better to use hooks in JSVM though. See "auditlog" example
+	 * in ./pb_hooks.
+	 */
+	// hooks.Register(app)
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		// serves static files from the provided public dir (if exists)
-		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDirFlag), true))
+		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDir), indexFallback))
 
+		// custom endpoint
 		e.Router.AddRoute(echo.Route{
 			Method: http.MethodGet,
-			Path:   "/api/hello",
+			Path:   "/api/go-hello",
 			Handler: func(c echo.Context) error {
-				obj := map[string]interface{}{"message": "Hello world!"}
+				obj := map[string]interface{}{"message": "Hello world from Go!"}
 				return c.JSON(http.StatusOK, obj)
 			},
 			// Middlewares: []echo.MiddlewareFunc{

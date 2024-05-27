@@ -1,35 +1,20 @@
 <script lang="ts">
-  import { base } from "$app/paths";
-  import { page } from "$app/stores";
-  import { metadata } from "$lib/app/stores";
-  import Delete from "$lib/components/Delete.svelte";
-  import { client } from "$lib/pocketbase";
-  import type { PageData } from "./$types";
-  export let data: PageData;
-  $: ({
-    post: { id, title, body, files },
-  } = data);
-  $: $metadata.title = title;
+  import ImgModal from "$lib/pocketbase/ImgModal.svelte";
+  import { client } from "$lib/pocketbase/index.js";
+
+  const { data } = $props();
+  const record = $derived(data.record);
+  $effect(() => {
+    data.metadata.title = data.metadata.headline = record.title;
+  });
 </script>
 
-{#if $page.url.hash === "#delete"}
-  <Delete table="posts" {id} />
-{/if}
-
-{#if files && files[0]}
-  <img
-    src={client.getFileUrl(data.post, files[0], { thumb: "600x0" })}
-    alt={title}
-  />
-{/if}
-<pre>{body}</pre>
-
-<a href={`${base}/auditlog/posts/${id}`}>
-  <button type="button">AuditLog</button>
-</a>
-
-<style>
-  img {
-    max-width: 100%;
-  }
-</style>
+<article>
+  <pre>{record.body}</pre>
+  {#each record.files ?? [] as file, index}
+    {@const src = client.files.getUrl(record, file)}
+    {@const title = `image ${index + 1} for: ${record.title}`}
+    <!-- <img {src} alt={title} {title} /> -->
+    <ImgModal {record} filename={file} />
+  {/each}
+</article>

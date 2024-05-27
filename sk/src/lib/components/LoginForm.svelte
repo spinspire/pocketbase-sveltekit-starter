@@ -1,96 +1,101 @@
 <script lang="ts">
-  export let authCollection = "users";
-  export let passwordLogin = true;
-  export let signup = true;
+  const {
+    authCollection = "users",
+    passwordLogin = true,
+    signupAllowed = true,
+  } = $props();
   import { client, providerLogin } from "../pocketbase";
+  import TabGroup from "./TabGroup.svelte";
   import Tab from "./Tab.svelte";
   import TabContent from "./TabContent.svelte";
-  import TabGroup from "./TabGroup.svelte";
   const coll = client.collection(authCollection);
 
-  let email: string;
-  let name: string;
-  let password: string;
-  let passwordConfirm: string;
-  let create = false;
-  let admin = false;
+  const form = $state({
+    email: "",
+    name: "",
+    password: "",
+    passwordConfirm: "",
+    admin: false,
+  });
+  let signup = false;
 
-  async function submit() {
-    if (create) {
-      await coll.create({ email, name, password, passwordConfirm });
+  async function submit(e: SubmitEvent) {
+    e.preventDefault();
+    if (signup) {
+      await coll.create({ ...form });
     }
-    if (admin) {
-      await client.admins.authWithPassword(email, password);
+    // signin
+    if (form.admin) {
+      await client.admins.authWithPassword(form.email, form.password);
     } else {
-      await coll.authWithPassword(email, password);
+      await coll.authWithPassword(form.email, form.password);
     }
   }
+  let active = $state("SignIn");
 </script>
 
-<form on:submit|preventDefault={submit}>
+{#snippet signin()}
+  <input bind:value={form.email} required type="text" placeholder="email" />
+  <input
+    bind:value={form.password}
+    required
+    type="password"
+    placeholder="password"
+  />
+  <label title="sign-in as admin">
+    <input type="checkbox" bind:checked={form.admin} />Admin
+  </label>
+  <button type="submit" onclick={() => (signup = false)}>Sign In</button>
+{/snippet}
+
+<form onsubmit={submit}>
   {#if passwordLogin}
-    {#if signup}
-      <TabGroup active="SignIn">
-        <div slot="tabs">
+    {#if signupAllowed}
+      <TabGroup bind:active>
+        {#snippet tabs()}
           <Tab key="SignIn">Sign In</Tab>
           <Tab key="SignUp">Sign Up</Tab>
-        </div>
+        {/snippet}
         <TabContent key="SignIn">
-          <input bind:value={email} required type="text" placeholder="email" />
-          <input
-            bind:value={password}
-            required
-            type="password"
-            placeholder="password"
-          />
-          <label title="sign-in as admin"
-            ><input type="checkbox" bind:checked={admin} />Admin</label
-          >
-          <button type="submit" on:click={() => (create = false)}
-            >Sign In</button
-          >
+          {@render signin()}
         </TabContent>
-
         <TabContent key="SignUp">
-          <input bind:value={email} required type="text" placeholder="email" />
           <input
-            bind:value={password}
+            bind:value={form.email}
+            required
+            type="text"
+            placeholder="email"
+          />
+          <input
+            bind:value={form.password}
             required
             type="password"
             placeholder="password"
           />
           <input
-            bind:value={passwordConfirm}
+            bind:value={form.passwordConfirm}
             required
             type="password"
             placeholder="confirm password"
           />
           <input
-            bind:value={name}
+            bind:value={form.name}
             required
             type="text"
             placeholder="name / label"
           />
           <input type="hidden" name="register" value={true} />
-          <button type="submit" on:click={() => (create = true)}>Sign Up</button
-          >
+          <button type="submit" onclick={() => (signup = true)}>Sign Up</button>
         </TabContent>
       </TabGroup>
     {:else}
       <h2>Sign In</h2>
-      <input bind:value={email} required type="text" placeholder="email" />
-      <input
-        bind:value={password}
-        required
-        type="password"
-        placeholder="password"
-      />
-      <button type="submit" on:click={() => (create = false)}>Sign In</button>
+      {@render signin()}
     {/if}
   {/if}
   {#await coll.listAuthMethods({ $autoCancel: false }) then methods}
     {#each methods.authProviders as p}
-      <button type="button" on:click={() => providerLogin(p, coll)}
+      <button type="button" onclick={() => providerLogin(p, coll)}
         >Sign-in with {p.name}</button
       >
     {/each}

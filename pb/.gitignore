@@ -1,5 +1,5 @@
 /.cache
 /pocketbase
-/pocketbase*.zip
+/*.zip
 /pb_data
 /tmp

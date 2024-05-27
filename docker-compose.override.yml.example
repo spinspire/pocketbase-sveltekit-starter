@@ -1,4 +1,4 @@
-version: "3.5"
+# version: "3.5"
 
 services:
   sk:
@@ -14,9 +14,10 @@ services:
     networks:
       - traefik_default
       - default
-  pb:
-    # for live development
-    command: modd
+  # uncomment to enable live development in Go
+  # pb:
+  #   image: golang:1.22-alpine
+  #   command: modd
 
 networks:
   traefik_default:

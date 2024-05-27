@@ -1,25 +1,39 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
+  const {
+    trigger = _trigger,
+    children,
+  }: { trigger?: Snippet<[() => void]>; children: Snippet<[]> } = $props();
   let dialog: HTMLDialogElement;
-  function close(e: any) {
-    if (typeof e?.target?.close === "function") e.target.close();
+  function show() {
+    dialog.showModal();
   }
+  function close(e: any) {
+    function inClientRect(element: Element, event: MouseEvent) {
+      const { left, right, top, bottom } = element.getBoundingClientRect();
+      return (
+        event.clientX >= left &&
+        event.clientX <= right &&
+        event.clientY >= top &&
+        event.clientY <= bottom
+      );
+    }
+    // if the user clicks on the dialog's backdrop
+    if (e?.target === dialog && !inClientRect(dialog, e)) {
+      dialog.close();
+    }
+  }
+  $effect(() => {
+    dialog.addEventListener("click", close);
+  });
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<span on:click={(e) => dialog.showModal()}>
-  <slot name="trigger">
-    <button>Open Dialog</button>
-  </slot>
-</span>
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<dialog bind:this={dialog} on:click={close}>
-  <slot />
-</dialog>
+{#snippet _trigger(show)}
+  <button onclick={show}>Open Dialog</button>
+{/snippet}
 
-<style lang="scss">
-  dialog {
-    padding: 6rem 8rem;
-  }
-</style>
+{@render trigger(show)}
+<dialog bind:this={dialog}>
+  {@render children()}
+</dialog>

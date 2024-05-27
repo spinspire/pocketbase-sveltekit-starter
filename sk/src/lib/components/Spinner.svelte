@@ -20,10 +20,16 @@
 </script>
 
 <script lang="ts">
-  export let active = false;
+  let { active }: { active: boolean } = $props();
 </script>
 
-<span class="loader" class:active />
+<!--
+  @component
+  ```svelte
+  <Spinner 
+  ```
+ -->
+<span class="loader" class:active></span>
 
 <style lang="scss">
   .loader {

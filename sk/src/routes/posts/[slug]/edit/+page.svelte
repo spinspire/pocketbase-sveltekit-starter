@@ -1,23 +1,69 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
-  import { authModel, save } from "$lib/pocketbase";
-  import { alertOnFailure } from "$lib/pocketbase/ui";
-  import type { PageData } from "./$types";
-  export let data: PageData;
-  $: ({ post } = data);
-  async function submit(e: SubmitEvent) {
-    post.user = $authModel?.id;
-    alertOnFailure(async () => {
-      await save("posts", post);
-      goto("../..");
-    });
+  import { alerts } from "$lib/components/Alerts.svelte";
+  import FileInput from "$lib/components/FileInput.svelte";
+  import Spinner, { activityStore } from "$lib/components/Spinner.svelte";
+  import { authModel, client, save } from "$lib/pocketbase";
+  import FileField from "$lib/pocketbase/FileField.svelte";
+  import type { PostsResponse } from "$lib/pocketbase/generated-types.js";
+  import z from "zod";
+
+  const { data } = $props();
+  let record = $state(data.record);
+  let fileInput = $state() as HTMLInputElement;
+  let toBeRemoved = $state([]);
+  $effect(() => {
+    data.metadata.title = data.metadata.headline = `Edit Post: ${record.title}`;
+  });
+
+  const schema = z.object({
+    id: z.string().optional().describe("ID"),
+    title: z.string().trim().min(1, "value required.").describe("Title"),
+    slug: z
+      .string()
+      .trim()
+      .min(1, "value required.")
+      .refine((s: string) => !s.startsWith("/"), "must not start with a slash.")
+      .describe("Slug"),
+    body: z.string().trim().min(1, "Required.").describe("Body"),
+  });
+
+  async function onsubmit(e: SubmitEvent) {
+    e.preventDefault();
+    const { success, error, data } = schema.safeParse(record);
+    if (success) {
+      const files = fileInput?.files;
+      const user = client.authStore.isAdmin ? "" : $authModel?.id;
+      record = await save<PostsResponse>("posts", {
+        ...data,
+        files,
+        user,
+        "files-": toBeRemoved,
+      });
+      alerts.info("Post saved.", 5000);
+      history.back();
+    } else {
+      Object.entries(error.flatten().fieldErrors).forEach(([k, v]) =>
+        alerts.error(`${k}: ${v}`)
+      );
+    }
   }
+  const store = activityStore<SubmitEvent>((e) => onsubmit(e));
 </script>
 
-<form on:submit|preventDefault={submit}>
-  <input name="title" bind:value={post.title} placeholder="title" />
-  <input name="slug" bind:value={post.slug} placeholder="slug" />
-  <textarea name="body" bind:value={post.body} placeholder="body" rows="10" />
-  <input type="file" bind:files={post.files} multiple />
-  <button type="submit">Submit</button>
+<form onsubmit={store.run}>
+  <output>ID: {record.id ?? "-"}</output>
+  <div data-label="TEST">
+    <input type="text" />
+  </div>
+  <div class="flex h">
+    <input type="text" bind:value={record.title} placeholder="title" />
+    <input type="text" bind:value={record.slug} placeholder="slug" />
+    <FileInput bind:fileInput pasteFile={true} multiple={true} />
+  </div>
+  <FileField {record} fieldName="files" />
+  <textarea bind:value={record.body} placeholder="body"></textarea>
+  <button type="submit">
+    <Spinner active={$store} />
+    Save
+  </button>
 </form>

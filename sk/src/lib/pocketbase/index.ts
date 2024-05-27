@@ -3,7 +3,9 @@ import type {
   AdminModel,
   AuthModel,
   ListResult,
+  RecordListOptions,
   RecordModel,
+  UnsubscribeFunc,
 } from "pocketbase";
 import { readable, type Readable, type Subscriber } from "svelte/store";
 import { browser } from "$app/environment";
@@ -11,15 +13,23 @@ import { base } from "$app/paths";
 import { invalidateAll } from "$app/navigation";
 
 export const client = new PocketBase(
-  browser ? window.location.origin + "/" + base : undefined
+  browser ? window.location.origin + base : undefined
 );
 
 export const authModel = readable<AuthModel | AdminModel | null>(
   null,
-  function (set) {
+  function (set, update) {
     client.authStore.onChange((token, model) => {
-      set(model);
-      invalidateAll(); // re-run load functions for current page
+      update((oldval) => {
+        if (
+          (oldval?.isValid && !model?.isValid) ||
+          (!oldval?.isValid && model?.isValid)
+        ) {
+          // if the auth changed, invalidate all page load data
+          invalidateAll();
+        }
+        return model;
+      });
     }, true);
   }
 );
@@ -45,14 +55,14 @@ export function logout() {
  * Save (create/update) a record (a plain object). Automatically converts to
  * FormData if needed.
  */
-export async function save(collection: string, record: any, create = false) {
+export async function save<T>(collection: string, record: any, create = false) {
   // convert obj to FormData in case one of the fields is instanceof FileList
   const data = object2formdata(record);
   if (record.id && !create) {
     // "create" flag overrides update
-    return await client.collection(collection).update(record.id, data);
+    return await client.collection(collection).update<T>(record.id, data);
   } else {
-    return await client.collection(collection).create(data);
+    return await client.collection(collection).create<T>(data);
   }
 }
 
@@ -95,60 +105,54 @@ export interface PageStore<T = any> extends Readable<ListResult<T>> {
   prev(): Promise<void>;
 }
 
-export function watch<T extends RecordModel>(
+export async function watch<T extends RecordModel>(
   idOrName: string,
-  queryParams = {} as any,
+  queryParams = {} as RecordListOptions,
   page = 1,
   perPage = 20,
   realtime = browser
-): PageStore<T> {
+): Promise<PageStore<T>> {
   const collection = client.collection(idOrName);
-  let result = {
-    page,
-    perPage,
-    totalItems: 0,
-    totalPages: 0,
-    items: [] as T[],
-  } as ListResult<T>;
+  let result = await collection.getList<T>(page, perPage, queryParams);
   let set: Subscriber<ListResult<T>>;
+  let unsubRealtime: UnsubscribeFunc | undefined;
+  // fetch first page
   const store = readable<ListResult<T>>(result, (_set) => {
     set = _set;
-    // fetch first page
-    collection
-      .getList<T>(page, perPage, queryParams)
-      .then((r) => set((result = r)));
     // watch for changes (only if you're in the browser)
     if (realtime)
-      collection.subscribe<T>("*", ({ action, record }) => {
-        (async function (action: string) {
-          // see https://github.com/pocketbase/pocketbase/discussions/505
-          async function expand(expand: any, record: T) {
-            return expand
-              ? await collection.getOne<T>(record.id, { expand })
-              : record;
-          }
-          switch (action) {
-            case "update":
-              record = await expand(queryParams.expand, record);
-              return result.items.map((item) =>
-                item.id === record.id ? record : item
-              );
-            case "create":
-              record = await expand(queryParams.expand, record);
-              const index = result.items.findIndex((r) => r.id === record.id);
-              // replace existing if found, otherwise append
-              if (index >= 0) {
-                result.items[index] = record;
-                return result.items;
-              } else {
-                return [...result.items, record];
+      collection
+        .subscribe<T>(
+          "*",
+          ({ action, record }) => {
+            (async function (action: string) {
+              // see https://github.com/pocketbase/pocketbase/discussions/505
+              switch (action) {
+                // ISSUE: no subscribe event when a record is modified and no longer fits the "filter"
+                // @see https://github.com/pocketbase/pocketbase/issues/4717
+                case "update":
+                case "create":
+                  // record = await expand(queryParams.expand, record);
+                  const index = result.items.findIndex(
+                    (r) => r.id === record.id
+                  );
+                  // replace existing if found, otherwise append
+                  if (index >= 0) {
+                    result.items[index] = record;
+                    return result.items;
+                  } else {
+                    return [...result.items, record];
+                  }
+                case "delete":
+                  return result.items.filter((item) => item.id !== record.id);
               }
-            case "delete":
-              return result.items.filter((item) => item.id !== record.id);
-          }
-          return result.items;
-        })(action).then((items) => set((result = { ...result, items })));
-      });
+              return result.items;
+            })(action).then((items) => set((result = { ...result, items })));
+          },
+          queryParams
+        )
+        // remember for later
+        .then((unsub) => (unsubRealtime = unsub));
   });
   async function setPage(newpage: number) {
     const { page, totalPages, perPage } = result;
@@ -158,6 +162,14 @@ export function watch<T extends RecordModel>(
   }
   return {
     ...store,
+    subscribe(run, invalidate) {
+      const unsubStore = store.subscribe(run, invalidate);
+      return async () => {
+        unsubStore();
+        // ISSUE: Technically, we should AWAIT here, but that will slow down navigation UX.
+        if (unsubRealtime) /* await */ unsubRealtime();
+      };
+    },
     setPage,
     async next() {
       setPage(result.page + 1);

@@ -1,21 +1,27 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import type { PageStore } from ".";
 
-  export let store: PageStore;
-  export let showIfSinglePage = false;
+  const {
+    store,
+    showIfSinglePage = false,
+  }: {
+    store: PageStore;
+    showIfSinglePage?: boolean;
+  } = $props();
 </script>
 
 {#if showIfSinglePage || $store.totalPages > 1}
   <div class="paginator">
     <button
       type="button"
-      on:click={() => store.prev()}
+      onclick={() => store.prev()}
       disabled={$store.page <= 1}>&laquo;</button
     >
     <div>page {$store.page} of {$store.totalPages}</div>
     <button
       type="button"
-      on:click={() => store.next()}
+      onclick={() => store.next()}
       disabled={$store.page >= $store.totalPages}>&raquo;</button
     >
   </div>

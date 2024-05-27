@@ -1,10 +1,12 @@
 <script lang="ts">
-  export let key: string | number;
-  import { getContext } from "svelte";
+  import { getContext, type Snippet } from "svelte";
   import type { Writable } from "svelte/store";
-  const store: Writable<string | number> = getContext("activeTab");
+
+  let { key, children }: { key: string; children: Snippet<[]> } = $props();
+
+  const store: Writable<string | number> = getContext("active");
 </script>
 
 {#if $store === key}
-  <slot />
+  {@render children()}
 {/if}

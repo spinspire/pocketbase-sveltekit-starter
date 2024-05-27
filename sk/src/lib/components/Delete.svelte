@@ -3,20 +3,31 @@
   import { client } from "$lib/pocketbase";
   import { alertOnFailure } from "$lib/pocketbase/ui";
 
-  export let id: string;
-  export let table: string;
-  async function submit() {
+  const {
+    id,
+    table,
+    return_path = "back",
+  }: { id: string; table: string; return_path?: string } = $props();
+  async function back() {
+    if (return_path === "back") {
+      history.back();
+    } else {
+      await goto(return_path);
+    }
+  }
+  async function submit(e: SubmitEvent) {
+    e.preventDefault();
     alertOnFailure(async () => {
       await client.collection(table).delete(id);
-      goto("..");
+      await back();
     });
   }
 </script>
 
-<form on:submit|preventDefault={submit}>
+<form onsubmit={submit}>
   <article>
     <aside>Are you sure you want to delete the following record?</aside>
   </article>
   <button type="submit">Yes - Proceed</button>
-  <button type="reset" on:click={() => goto("..")}>No - Cancel</button>
+  <button type="reset" onclick={back}>No - Cancel</button>
 </form>

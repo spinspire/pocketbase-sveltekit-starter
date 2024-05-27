@@ -1,53 +1,40 @@
-<script context="module">
-  import "../app.scss";
-  import { beforeNavigate } from "$app/navigation";
-  import { base } from "$app/paths";
-  import { metadata } from "$lib/app/stores";
-  import Alerts from "$lib/components/Alerts.svelte";
-  import Nav from "$lib/components/Nav.svelte";
-  import { site, sponsor } from "$lib/config";
-</script>
-
 <script lang="ts">
+  import "../app.scss";
+  import { base } from "$app/paths";
+  import { page } from "$app/stores";
+  import Alerts from "$lib/components/Alerts.svelte";
   import LoginBadge from "$lib/components/LoginBadge.svelte";
+  import Nav from "$lib/components/Nav.svelte";
+  const { data, children } = $props();
+  const metadata = $derived(data.metadata ?? {});
+  const config = $derived(data.config ?? {});
 
-  $: title = $metadata.title ? $metadata.title + " | " + site.name : site.name;
-  $: description = $metadata.description ?? site.description;
-  $: headline = $metadata.headline ?? $metadata.title;
-  // reset metadata on navigation so that the new page inherits nothing from the old page
-  beforeNavigate(() => {
-    $metadata = {};
+  $effect(() => {
+    if ($page.error) {
+      metadata.title = $page.error.message;
+    }
   });
 </script>
 
 <svelte:head>
-  <title>{title}</title>
-  <meta name="description" content={description} />
+  <title>{metadata.title} | {config.site?.name}</title>
 </svelte:head>
 
-<header>
-  <a href={`${base}/`} class="logo"
-    ><img src={`${base}/favicon.ico`} alt="application logo" /></a
-  >
+<header class="container">
+  <a href={`${base}/`} class="logo">
+    <img src={`${base}/favicon.svg`} alt="application logo" />
+  </a>
   <Nav />
-  <LoginBadge />
+  <LoginBadge signupAllowed={config.signupAllowed} />
 </header>
-<main>
-  {#if headline}
-    <h1>{headline}</h1>
-  {/if}
+<main class="container">
   <Alerts />
-  <slot />
+  <h1>{metadata.headline ?? metadata.title}</h1>
+  {@render children()}
 </main>
-<footer>
-  <div>
-    <em>{site.name}</em> is an
-    <a href={site.source_url} target="_blank" rel="noreferrer"
-      >Open Source project</a
-    >
-    sponsored by
-    <a href={sponsor.url} target="_blank" rel="noreferrer">{sponsor.name}</a>.
-  </div>
+<footer class="container">
+  Copyright &copy; {config.site?.year}
+  {config.site?.copyright}
 </footer>
 
 <style lang="scss">
@@ -59,5 +46,8 @@
       width: 2rem;
       height: 2rem;
     }
+  }
+  main {
+    flex-grow: 1;
   }
 </style>

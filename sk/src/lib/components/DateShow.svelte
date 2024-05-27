@@ -1,24 +1,11 @@
 <script lang="ts">
-  export let date: string;
-  let dt: Date,
-    // year: number,
-    // dom: number,
-    // dow: number,
-    // mon: number,
-    year: string,
-    dom: string,
-    dowName: string,
-    monName: string;
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-  $: {
-    dt = new Date(date);
-    // year = dt.getFullYear();
-    // dom = dt.getDate();
-    // dow = dt.getDay();
-    // mon = dt.getMonth();
-    [dowName, monName, dom, year] = dt.toDateString().split(" ");
-  }
+  const { date }: { date: string } = $props();
+  // year = dt.getFullYear();
+  // dom = dt.getDate();
+  // dow = dt.getDay();
+  // mon = dt.getMonth();
+  const dt = $derived(new Date(date));
+  const [dowName, monName, dom, year] = $derived(dt.toDateString().split(" "));
 </script>
 
 <div class="date" title={dt.toLocaleString()}>

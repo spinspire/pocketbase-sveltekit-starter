@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import { authModel, client } from "../pocketbase";
-  import { alerts } from "./Alerts.svelte";
+  import Alerts, { alerts } from "./Alerts.svelte";
   import Dialog from "./Dialog.svelte";
   import LoginForm from "./LoginForm.svelte";
-  let signup = true;
+  const { signupAllowed = true } = $props();
   async function logout() {
     client.authStore.clear();
   }
@@ -19,23 +19,23 @@
   onDestroy(() => {
     unsubscribe();
   });
-  $: console.log({ $authModel });
 </script>
 
 {#if $authModel}
   <Dialog>
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div class="badge" slot="trigger">
-      {#if $authModel.avatar}
-        <img
-          src={client.getFileUrl($authModel, $authModel.avatar)}
-          alt="profile pic"
-        />
-      {/if}
-      <samp
-        >{$authModel?.name || $authModel?.username || $authModel?.email}</samp
-      >
-    </div>
+    {#snippet trigger(show)}
+      <button class="badge" onclick={show}>
+        {#if $authModel.avatar}
+          <img
+            src={client.getFileUrl($authModel, $authModel.avatar)}
+            alt="profile pic"
+          />
+        {/if}
+        <samp
+          >{$authModel?.name || $authModel?.username || $authModel?.email}</samp
+        >
+      </button>
+    {/snippet}
     <div class="wrapper">
       <div class="badge">
         {#if $authModel.avatar}
@@ -48,18 +48,25 @@
           >{$authModel?.name ?? $authModel?.username ?? $authModel?.email}</samp
         >
       </div>
-      <button on:click={logout}>Sign Out</button>
+      <button onclick={logout}>Sign Out</button>
     </div>
   </Dialog>
 {:else}
   <Dialog>
-    <button slot="trigger">{signup ? "Sign In / Sign Up" : "Sign In"}</button>
-    <LoginForm {signup} />
+    {#snippet trigger(show)}
+      <button onclick={show}>
+        {signupAllowed ? "Sign In / Sign Up" : "Sign In"}
+      </button>
+    {/snippet}
+    <Alerts />
+    <LoginForm {signupAllowed} />
   </Dialog>
 {/if}
 
 <style lang="scss">
   .badge {
+    padding: 0;
+    background-color: transparent;
     cursor: pointer;
     display: flex;
     align-items: center;

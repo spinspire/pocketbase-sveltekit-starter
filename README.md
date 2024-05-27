@@ -45,11 +45,19 @@ This method is the most recommended method for setting up this application in mo
 
 Make sure your Docker daemon is running then complete the following steps:
 
-1. Copy`.env.example` to `.env` and then edit it to match your environment. And then just run `docker compose up -d`.
-2. Open a new terminal and navigate to the `/sk` directory. Install dependencies by running `npx pnpm install`
-3. In the same terminal, after the dependencies are installed, run the command `npm run dev:backend` This runs `go build` in the `/pb` directory and runs `modd` for live development on a backend server
-4. Open a seperate terminal, navigate to the `/sk` directory, and run the command `npm run dev`. This starts the frontend development server.
-5. Both sides are working if you navigate to the "Hello" page on the development server and there is an API response that says "Hello World!"
+1. Copy`.env.example` to `.env` and then edit it to match your environment.
+   Also, if you wish, copy `docker-compose.override.yml` to `docker-compose.override.yml`
+   and edit it to your taste before proceeding.
+   And then just run `docker compose up -d`.
+2. Open a new terminal and navigate to the `/sk` directory. Install dependencies by
+   running `npx pnpm install`
+3. In the same terminal, after the dependencies are installed, run the command `npm run dev:backend`
+   This runs `go build` in the `/pb` directory and runs `modd` for live development on a
+   backend server
+4. Open a seperate terminal, navigate to the `/sk` directory, and run the command `npm run dev`.
+   This starts the frontend dev server.
+5. Both sides are working if you navigate to the "Hello" page on the development server
+   and there is an API response that says "Hello World!"
 
 ## With pocketbase binary
 

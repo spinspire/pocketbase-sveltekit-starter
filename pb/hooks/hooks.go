@@ -14,10 +14,11 @@ import (
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
 )
 
-func PocketBaseInit(app *pocketbase.PocketBase) error {
+func Register(app *pocketbase.PocketBase) {
 	modelHandler := func(event string) func(e *core.ModelEvent) error {
 		return func(e *core.ModelEvent) error {
 			table := e.Model.TableName()
@@ -36,13 +37,13 @@ func PocketBaseInit(app *pocketbase.PocketBase) error {
 		}
 	}
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		ensureSchema(app.Dao().DB())
 		// watch insert/update/delete of rows of all collections
 		app.OnModelAfterCreate().Add(modelHandler("insert"))
 		app.OnModelAfterUpdate().Add(modelHandler("update"))
 		app.OnModelAfterDelete().Add(modelHandler("delete"))
 		return nil
 	})
-	return nil
 }
 
 // cache of "hooks" table rows (all where disabled=false)
@@ -149,4 +150,134 @@ func doPost(action, action_params string, record *models.Record) error {
 		log.Println("ERROR writing to pipe", err)
 	}
 	return nil
+}
+
+func ensureSchema(db dbx.Builder) error {
+	// add up queries...
+	jsonData := `[
+			{
+				"id": "3fhw2mfr9zrgodj",
+				"created": "2022-12-23 22:30:35.443Z",
+				"updated": "2024-05-27 18:57:06.058Z",
+				"name": "hooks",
+				"type": "base",
+				"system": false,
+				"schema": [
+					{
+						"system": false,
+						"id": "j8mewfur",
+						"name": "collection",
+						"type": "text",
+						"required": true,
+						"presentable": false,
+						"unique": false,
+						"options": {
+							"min": null,
+							"max": null,
+							"pattern": ""
+						}
+					},
+					{
+						"system": false,
+						"id": "4xcxcfuv",
+						"name": "event",
+						"type": "select",
+						"required": true,
+						"presentable": false,
+						"unique": false,
+						"options": {
+							"maxSelect": 1,
+							"values": [
+								"insert",
+								"update",
+								"delete"
+							]
+						}
+					},
+					{
+						"system": false,
+						"id": "u3bmgjpb",
+						"name": "action_type",
+						"type": "select",
+						"required": true,
+						"presentable": false,
+						"unique": false,
+						"options": {
+							"maxSelect": 1,
+							"values": [
+								"command",
+								"email",
+								"post"
+							]
+						}
+					},
+					{
+						"system": false,
+						"id": "kayyu1l3",
+						"name": "action",
+						"type": "text",
+						"required": true,
+						"presentable": false,
+						"unique": false,
+						"options": {
+							"min": null,
+							"max": null,
+							"pattern": ""
+						}
+					},
+					{
+						"system": false,
+						"id": "zkengev8",
+						"name": "action_params",
+						"type": "text",
+						"required": false,
+						"presentable": false,
+						"unique": false,
+						"options": {
+							"min": null,
+							"max": null,
+							"pattern": ""
+						}
+					},
+					{
+						"system": false,
+						"id": "balsaeka",
+						"name": "expands",
+						"type": "text",
+						"required": false,
+						"presentable": false,
+						"unique": false,
+						"options": {
+							"min": null,
+							"max": null,
+							"pattern": ""
+						}
+					},
+					{
+						"system": false,
+						"id": "emgxgcok",
+						"name": "disabled",
+						"type": "bool",
+						"required": false,
+						"presentable": false,
+						"unique": false,
+						"options": {}
+					}
+				],
+				"indexes": [],
+				"listRule": null,
+				"viewRule": null,
+				"createRule": null,
+				"updateRule": null,
+				"deleteRule": null,
+				"options": {}
+			}
+	]`
+
+	collections := []*models.Collection{}
+	if err := json.Unmarshal([]byte(jsonData), &collections); err != nil {
+		return err
+	}
+
+	return daos.New(db).ImportCollections(collections, false, nil)
 }

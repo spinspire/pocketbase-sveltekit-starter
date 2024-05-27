@@ -1,11 +1,11 @@
 {
-  "name": "pocketbase-sveltekit-starter",
+  "name": "sk",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "vite dev",
     "dev:backend": "cd ../pb && modd",
-    "backend": "cd ../pb && ./pocketbase serve --publicDir=../sk/build",
+    "backend": "AUDITLOG=users,posts ../pb/entrypoint.sh ./pocketbase serve --publicDir=../sk/build",
     "build": "vite build",
     "build:backend": "cd ../pb && go build",
     "typegen": "pocketbase-typegen --db ../pb/pb_data/data.db --out ./src/lib/pocketbase/generated-types.ts",
@@ -17,23 +17,24 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@sveltejs/adapter-auto": "^2.1.1",
-    "@sveltejs/adapter-static": "^2.0.3",
-    "@sveltejs/kit": "^1.30.4",
-    "@types/node": "^20.12.11",
+    "@sveltejs/adapter-auto": "^3.0.0",
+    "@sveltejs/adapter-static": "^3.0.1",
+    "@sveltejs/kit": "^2.0.0",
+    "@sveltejs/vite-plugin-svelte": "^3.0.0",
     "pocketbase-typegen": "^1.2.1",
-    "prettier": "^3.2.5",
-    "prettier-plugin-svelte": "^3.2.3",
+    "prettier": "^3.1.1",
+    "prettier-plugin-svelte": "^3.1.2",
     "sass": "^1.77.1",
-    "svelte": "^4.2.16",
-    "svelte-check": "^3.7.1",
+    "svelte": "^5.0.0-next.1",
+    "svelte-check": "^3.6.0",
     "svelte-preprocess": "^5.1.4",
-    "tslib": "^2.6.2",
-    "typescript": "^5.4.5",
-    "vite": "^4.5.3"
+    "tslib": "^2.4.1",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.3"
   },
   "type": "module",
   "dependencies": {
-    "pocketbase": "^0.21.2"
+    "pocketbase": "^0.21.2",
+    "zod": "^3.23.8"
   }
 }

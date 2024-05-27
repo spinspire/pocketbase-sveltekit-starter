@@ -5,7 +5,9 @@ There are two flavors of the backend:
 1. Standard release downloaded from https://github.com/pocketbase/pocketbase/releases. It even allows [extending with JavaScript](https://pocketbase.io/docs/js-overview/). This one is a good start, but if you want full control see next.
 2. Custom compiled (`go build`), possibly with my customizations and perhaps yours too.
 
-Out of the box, the project assumes #2 (custom compiled with my customizations).
+`entrypoint.sh` defaults to option 2 if `go` compiler is found. If not, then is just downloads
+`pocketbase` (option 1). Also, you can control it by looking at the `image` and `command` settings
+in `docker-compose.yml` and `docker-compose.override.yml`.
 
 ## standard (official) release of pocketbase
 
@@ -13,7 +15,9 @@ Download from release archive from https://github.com/pocketbase/pocketbase/rele
 
 ## custom build
 
-If you would like to extend PocketBase and use it as a framework then there is a `main.go` in this folder that you can customize and build using `go build` or do live development using `modd`.
+If you would like to extend PocketBase and use it as a framework then there is a `main.go`
+in this folder that you can customize and build using `go build` or do live development
+using `modd`.
 
 See https://pocketbase.io/docs/use-as-framework/ for details.
 
@@ -67,6 +71,8 @@ Not only that, they are also generated automatically whenever you change the sch
 The file `generated-types.ts` contains TypeScript definitions of `Record` types mirroring the fields in your database collections. But it needs to be regenerated every time you modify the schema. This can be done by simply running the `typegen` script in the frontend's `package.json`. So remember to do that.
 
 # Hooks
+
+_**NOTE**: "hooks" funtionality has been commented out in `main.go` because (my) recommended way to implement hooks is using JSVM. Same principle, but instead of being driven by config in a table, you can implement `onRecord*` callbacks in `pb_hooks/*.pb.js` files._
 
 PocketBase provides API's like .OnModelBefore* and .OnModelAfter* to run
 callbacks when records change. This app builds on top of that by providing

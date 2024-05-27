@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { AuditlogResponse } from "$lib/pocketbase/generated-types";
 
-  export let auditlog: AuditlogResponse;
-  $: keys = Object.keys(auditlog.original || {});
+  const { auditlog }: { auditlog: AuditlogResponse } = $props();
+  const keys = $derived(Object.keys(auditlog.original || {}));
 </script>
 
 <table>

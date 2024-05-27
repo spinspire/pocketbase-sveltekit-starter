@@ -1,56 +1,65 @@
 <script lang="ts">
-  import { metadata } from "$lib/app/stores";
-  import Image from "$lib/components/Image.svelte";
-  import { authModel, watch } from "$lib/pocketbase";
-  import type { PostsResponse } from "$lib/pocketbase/generated-types";
-  $metadata.title = "Recent Posts";
-  const posts = watch<PostsResponse>("posts", {
-    sort: "-updated",
+  import { base } from "$app/paths";
+  import DateShow from "$lib/components/DateShow.svelte";
+  import Image from "$lib/pocketbase/Image.svelte";
+  import Link2Modal from "$lib/components/Link2Modal.svelte";
+  import { client } from "$lib/pocketbase";
+  import EditPage from "./[slug]/edit/+page.svelte";
+  import LoginGuard from "$lib/components/LoginGuard.svelte";
+  import Paginator from "$lib/pocketbase/Paginator.svelte";
+
+  const { data } = $props();
+  const posts = $derived(data.posts);
+  $effect(() => {
+    data.metadata.title = data.metadata.headline = "Posts";
   });
 </script>
 
-{#if $authModel}
-  <a href="new/edit">Create New</a>
+<LoginGuard>
+  <Link2Modal component={EditPage}>
+    {#snippet trigger(onclick)}
+      <a href="{base}/posts/new/edit" class="button" {onclick}>
+        New Post
+        <i class="bx bx-tada bx-list-plus"></i>
+      </a>
+    {/snippet}
+  </Link2Modal>
+</LoginGuard>
+
+<Paginator store={posts} showIfSinglePage={true} />
+{#each $posts.items as item}
+  {@const [file] = item.files}
+  {@const thumbnail = client.files.getUrl(item, file, { thumb: "100x100" })}
+  <a href={`${base}/posts/${item.slug}`} class="post">
+    <DateShow date={item.updated} />
+    <Image record={item} {file} />
+    <div>
+      <div>
+        <i class="bx bx-calendar" title="on date"></i>
+        {new Intl.DateTimeFormat(undefined, { dateStyle: "full" }).format(
+          new Date(item.updated)
+        )}
+        {#if item.expand?.user?.name}
+          <i class="bx bx-pen" title="author"></i>
+          {item.expand.user.name}
+        {/if}
+      </div>
+      <h2>{item.title}</h2>
+    </div>
+  </a>
 {:else}
-  <p>Please login to create new posts.</p>
-{/if}
-<hr />
-<table>
-  <tbody>
-    {#each $posts.items as post}
-      {#if $authModel?.id == post.user}
-        <tr>
-          <td>
-            <Image
-              record={post}
-              file={post.files[0]}
-              thumb="100x100"
-              alt={post.title}
-            />
-          </td>
-          <td><a href={post.slug}>{post.title}</a></td>
-          <td>{post.updated}</td>
-          <td><a href={`${post.id}/edit`}>Edit</a></td>
-          <td><a href={`${post.slug}#delete`}>Delete</a></td>
-        </tr>
-      {:else}
-        <tr>
-          <td>
-            <Image
-              record={post}
-              file={post.files[0]}
-              thumb="100x100"
-              alt={post.title}
-            />
-          </td>
-          <td><a href={post.slug}>{post.title}</a></td>
-          <td>{post.updated}</td>
-        </tr>
-      {/if}
-    {:else}
-      <tr>
-        <td>No posts found.</td>
-      </tr>
-    {/each}
-  </tbody>
-</table>
+  <div>No posts found.</div>
+{/each}
+<Paginator store={posts} showIfSinglePage={true} />
+
+<style lang="scss">
+  .post {
+    color: inherit;
+    display: flex;
+    gap: 1rem;
+    padding-block: 1rem;
+    & + .post {
+      border-block-start: dashed 1px;
+    }
+  }
+</style>

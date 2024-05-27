@@ -1,25 +1,34 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { Admin } from "pocketbase";
-  import { authModel } from "../pocketbase";
-  import LoginForm from "./LoginForm.svelte";
-  export let admin: boolean | undefined = undefined;
-  export let slotLogin = false;
-  export let destination: string | null = null;
-  $: if (destination != null && $authModel) {
-    goto(destination);
-  }
-  $: authorized =
+  import { authModel, client } from "$lib/pocketbase";
+  import type { Snippet } from "svelte";
+  import type { BaseAuthStore } from "pocketbase";
+  const {
+    admin,
+    destination,
+    otherwise,
+    children,
+  }: {
+    admin?: boolean;
+    destination?: string;
+    otherwise?: Snippet<[]>;
+    children: Snippet<[]>;
+  } = $props();
+  $effect(() => {
+    if (!!destination && client.authStore.isValid) {
+      // navigate to destination if specified, and logged in
+      goto(destination);
+    }
+  });
+  const authorized = $derived(
     $authModel && //  must be logged in
-    (admin === undefined || // admin or not, doesn't matter
-      (admin === true && $authModel instanceof Admin) || // must be admin
-      (admin === false && !($authModel instanceof Admin))); // must not be admin
+      // if admin is specified -- must be admin if admin true, must not be admin if admin false
+      (admin === undefined || admin === client.authStore.isAdmin)
+  );
 </script>
 
 {#if authorized}
-  <slot />
-{:else if slotLogin || $$slots["login"]}
-  <slot name="login">
-    <LoginForm />
-  </slot>
+  {@render children()}
+{:else if otherwise}
+  {@render otherwise()}
 {/if}

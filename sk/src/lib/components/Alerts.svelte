@@ -1,6 +1,4 @@
 <script lang="ts" context="module">
-  import { writable } from "svelte/store";
-
   interface Alert {
     message: string;
     type: string;
@@ -8,11 +6,11 @@
     html?: boolean;
   }
 
+  let _alerts = $state<Alert[]>([]);
   export const alerts = {
-    ...writable<Alert[]>([]),
     add({ message, type = "info", timeout = 0, html = false }: Alert) {
       const alert = { message, type, html };
-      this.update((v) => [...v, alert]);
+      _alerts = _alerts.concat(alert);
       if (timeout) {
         setTimeout(() => {
           dismiss(alert);
@@ -38,23 +36,31 @@
   }
 
   function dismiss(alert: Alert) {
-    alerts.update((val) => val.filter((a) => a !== alert));
+    _alerts = _alerts.filter((a) => a !== alert);
   }
 
   function dismissAll() {
-    alerts.set([]);
+    _alerts = [];
+  }
+  function onunhandledrejection(e: PromiseRejectionEvent) {
+    alerts.error(e.reason.toString());
+    const { data = {} } = e.reason.response ?? {};
+    for (const [key, value] of Object.entries(data)) {
+      alerts.error(`${key}: ${value?.message}`);
+    }
   }
 </script>
 
-<svelte:window on:unhandledrejection={(e) => alerts.error(e.reason.toString())} />
+<!-- to display alerts for unhandled promise rejections -->
+<svelte:window {onunhandledrejection} />
 
 <article>
-  {#if $alerts.length > 1}
-    <button on:click={dismissAll} class="tight">Dismiss All</button>
+  {#if _alerts.length > 1}
+    <button onclick={dismissAll} class="dismiss">&times; dismiss all</button>
   {/if}
-  {#each $alerts as alert}
+  {#each _alerts as alert}
     <blockquote class={alert.type}>
-      <button on:click={() => dismiss(alert)} class="dismiss">&times;</button>
+      <button onclick={() => dismiss(alert)} class="dismiss">&times;</button>
       {#if alert.html}
         {@html alert.message}
       {:else}
@@ -67,8 +73,8 @@
 <style>
   .dismiss {
     cursor: pointer;
-    padding: 0px 5px;
-    border-radius: 50%;
+    padding: 2px 7px;
+    border-radius: 15px;
   }
   blockquote {
     margin: 0 0;
@@ -79,10 +85,10 @@
   }
   .warning {
     color: var(--variable);
-    border-left-color: var(--variable);
+    border-left-color: var(--selection);
   }
   .error {
     color: var(--danger);
-    border-left-color: var(--danger);
+    border-left-color: var(--variable);
   }
 </style>

@@ -1,13 +1,30 @@
 <script lang="ts">
-  import { metadata } from "$lib/app/stores";
-  $metadata.title = "Home";
+  const { data } = $props();
+  $effect(() => {
+    // you could set the metadata either here or in +page.ts
+    data.metadata.title = "Home";
+    data.metadata.headline = `Welcome to ${data.config.site?.name}`;
+  });
 </script>
 
-<blockquote>
-  <a href="/api/hello">invoke hello api: implemented with Go</a>
-</blockquote>
-<blockquote>
-  <a href="/api/goodbye/WALDO">invoke goodbye api: implemented with JSVM</a>
-</blockquote>
+<p>
+  Visit
+  <a
+    href="https://github.com/spinspire/pocketbase-sveltekit-starter"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    https://github.com/spinspire/pocketbase-sveltekit-starter
+  </a>
+  on <i class="bx bxl-github bx-sm"></i>GitHub to read the documentation.
+</p>
 
-<button>Send me an email: implemented with JavaScript/TypeScript</button>
+<h2>Features</h2>
+<ul>
+  <li>Svelte 5: runes, $props, snippets, etc.</li>
+  <li>
+    SvelteKit: routing, PageData loading, CSR with <code>adapter-static</code>
+  </li>
+  <li>PocketBase: CRUD, typegen, realtime data updates</li>
+  <li>PocketBase: JSVM hook, routes, etc.</li>
+</ul>
