@@ -7,12 +7,16 @@
   import EditPage from "./[slug]/edit/+page.svelte";
   import LoginGuard from "$lib/components/LoginGuard.svelte";
   import Paginator from "$lib/pocketbase/Paginator.svelte";
+  import Spinner, { activityStore } from "$lib/components/Spinner.svelte";
 
   const { data } = $props();
   const posts = $derived(data.posts);
   $effect(() => {
     data.metadata.title = data.metadata.headline = "Posts";
   });
+  const store = activityStore(() =>
+    client.send("/api/generate", { method: "post" })
+  );
 </script>
 
 <LoginGuard>
@@ -24,13 +28,17 @@
       </a>
     {/snippet}
   </Link2Modal>
+  <button type="button" onclick={store.run} disabled={$store}
+    ><Spinner active={$store} />
+    Generate a random post
+  </button>
 </LoginGuard>
 
 <Paginator store={posts} showIfSinglePage={true} />
 {#each $posts.items as item}
   {@const [file] = item.files}
   {@const thumbnail = client.files.getUrl(item, file, { thumb: "100x100" })}
-  <a href={`${base}/posts/${item.slug}`} class="post">
+  <a href={`${base}/posts/${item.slug || item.id}`} class="post">
     <DateShow date={item.updated} />
     <Image record={item} {file} />
     <div>

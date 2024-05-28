@@ -96,3 +96,27 @@ onModelBeforeUpdate((e) => {
   slugDefault(e.model);
 }, "posts");
 
+routerAdd(
+  "POST",
+  "/api/generate",
+  (c) => {
+    const url = "https://loripsum.net/api/3/short/medium/plaintext";
+    const response = $http.send({ url });
+    const body = response.raw;
+    // last sentence becomes the title
+    const [_, title] = body.match(/([a-zA-Z][ a-zA-Z]*[a-zAZ])[^a-zA-Z]*$/);
+    const slug = title.toLowerCase().replace(" ", "-");
+    const coll = $app.dao().findCollectionByNameOrId("posts");
+    const record = new Record(coll, { title, body, slug });
+    const form = new RecordUpsertForm($app, record);
+    form.addFiles(
+      "files",
+      $filesystem.fileFromUrl("https://picsum.photos/500/300"),
+      $filesystem.fileFromUrl("https://picsum.photos/500/300")
+    );
+    form.submit();
+    // $app.dao().saveRecord(record);
+    c.json(200, record);
+  },
+  $apis.requireAdminOrRecordAuth()
+);

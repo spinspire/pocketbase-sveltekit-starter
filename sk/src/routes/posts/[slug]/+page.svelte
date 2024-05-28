@@ -10,7 +10,7 @@
 </script>
 
 <article>
-  <pre>{record.body}</pre>
+  <pre class="body">{record.body}</pre>
   {#each record.files ?? [] as file, index}
     {@const src = client.files.getUrl(record, file)}
     {@const title = `image ${index + 1} for: ${record.title}`}
