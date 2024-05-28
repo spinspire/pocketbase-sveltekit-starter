@@ -52,15 +52,12 @@
 
 <form onsubmit={store.run}>
   <output>ID: {record.id ?? "-"}</output>
-  <div data-label="TEST">
-    <input type="text" />
-  </div>
   <div class="flex h">
     <input type="text" bind:value={record.title} placeholder="title" />
     <input type="text" bind:value={record.slug} placeholder="slug" />
     <FileInput bind:fileInput pasteFile={true} multiple={true} />
   </div>
-  <FileField {record} fieldName="files" />
+  <FileField {record} fieldName="files" bind:toBeRemoved />
   <textarea bind:value={record.body} placeholder="body"></textarea>
   <button type="submit">
     <Spinner active={$store} />
