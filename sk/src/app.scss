@@ -84,14 +84,18 @@ button {
 
 [data-label] {
   position: relative;
-  // display: flex;
-  &:focus-within::after {
+  display: flex;
+  &::after {
     position: absolute;
     top: 0;
     right: 0;
-    color: red;
-    background: black;
+    color: var(--text-muted);
     content: attr(data-label);
-    margin-right: 1em;
+    margin-right: 0.75em;
+    font-size: 75%;
+    transition: all 0.3s;
+  }
+  &:focus-within::after {
+    font-weight: bold;
   }
 }

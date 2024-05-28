@@ -21,10 +21,10 @@
     slug: z
       .string()
       .trim()
-      .min(1, "value required.")
+      .min(1, "required.")
       .refine((s: string) => !s.startsWith("/"), "must not start with a slash.")
       .describe("Slug"),
-    body: z.string().trim().min(1, "Required.").describe("Body"),
+    body: z.string().trim().min(1, "required.").describe("Body"),
   });
 
   async function onsubmit(e: SubmitEvent) {
@@ -53,12 +53,20 @@
 <form onsubmit={store.run}>
   <output>ID: {record.id ?? "-"}</output>
   <div class="flex h">
-    <input type="text" bind:value={record.title} placeholder="title" />
-    <input type="text" bind:value={record.slug} placeholder="slug" />
-    <FileInput bind:fileInput pasteFile={true} multiple={true} />
+    <div data-label="title">
+      <input type="text" bind:value={record.title} />
+    </div>
+    <div data-label="slug">
+      <input type="text" bind:value={record.slug} />
+    </div>
+    <div data-label="files">
+      <FileInput bind:fileInput pasteFile={true} multiple={true} />
+    </div>
   </div>
   <FileField {record} fieldName="files" bind:toBeRemoved />
-  <textarea bind:value={record.body} placeholder="body"></textarea>
+  <div data-label="body">
+    <textarea bind:value={record.body} placeholder="body"></textarea>
+  </div>
   <button type="submit">
     <Spinner active={$store} />
     Save
