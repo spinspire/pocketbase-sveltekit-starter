@@ -8,7 +8,7 @@
   import AuditPage from "../../auditlog/[coll]/[id]/+page.svelte";
   import type { PageData } from "../../auditlog/[coll]/[id]/$types";
   import Delete from "$lib/components/Delete.svelte";
-  import { authModel } from "$lib/pocketbase";
+  import { authModel, client } from "$lib/pocketbase";
 
   const { data, children }: { data: any; children: Snippet } = $props();
   const record = $derived(data.record);
@@ -29,7 +29,7 @@
       <a href="{base}/posts/{record.slug || record.id}/">
         <Tab key="view" pathname="/posts/{record.slug || record.id}/">View</Tab>
       </a>
-      {#if $authModel?.id === record.user}
+      {#if $authModel?.id === record.user || client.authStore.isAdmin}
         <a href="{base}/posts/{record.id}/edit/">
           <Tab key="edit" pathname="/posts/{record.id}/edit/">Edit</Tab>
         </a>
