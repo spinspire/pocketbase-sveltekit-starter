@@ -85,3 +85,14 @@ onRecordAfterDeleteRequest((e) => {
   const { doAudit } = require(`${__hooks}/auditlog`);
   doAudit("delete", e.record, e.httpContext);
 });
+
+onModelBeforeCreate((e) => {
+  const { slugDefault } = require(`${__hooks}/util`);
+  slugDefault(e.model);
+}, "posts");
+
+onModelBeforeUpdate((e) => {
+  const { slugDefault } = require(`${__hooks}/util`);
+  slugDefault(e.model);
+}, "posts");
+
