@@ -32,6 +32,9 @@
     ><Spinner active={$store} />
     Generate a random post
   </button>
+  {#snippet otherwise()}
+    <p>Please Sign In to create/edit posts.</p>
+  {/snippet}
 </LoginGuard>
 
 <Paginator store={posts} showIfSinglePage={true} />
@@ -56,7 +59,7 @@
     </div>
   </a>
 {:else}
-  <div>No posts found.</div>
+  <div>No posts found. Create some.</div>
 {/each}
 <Paginator store={posts} showIfSinglePage={true} />
 
