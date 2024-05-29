@@ -107,7 +107,9 @@ routerAdd(
     const [_, title] = body.match(/([a-zA-Z][ a-zA-Z]*[a-zAZ])[^a-zA-Z]*$/);
     const slug = title.toLowerCase().replace(" ", "-");
     const coll = $app.dao().findCollectionByNameOrId("posts");
-    const record = new Record(coll, { title, body, slug });
+    /** @type {models.Record} */
+    const user = c.get("authRecord");
+    const record = new Record(coll, { title, body, slug, user: user?.id });
     const form = new RecordUpsertForm($app, record);
     form.addFiles(
       "files",
