@@ -42,7 +42,7 @@ function doAudit(event, request) {
   const collection = record.collection().name;
   // exclude logging "auditlog" and include only what's in AUDITLOG env var
   if (collection != "auditlog" && collections.includes(collection)) {
-    const user = auth;
+    const user = auth?.isSuperuser() ? null : auth;
     const admin = auth?.isSuperuser() ? auth : null;
     console.log("AuditLog", collection, record.id, event, user?.id, admin?.id);
     const auditlog = new Record($app.findCollectionByNameOrId("auditlog"));

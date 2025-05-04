@@ -90,9 +90,7 @@ routerAdd(
     const [_, title] = body.match(/([a-zA-Z][ a-zA-Z]*[a-zAZ])[^a-zA-Z]*$/);
     const slug = title.toLowerCase().replace(" ", "-");
     const coll = $app.findCollectionByNameOrId("posts");
-    /** @type {models.Record} */
-    const user = c.get("authRecord");
-    const record = new Record(coll, { title, body, slug, user: user?.id });
+    const record = new Record(coll, { title, body, slug, user: c.auth?.id });
     const form = new RecordUpsertForm($app, record);
     record.set("files", [
       $filesystem.fileFromURL("https://picsum.photos/500/300"),
