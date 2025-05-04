@@ -1,15 +1,16 @@
 <script lang="ts">
   import { invalidateAll, preloadData, pushState } from "$app/navigation";
   import { page } from "$app/stores";
-  import type { ComponentType, Snippet, SvelteComponent } from "svelte";
+  import type { Component, Snippet } from "svelte";
   import Alerts from "./Alerts.svelte";
+  import { metadata } from "$lib/metadata";
 
   const {
     component,
     trigger,
   }: {
     trigger: Snippet<[(e: MouseEvent) => void]>;
-    component: ComponentType<SvelteComponent<{ data: any }>>;
+    component: Component;
   } = $props();
 
   let dialog: HTMLDialogElement | undefined = $state();
@@ -44,7 +45,7 @@
   <dialog bind:this={dialog} {onclose}>
     <button type="button" class="dismiss" onclick={onclose}>&times;</button>
     <Alerts />
-    <h2>{$page.state.selected.metadata.headline}</h2>
+    <h2>{$metadata.headline}</h2>
     <svelte:component this={component} data={$page.state.selected} />
   </dialog>
 {/if}

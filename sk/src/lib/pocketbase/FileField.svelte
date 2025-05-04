@@ -30,7 +30,13 @@
           </a>
         </td>
         <td>
-          <button type="button" class="small round" {onclick} {title}>
+          <button
+            type="button"
+            class="small round"
+            {onclick}
+            {title}
+            aria-label={title}
+          >
             <i class="bx bx-{icon}"></i>
           </button>
         </td>
