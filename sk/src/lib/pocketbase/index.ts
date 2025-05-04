@@ -11,10 +11,11 @@ import { readable, type Readable, type Subscriber } from "svelte/store";
 import { browser } from "$app/environment";
 import { base } from "$app/paths";
 import { invalidateAll } from "$app/navigation";
+import type { TypedPocketBase } from "./generated-types";
 
 export const client = new PocketBase(
   browser ? window.location.origin + base : undefined
-);
+) as TypedPocketBase;
 
 export const authModel = readable<AuthModel | AdminModel | null>(
   null,

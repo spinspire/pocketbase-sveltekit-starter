@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       pocketbase:
-        specifier: ^0.21.2
-        version: 0.21.5
+        specifier: ^0.26.0
+        version: 0.26.0
       zod:
         specifier: ^3.23.8
         version: 3.24.3
@@ -28,7 +28,7 @@ importers:
         specifier: ^3.0.0
         version: 3.1.2(svelte@5.28.2)(vite@5.4.19(sass@1.87.0))
       pocketbase-typegen:
-        specifier: ^1.2.1
+        specifier: ^1.3.1
         version: 1.3.1(encoding@0.1.13)
       prettier:
         specifier: ^3.1.1
@@ -1038,8 +1038,8 @@ packages:
     resolution: {integrity: sha512-nwPkcZU/EFDdGfVJWiaEKstkHWFXvf8RrmE36xANCXPwDo4OI5OS70CN3N/Ruw1CVx87EaGCbquVs0yRD3IqpQ==}
     hasBin: true
 
-  pocketbase@0.21.5:
-    resolution: {integrity: sha512-bnI/uinnQps+ElSlzxkc4yvwuSFfKcoszDtXH/4QT2FhGq2mJVUvDlxn+rjRXVntUjPfmMG5LEPZ1eGqV6ssog==}
+  pocketbase@0.26.0:
+    resolution: {integrity: sha512-WBBeOgz4Jnrd7a1KEzSBUJqpTortKKCcp16j5KoF+4tNIyQHsmynj+qRSvS56/RVacVMbAqO8Qkfj3N84fpzEw==}
 
   postcss@8.5.3:
     resolution: {integrity: sha512-dle9A3yYxlBSrt8Fu+IpjGT8SY8hN0mlaA6GY8t0P5PjIOZemULz/E2Bnm/2dcUOena75OTNkHI76uZBNUUq3A==}
@@ -2288,7 +2288,7 @@ snapshots:
       - encoding
       - supports-color
 
-  pocketbase@0.21.5: {}
+  pocketbase@0.26.0: {}
 
   postcss@8.5.3:
     dependencies:
