@@ -9,18 +9,13 @@ routerAdd(
   "GET",
   "/api/hello",
   (c) => {
-    /** @type {models.Admin} */
-    const admin = c.get("admin");
-    /** @type {models.Record} */
-    const record = c.get("authRecord");
+    const auth = c.auth;
     return c.json(200, {
-      message: "Hello " + (record?.getString("name") ?? admin?.email),
-      // the next var was injected by Go
-      foo,
+      message: "Hello " + (auth?.getString("name") ?? auth?.email()),
     });
   },
   // middleware(s)
-  $apis.requireAdminOrRecordAuth()
+  $apis.requireAuth()
 );
 
 /**
@@ -55,7 +50,7 @@ routerAdd(
     return c.json(200, { message });
   },
   // middleware(s)
-  $apis.requireAdminOrRecordAuth()
+  $apis.requireAuth()
 );
 
 // public config
@@ -68,57 +63,44 @@ routerAdd(
     const settings = $app.settings();
     config.site.name = settings.meta.appName;
     config.site.copyright = settings.meta.appName;
-    c.json(200, config);
+    return c.json(200, config);
   } /* no auth */
 );
 
-// auditlog generation
-onRecordAfterCreateRequest((e) => {
-  const { doAudit } = require(`${__hooks}/auditlog`);
-  return doAudit("insert", e.record, e.httpContext);
-});
-onRecordAfterUpdateRequest((e) => {
-  const { doAudit } = require(`${__hooks}/auditlog`);
-  return doAudit("update", e.record, e.httpContext);
-});
-onRecordAfterDeleteRequest((e) => {
-  const { doAudit } = require(`${__hooks}/auditlog`);
-  doAudit("delete", e.record, e.httpContext);
-});
-
-onModelBeforeCreate((e) => {
+onModelCreate((e) => {
   const { slugDefault } = require(`${__hooks}/util`);
   slugDefault(e.model);
+  e.next();
 }, "posts");
 
-onModelBeforeUpdate((e) => {
+onModelUpdate((e) => {
   const { slugDefault } = require(`${__hooks}/util`);
   slugDefault(e.model);
+  e.next();
 }, "posts");
 
 routerAdd(
   "POST",
   "/api/generate",
   (c) => {
-    const url = "https://loripsum.net/api/3/short/medium/plaintext";
+    const url = "http://metaphorpsum.com/paragraphs/2/4";
     const response = $http.send({ url });
     const body = response.raw;
     // last sentence becomes the title
     const [_, title] = body.match(/([a-zA-Z][ a-zA-Z]*[a-zAZ])[^a-zA-Z]*$/);
     const slug = title.toLowerCase().replace(" ", "-");
-    const coll = $app.dao().findCollectionByNameOrId("posts");
+    const coll = $app.findCollectionByNameOrId("posts");
     /** @type {models.Record} */
     const user = c.get("authRecord");
     const record = new Record(coll, { title, body, slug, user: user?.id });
     const form = new RecordUpsertForm($app, record);
-    form.addFiles(
-      "files",
-      $filesystem.fileFromUrl("https://picsum.photos/500/300"),
-      $filesystem.fileFromUrl("https://picsum.photos/500/300")
-    );
+    record.set("files", [
+      $filesystem.fileFromURL("https://picsum.photos/500/300"),
+      $filesystem.fileFromURL("https://picsum.photos/500/300"),
+    ]);
     form.submit();
     // $app.dao().saveRecord(record);
     c.json(200, record);
   },
-  $apis.requireAdminOrRecordAuth()
+  $apis.requireAuth()
 );

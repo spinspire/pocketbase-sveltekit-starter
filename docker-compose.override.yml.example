@@ -16,7 +16,7 @@ services:
       - default
   # uncomment to enable live development in Go
   # pb:
-  #   image: golang:1.22-alpine
+  #   image: golang:1.24-alpine
   #   command: modd
 
 networks:

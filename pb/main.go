@@ -7,12 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/dop251/goja"
-	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
-	"github.com/pocketbase/pocketbase/plugins/jsvm"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
 
@@ -94,14 +91,15 @@ func main() {
 
 	app.RootCmd.ParseFlags(os.Args[1:])
 
+	// TODO: get this working again
 	// load js files to allow loading external JavaScript migrations
-	jsvm.MustRegister(app, jsvm.Config{
-		MigrationsDir: migrationsDir,
-		HooksWatch:    true, // make this false for production
-		OnInit: func(vm *goja.Runtime) {
-			vm.Set("foo", "this var was injected into JSVM by Go")
-		},
-	})
+	// jsvm.MustRegister(app, jsvm.Config{
+	// 	MigrationsDir: migrationsDir,
+	// 	HooksWatch:    true, // make this false for production
+	// 	OnInit: func(vm *goja.Runtime) {
+	// 		vm.Set("foo", "this var was injected into JSVM by Go")
+	// 	},
+	// })
 
 	// register the `migrate` command
 	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
@@ -123,24 +121,15 @@ func main() {
 	 */
 	// hooks.Register(app)
 
-	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		// serves static files from the provided public dir (if exists)
-		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS(publicDir), indexFallback))
+		se.Router.GET("/*", apis.Static(os.DirFS(publicDir), indexFallback))
 
-		// custom endpoint
-		e.Router.AddRoute(echo.Route{
-			Method: http.MethodGet,
-			Path:   "/api/go-hello",
-			Handler: func(c echo.Context) error {
-				obj := map[string]interface{}{"message": "Hello world from Go!"}
-				return c.JSON(http.StatusOK, obj)
-			},
-			// Middlewares: []echo.MiddlewareFunc{
-			// 	apis.RequireAdminOrUserAuth(),
-			// },
+		se.Router.GET("/api/go-hello", func(e *core.RequestEvent) error {
+			return e.JSON(http.StatusOK, map[string]string{"message": "Hello world from Go!"})
 		})
 
-		return nil
+		return se.Next()
 	})
 
 	if err := app.Start(); err != nil {

@@ -1,4 +1,5 @@
 /.cache
+/.config
 /pocketbase
 /*.zip
 /pb_data

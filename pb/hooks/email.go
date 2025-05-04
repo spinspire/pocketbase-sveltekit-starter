@@ -9,7 +9,7 @@ import (
 	"html/template"
 
 	"github.com/pocketbase/pocketbase"
-	"github.com/pocketbase/pocketbase/models"
+	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/mailer"
 )
 
@@ -20,17 +20,17 @@ func init() {
 }
 
 // set IgnoreEmailVisibilityFlag for the record and it's expanded records (recursively)
-func ignoreEmailVisibility(record *models.Record, value bool) {
+func ignoreEmailVisibility(record *core.Record, value bool) {
 	record.IgnoreEmailVisibility(value)
 	for _, v := range record.Expand() {
-		if child, ok := v.(*models.Record); ok {
+		if child, ok := v.(*core.Record); ok {
 			// recursively set ...
 			ignoreEmailVisibility(child, value)
 		}
 	}
 }
 
-func doEmail(app *pocketbase.PocketBase, action, action_params string, record *models.Record) (err error) {
+func doEmail(app *pocketbase.PocketBase, action, action_params string, record *core.Record) (err error) {
 	// we have to IgnoreEmailVisibility(true) on the main record and all expanded relations in order
 	// to include email fields in the exported JSON
 	ignoreEmailVisibility(record, true)
