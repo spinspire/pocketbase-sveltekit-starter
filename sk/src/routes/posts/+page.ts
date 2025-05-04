@@ -11,11 +11,7 @@ export const load: PageLoad = async ({ parent, fetch }) => {
     fetch,
   };
   const posts = await watch<PostsResponse<any>>("posts", queryParams);
-  const { metadata } = await parent();
-  // you could set the title/headline either here or in +page.svelte
-  metadata.title = "Posts";
   return {
-    metadata,
     posts,
   };
 };

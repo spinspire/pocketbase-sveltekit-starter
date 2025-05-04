@@ -8,11 +8,12 @@
   import LoginGuard from "$lib/components/LoginGuard.svelte";
   import Paginator from "$lib/pocketbase/Paginator.svelte";
   import Spinner, { activityStore } from "$lib/components/Spinner.svelte";
+  import { metadata } from "$lib/metadata";
 
   const { data } = $props();
   const posts = $derived(data.posts);
   $effect(() => {
-    data.metadata.title = data.metadata.headline = "Posts";
+    $metadata.title = $metadata.headline = "Posts";
   });
   const store = activityStore(() =>
     client.send("/api/generate", { method: "post" })

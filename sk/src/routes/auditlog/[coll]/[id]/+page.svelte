@@ -1,10 +1,11 @@
 <script lang="ts">
+    import { metadata } from "$lib/metadata";
   import type { PageData } from "./$types";
   import Changes from "./Changes.svelte";
 
   const { data }: { data: PageData } = $props();
   $effect(() => {
-    data.metadata.title = data.metadata.headline = "Auditlog";
+    $metadata.title = $metadata.headline = "Auditlog";
   });
 </script>
 

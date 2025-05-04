@@ -2,6 +2,7 @@
   import { alerts } from "$lib/components/Alerts.svelte";
   import FileInput from "$lib/components/FileInput.svelte";
   import Spinner, { activityStore } from "$lib/components/Spinner.svelte";
+  import { metadata } from "$lib/metadata.js";
   import { authModel, client, save } from "$lib/pocketbase";
   import FileField from "$lib/pocketbase/FileField.svelte";
   import type { PostsResponse } from "$lib/pocketbase/generated-types.js";
@@ -12,7 +13,7 @@
   let fileInput = $state() as HTMLInputElement;
   let toBeRemoved = $state([]);
   $effect(() => {
-    data.metadata.title = data.metadata.headline = `Edit Post: ${record.title}`;
+    $metadata.title = $metadata.headline = `Edit Post: ${record.title}`;
   });
 
   const schema = z.object({

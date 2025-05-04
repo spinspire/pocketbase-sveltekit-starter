@@ -5,19 +5,19 @@
   import Alerts from "$lib/components/Alerts.svelte";
   import LoginBadge from "$lib/components/LoginBadge.svelte";
   import Nav from "$lib/components/Nav.svelte";
+  import { metadata } from "$lib/metadata";
   const { data, children } = $props();
-  const metadata = $derived(data.metadata ?? {});
   const config = $derived(data.config ?? {});
 
   $effect(() => {
     if ($page.error) {
-      metadata.title = $page.error.message;
+      $metadata.title = $page.error.message;
     }
   });
 </script>
 
 <svelte:head>
-  <title>{metadata.title} | {config.site?.name}</title>
+  <title>{$metadata.title} | {config.site?.name}</title>
 </svelte:head>
 
 <header class="container">
@@ -29,7 +29,7 @@
 </header>
 <main class="container">
   <Alerts />
-  <h1>{metadata.headline ?? metadata.title}</h1>
+  <h1>{$metadata.headline ?? $metadata.title}</h1>
   {@render children()}
 </main>
 <footer class="container">

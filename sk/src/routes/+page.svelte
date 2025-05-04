@@ -1,11 +1,12 @@
 <script lang="ts">
   import { base } from "$app/paths";
+  import { metadata } from "$lib/metadata.js";
 
   const { data } = $props();
   $effect(() => {
     // you could set the metadata either here or in +page.ts
-    data.metadata.title = "Home";
-    data.metadata.headline = `Welcome to ${data.config.site?.name}`;
+    $metadata.title = "Home";
+    $metadata.headline = `Welcome to ${data.config.site?.name}`;
   });
 </script>
 

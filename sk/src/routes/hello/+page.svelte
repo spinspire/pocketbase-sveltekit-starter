@@ -1,9 +1,10 @@
 <script lang="ts">
+  import { metadata } from "$lib/metadata.js";
   import { client } from "$lib/pocketbase/index.js";
 
   let { data } = $props();
   $effect(() => {
-    data.metadata.title = data.metadata.headline = "Hello Page";
+    $metadata.title = $metadata.headline = "Hello Page";
   });
   async function sendEmail(e: SubmitEvent) {
     e.preventDefault();

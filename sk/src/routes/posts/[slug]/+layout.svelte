@@ -9,17 +9,18 @@
   import type { PageData } from "../../auditlog/[coll]/[id]/$types";
   import Delete from "$lib/components/Delete.svelte";
   import { authModel, client } from "$lib/pocketbase";
+  import { metadata } from "$lib/metadata";
 
   const { data, children }: { data: any; children: Snippet } = $props();
   const record = $derived(data.record);
   let active = $state("");
   $effect(() => {
     if (active === "auditlog")
-      data.metadata.title =
-        data.metadata.headline = `Auditlog: ${record.collectionName}/${record.id}`;
+      $metadata.title =
+        $metadata.headline = `Auditlog: ${record.collectionName}/${record.id}`;
     if (active === "delete")
-      data.metadata.title =
-        data.metadata.headline = `Delete: ${record.collectionName}/${record.id}`;
+      $metadata.title =
+        $metadata.headline = `Delete: ${record.collectionName}/${record.id}`;
   });
 </script>
 
