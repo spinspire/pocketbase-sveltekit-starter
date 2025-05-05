@@ -20,7 +20,8 @@ if [ "$RELEASE" = "standard" ]; then
     wget -q "$url" -O /tmp/pb.zip
     unzip -o /tmp/pb.zip pocketbase
   fi
-else
+fi
+if [ "$RELEASE" = "custom" ]; then
   # check for go and main.go, and use if present
   if [ -x "$(which go)" ] && [ -f "./main.go" ]; then
     CMD=${CMD:-"modd"}

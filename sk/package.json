@@ -6,6 +6,7 @@
     "dev": "vite dev",
     "dev:backend": "cd ../pb && modd",
     "backend": "AUDITLOG=users,posts ../pb/entrypoint.sh ./pocketbase serve --publicDir=../sk/build",
+    "backend:windows": "cd ../pb && set \"RELEASE=standard\" && entrypoint.bat pocketbase.exe serve --publicDir=../sk/build",
     "build": "vite build",
     "build:backend": "cd ../pb && go build",
     "typegen": "pocketbase-typegen --db ../pb/pb_data/data.db --out ./src/lib/pocketbase/generated-types.ts",
