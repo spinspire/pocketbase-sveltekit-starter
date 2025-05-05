@@ -81,14 +81,6 @@ func main() {
 		"fallback the request to index.html on missing static path (eg. when pretty urls are used with SPA)",
 	)
 
-	var queryTimeout int
-	app.RootCmd.PersistentFlags().IntVar(
-		&queryTimeout,
-		"queryTimeout",
-		30,
-		"the default SELECT queries timeout in seconds",
-	)
-
 	app.RootCmd.ParseFlags(os.Args[1:])
 
 	// TODO: get this working again
