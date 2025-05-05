@@ -1,9 +1,7 @@
 <script lang="ts">
   import "../app.scss";
-  import { base } from "$app/paths";
   import { page } from "$app/stores";
   import Alerts from "$lib/components/Alerts.svelte";
-  import LoginBadge from "$lib/components/LoginBadge.svelte";
   import Nav from "$lib/components/Nav.svelte";
   import { metadata } from "$lib/metadata";
   const { data, children } = $props();
@@ -20,16 +18,9 @@
   <title>{$metadata.title} | {config.site?.name}</title>
 </svelte:head>
 
-<header class="container">
-  <a href={`${base}/`} class="logo">
-    <img src={`${base}/favicon.svg`} alt="application logo" />
-  </a>
-  <Nav />
-  <LoginBadge signupAllowed={config.signupAllowed} />
-</header>
+<Nav />
 <main class="container">
   <Alerts />
-  <h1>{$metadata.headline ?? $metadata.title}</h1>
   {@render children()}
 </main>
 <footer class="container">
@@ -38,15 +29,6 @@
 </footer>
 
 <style lang="scss">
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    .logo {
-      width: 2rem;
-      height: 2rem;
-    }
-  }
   main {
     flex-grow: 1;
   }

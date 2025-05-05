@@ -56,39 +56,75 @@
 
 <article>
   {#if _alerts.length > 1}
-    <button onclick={dismissAll} class="dismiss">&times; dismiss all</button>
+    <button
+      onclick={dismissAll}
+      class={`dismiss-all top-round ${_alerts[0].type}`}
+      >&times; dismiss all</button
+    >
   {/if}
   {#each _alerts as alert}
     <blockquote class={alert.type}>
-      <button onclick={() => dismiss(alert)} class="dismiss">&times;</button>
-      {#if alert.html}
-        {@html alert.message}
-      {:else}
-        {alert.message}
-      {/if}
+      <button onclick={() => dismiss(alert)} class="dismiss circle extra"
+        >&times;</button
+      >
+      <span>
+        {#if alert.html}
+          {@html alert.message}
+        {:else}
+          {alert.message}
+        {/if}
+      </span>
     </blockquote>
   {/each}
 </article>
 
-<style>
-  .dismiss {
-    cursor: pointer;
-    padding: 2px 7px;
+<style lang="scss">
+  .dismiss-all {
+    margin: 0;
+    padding: 0.1rem 1rem;
     border-radius: 15px;
   }
-  blockquote {
-    margin: 0 0;
+  .dismiss {
+    font-size: 2rem;
+    font-weight: bold;
+    padding: 0;
+    color: var(--error-container);
+    background-color: transparent;
+  }
+  article {
+    background-color: transparent;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+
+    blockquote {
+      margin: 0 0;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem 1rem;
+      span {
+        vertical-align: middle;
+        font-weight: bold;
+        font-size: 1.2rem;
+      }
+    }
   }
   .success {
-    color: var(--links);
+    color: var(--success-text);
     border-left-color: var(--links);
+    background-color: var(--success);
   }
   .warning {
-    color: var(--variable);
-    border-left-color: var(--selection);
+    color: var(--warning-text);
+    border-left-color: var(--warning-text);
+    background-color: var(--warning);
   }
   .error {
     color: var(--danger);
     border-left-color: var(--variable);
+  }
+  .info {
+    color: var(--info-text);
+    border-left-color: var(--info-text);
+    background-color: var(--info);
   }
 </style>

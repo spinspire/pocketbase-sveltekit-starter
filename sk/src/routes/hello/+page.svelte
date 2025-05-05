@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { alerts } from "$lib/components/Alerts.svelte";
   import { metadata } from "$lib/metadata.js";
   import { client } from "$lib/pocketbase/index.js";
 

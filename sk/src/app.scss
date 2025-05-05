@@ -1,3 +1,14 @@
+:root {
+  --success: #a4f1a7;
+  --success-text: #1b9528;
+  --error: #ffb4ab;
+  --error-text: #93000a;
+  --warning: #ffbd5b;
+  --warning-text: #90672e;
+  --info: #79c3ff;
+  --info-text: #2c5d6c;
+}
+
 html {
   display: flex;
   flex-flow: column;

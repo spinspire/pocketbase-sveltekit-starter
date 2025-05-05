@@ -1,6 +1,9 @@
 <script lang="ts">
   import { base } from "$app/paths";
   import { page } from "$app/stores";
+  import LoginBadge from "./LoginBadge.svelte";
+  import { metadata } from "$lib/metadata";
+
   const links = [
     ["/", "Home"],
     ["/posts/", "Posts"],
@@ -8,33 +11,37 @@
   ];
 </script>
 
-<nav>
-  {#each links as [path, label]}
-    {@const active = $page.url.pathname == path}
-    <a href={`${base}${path}`} class:active>{label}</a>
-  {/each}
-</nav>
+<header>
+  <nav class="container">
+    <a href={`${base}/`} class="logo">
+      <img src={`${base}/favicon.svg`} alt="application logo" />
+    </a>
+    <h1 class="max center-align">{$metadata.headline ?? $metadata.title}</h1>
+    <div class="tabs">
+      {#each links as [path, label]}
+        {@const active = $page.url.pathname == path}
+        <a href={`${base}${path}`} class:active>{label}</a>
+      {/each}
+    </div>
+    <LoginBadge />
+  </nav>
+</header>
 
 <style lang="scss">
-  nav {
-    a {
-      padding: 0.5em 1em;
-      margin: 0;
-      border-radius: 0;
-      background: var(--background-alt);
-      border-bottom: solid var(--background);
-      &.active {
-        background: var(--background);
-        font-weight: bold;
-        border-bottom: solid var(--links);
-      }
-      &:first-child {
-        border-top-left-radius: 0.5rem;
-        border-bottom-left-radius: 0.5rem;
-      }
-      &:last-child {
-        border-top-right-radius: 0.5rem;
-        border-bottom-right-radius: 0.5rem;
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    h1 {
+      font-size: 2rem;
+    }
+    .logo {
+      // responsive logo
+      width: 2rem;
+      height: 2rem;
+      img {
+        width: 100%;
+        height: 100%;
       }
     }
   }

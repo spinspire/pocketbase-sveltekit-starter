@@ -24,7 +24,7 @@
 {#if $authModel}
   <Dialog>
     {#snippet trigger(show)}
-      <button class="badge" onclick={show}>
+      <button onclick={show} class="border">
         {#if $authModel.avatar}
           <img
             src={client.getFileUrl($authModel, $authModel.avatar)}
@@ -37,7 +37,7 @@
       </button>
     {/snippet}
     <div class="wrapper">
-      <div class="badge">
+      <div>
         {#if $authModel.avatar}
           <img
             src={client.getFileUrl($authModel, $authModel.avatar)}
@@ -48,7 +48,7 @@
           >{$authModel?.name ?? $authModel?.username ?? $authModel?.email}</samp
         >
       </div>
-      <button onclick={logout}>Sign Out</button>
+      <button onclick={logout} class="border">Sign Out</button>
     </div>
   </Dialog>
 {:else}
@@ -62,33 +62,3 @@
     <LoginForm {signupAllowed} />
   </Dialog>
 {/if}
-
-<style lang="scss">
-  .badge {
-    padding: 0;
-    background-color: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    > img {
-      height: 2em;
-      width: 2em;
-      border-radius: 50%;
-    }
-    > samp {
-      display: inline-block !important;
-      -moz-border-radius: 20px !important;
-      -webkit-border-radius: 20px !important;
-      -khtml-border-radius: 20px !important;
-      border-radius: 20px !important;
-      padding: 0.5rem !important;
-      text-align: center !important;
-      line-height: 1.5rem !important;
-    }
-  }
-  .wrapper {
-    display: flex;
-    flex-direction: column;
-  }
-</style>
