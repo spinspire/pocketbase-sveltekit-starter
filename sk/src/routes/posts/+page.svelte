@@ -21,18 +21,29 @@
 </script>
 
 <LoginGuard>
-  <Link2Modal component={EditPage}>
-    {#snippet trigger(onclick)}
-      <a href="{base}/posts/new/edit" class="button" {onclick}>
-        New Post
-        <i class="bx bx-tada bx-list-plus"></i>
-      </a>
-    {/snippet}
-  </Link2Modal>
-  <button type="button" onclick={store.run} disabled={$store}
-    ><Spinner active={$store} />
-    Generate a random post
-  </button>
+  <nav class="no-space">
+    <Link2Modal component={EditPage}>
+      {#snippet trigger(onclick)}
+        <a href="{base}/posts/new/edit" class="link-modal" {onclick}>
+          <button class="border left-round">
+            <span>New Post</span>
+            <i class="bx bx-tada bx-list-plus"></i>
+          </button>
+        </a>
+      {/snippet}
+    </Link2Modal>
+    <button
+      class="right-round"
+      type="button"
+      onclick={store.run}
+      disabled={$store}
+    >
+      {#if $store}
+        <progress class="circle small"></progress>
+      {/if}
+      <span>Generate a random post</span>
+    </button>
+  </nav>
   {#snippet otherwise()}
     <p>Please Sign In to create/edit posts.</p>
   {/snippet}
@@ -41,37 +52,53 @@
 <Paginator store={posts} showIfSinglePage={true} />
 {#each $posts.items as item}
   {@const [file] = item.files}
-  {@const thumbnail = client.files.getUrl(item, file, { thumb: "100x100" })}
-  <a href={`${base}/posts/${item.slug || item.id}`} class="post">
-    <DateShow date={item.updated} />
-    <Image record={item} {file} />
-    <div>
-      <div>
-        <i class="bx bx-calendar" title="on date"></i>
-        {new Intl.DateTimeFormat(undefined, { dateStyle: "full" }).format(
-          new Date(item.updated)
-        )}
-        {#if item.expand?.user?.name}
-          <i class="bx bx-pen" title="author"></i>
-          {item.expand.user.name}
-        {/if}
+  <article class="no-padding">
+    <!-- <a href={`${base}/posts/${item.slug || item.id}`}> -->
+    <div class="grid no-space">
+      <div class="s1">
+        <Image record={item} {file} />
       </div>
-      <h2>{item.title}</h2>
+      <div class="s11">
+        <a class="body" href={`${base}/posts/${item.slug || item.id}`}>
+          <div class="padding">
+            <h5>{item.title}</h5>
+            <div class="article-info">
+              <i class="bx bx-calendar" title="on date"></i>
+              {new Intl.DateTimeFormat(undefined, { dateStyle: "full" }).format(
+                new Date(item.updated)
+              )}
+              {#if item.expand?.user?.name}
+                <i class="bx bx-pen" title="author"></i>
+                {item.expand.user.name}
+              {/if}
+            </div>
+          </div>
+        </a>
+      </div>
     </div>
-  </a>
+  </article>
 {:else}
   <div>No posts found. Create some.</div>
 {/each}
 <Paginator store={posts} showIfSinglePage={true} />
 
 <style lang="scss">
-  .post {
-    color: inherit;
-    display: flex;
-    gap: 1rem;
-    padding-block: 1rem;
-    & + .post {
-      border-block-start: dashed 1px;
+  article {
+    h5 {
+      font-size: larger;
+    }
+    .body {
+      justify-content: left;
+      width: 100%;
+    }
+    .article-info {
+      padding-top: 0.5rem;
+    }
+  }
+
+  .link-modal {
+    button {
+      margin: 0;
     }
   }
 </style>

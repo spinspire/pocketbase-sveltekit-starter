@@ -10,7 +10,7 @@ export const load: PageLoad = async ({ parent, fetch }) => {
     expand,
     fetch,
   };
-  const posts = await watch<PostsResponse<any>>("posts", queryParams);
+  const posts = await watch<PostsResponse<any>>("posts", queryParams, 0, 4);
   return {
     posts,
   };

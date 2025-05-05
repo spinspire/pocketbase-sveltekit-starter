@@ -23,9 +23,11 @@
   <Alerts />
   {@render children()}
 </main>
-<footer class="container">
-  Copyright &copy; {config.site?.year}
-  {config.site?.copyright}
+<footer>
+  <div class="container">
+    Copyright &copy; {config.site?.year}
+    {config.site?.copyright}
+  </div>
 </footer>
 
 <style lang="scss">
