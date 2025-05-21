@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"pocketbase/webauthn"
 	"strings"
 
 	"github.com/pocketbase/pocketbase"
@@ -112,6 +113,9 @@ func main() {
 	 * in ./pb_hooks.
 	 */
 	// hooks.Register(app)
+
+	// register the webauthn plugin
+	webauthn.Register(app)
 
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		// serves static files from the provided public dir (if exists)

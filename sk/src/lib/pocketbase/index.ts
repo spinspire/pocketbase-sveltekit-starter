@@ -1,6 +1,5 @@
 import PocketBase, { type AuthProviderInfo, RecordService } from "pocketbase";
 import type {
-  AdminModel,
   AuthModel,
   ListResult,
   RecordListOptions,
@@ -12,12 +11,17 @@ import { browser } from "$app/environment";
 import { base } from "$app/paths";
 import { invalidateAll } from "$app/navigation";
 import type { TypedPocketBase } from "./generated-types";
+import {
+  startAuthentication,
+  startRegistration,
+} from "@simplewebauthn/browser";
+import { alerts } from "$lib/components/Alerts.svelte";
 
 export const client = new PocketBase(
   browser ? window.location.origin + base : undefined
 ) as TypedPocketBase;
 
-export const authModel = readable<AuthModel | AdminModel | null>(
+export const authModel = readable<AuthModel | null>(
   null,
   function (set, update) {
     client.authStore.onChange((token, model) => {
@@ -43,9 +47,74 @@ export async function login(
 ) {
   if (register) {
     const user = { ...rest, email, password, confirmPassword: password };
-    await client.collection("users").create(user);
+    await client.collection("users").create({ ...user, metadata: {} });
   }
   await client.collection("users").authWithPassword(email, password);
+}
+
+export async function webauthnRegister(
+  usernameOrEmail: string
+): Promise<void | Error> {
+  try {
+    const resp = await fetch(
+      `/api/webauthn/registration-options?usernameOrEmail=${usernameOrEmail}`
+    );
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error(text);
+    }
+    const { publicKey: optionsJSON } = await resp.json();
+    let attResp = await startRegistration({ optionsJSON });
+    const res = await fetch(`/api/webauthn/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...attResp, usernameOrEmail }),
+    });
+    if (!res.ok) throw new Error("Failed to register");
+    alerts.success("Passkey registered successfully.");
+  } catch (e) {
+    if (e instanceof Error) {
+      if (e.name === "NotAllowedError") {
+        alerts.error("Registration denied or timed out.");
+      }
+      console.error(e);
+    }
+  }
+}
+
+export async function webauthnLogin(usernameOrEmail: string) {
+  try {
+    const resp = await fetch(
+      `/api/webauthn/login-options?usernameOrEmail=${usernameOrEmail}`
+    );
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error(text);
+    }
+    const { publicKey: optionsJSON } = await resp.json();
+    let asseResp = await startAuthentication({ optionsJSON });
+    const res = await fetch(`/api/webauthn/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...asseResp, usernameOrEmail }),
+    });
+    const authResponse = await res.json();
+    if (!res.ok) throw new Error("Failed to login");
+    client.authStore.save(authResponse.token, authResponse.record);
+  } catch (e) {
+    if (e instanceof Error) {
+      if (e.name === "NotAllowedError") {
+        alerts.error("Registration denied or timed out.");
+      } else {
+        alerts.error(e.message);
+      }
+      console.error(e);
+    }
+  }
 }
 
 export function logout() {

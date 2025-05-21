@@ -4,7 +4,7 @@
     passwordLogin = true,
     signupAllowed = true,
   } = $props();
-  import { client, providerLogin } from "../pocketbase";
+  import { client, providerLogin, webauthnLogin } from "../pocketbase";
   import TabGroup from "./TabGroup.svelte";
   import Tab from "./Tab.svelte";
   import TabContent from "./TabContent.svelte";
@@ -16,17 +16,30 @@
     password: "",
     passwordConfirm: "",
     admin: false,
+    passkey: false,
   });
   let signup = false;
 
   async function submit(e: SubmitEvent) {
     e.preventDefault();
     if (signup) {
-      await coll.create({ ...form });
+      await coll.create({
+        ...form,
+        metadata: {
+          foo: "bar",
+        },
+      });
+    }
+    if (form.passkey) {
+      const { email } = form;
+      await webauthnLogin(email);
+      return;
     }
     // signin
     if (form.admin) {
-      await client.admins.authWithPassword(form.email, form.password);
+      await client
+        .collection("_superusers")
+        .authWithPassword(form.email, form.password);
     } else {
       await coll.authWithPassword(form.email, form.password);
     }
@@ -35,15 +48,25 @@
 </script>
 
 {#snippet signin()}
-  <input bind:value={form.email} required type="text" placeholder="email" />
   <input
-    bind:value={form.password}
+    bind:value={form.email}
     required
-    type="password"
-    placeholder="password"
+    type="text"
+    placeholder="email/username"
   />
+  {#if !form.passkey}
+    <input
+      bind:value={form.password}
+      required
+      type="password"
+      placeholder="password"
+    />
+  {/if}
   <label title="sign-in as admin">
     <input type="checkbox" bind:checked={form.admin} />Admin
+  </label>
+  <label title="sign-in using passkey">
+    <input type="checkbox" bind:checked={form.passkey} />Sign-in with passkey
   </label>
   <button type="submit" onclick={() => (signup = false)}>Sign In</button>
 {/snippet}

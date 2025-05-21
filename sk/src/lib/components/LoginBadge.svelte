@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
-  import { authModel, client } from "../pocketbase";
+  import { authModel, client, webauthnRegister } from "../pocketbase";
   import Alerts, { alerts } from "./Alerts.svelte";
   import Dialog from "./Dialog.svelte";
   import LoginForm from "./LoginForm.svelte";
@@ -48,6 +48,9 @@
           >{$authModel?.name ?? $authModel?.username ?? $authModel?.email}</samp
         >
       </div>
+      <button onclick={() => webauthnRegister($authModel?.email)}
+        >Register Passkey</button
+      >
       <button onclick={logout}>Sign Out</button>
     </div>
   </Dialog>

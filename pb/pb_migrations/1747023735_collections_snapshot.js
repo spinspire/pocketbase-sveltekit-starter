@@ -401,6 +401,16 @@ migrate((app) => {
         },
         {
           "hidden": false,
+          "id": "json1326724116",
+          "maxSize": 0,
+          "name": "metadata",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "hidden": false,
           "id": "autodate2990389176",
           "name": "created",
           "onCreate": true,
@@ -1191,6 +1201,107 @@ migrate((app) => {
       "type": "base",
       "updateRule": null,
       "viewRule": null
+    },
+    {
+      "createRule": null,
+      "deleteRule": "@request.auth.id != null && @request.auth.id = user.id",
+      "fields": [
+        {
+          "autogeneratePattern": "[a-z0-9]{15}",
+          "hidden": false,
+          "id": "text3208210256",
+          "max": 15,
+          "min": 15,
+          "name": "id",
+          "pattern": "^[a-z0-9]+$",
+          "presentable": false,
+          "primaryKey": true,
+          "required": true,
+          "system": true,
+          "type": "text"
+        },
+        {
+          "cascadeDelete": true,
+          "collectionId": "_pb_users_auth_",
+          "hidden": false,
+          "id": "relation2375276105",
+          "maxSelect": 1,
+          "minSelect": 0,
+          "name": "user",
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "relation"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text245846248",
+          "max": 0,
+          "min": 0,
+          "name": "label",
+          "pattern": "",
+          "presentable": true,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text1727648867",
+          "max": 0,
+          "min": 0,
+          "name": "credential_id",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": true,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "json4194641934",
+          "maxSize": 0,
+          "name": "credentials",
+          "presentable": false,
+          "required": true,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "hidden": false,
+          "id": "autodate2990389176",
+          "name": "created",
+          "onCreate": true,
+          "onUpdate": false,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        },
+        {
+          "hidden": false,
+          "id": "autodate3332085495",
+          "name": "updated",
+          "onCreate": true,
+          "onUpdate": true,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        }
+      ],
+      "id": "pbc_2446740374",
+      "indexes": [
+        "CREATE INDEX `idx_VTZxlVVqVm` ON `passkeys` (\n  `credential_id`,\n  `user`\n)"
+      ],
+      "listRule": "@request.auth.id != null && @request.auth.id = user.id",
+      "name": "passkeys",
+      "system": false,
+      "type": "base",
+      "updateRule": null,
+      "viewRule": "@request.auth.id != null && @request.auth.id = user.id"
     }
   ];
 
