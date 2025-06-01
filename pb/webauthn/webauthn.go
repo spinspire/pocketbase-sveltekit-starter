@@ -56,14 +56,14 @@ var (
 	webAuthn *webauthn.WebAuthn
 )
 
-func FindAuthRecordByUsernameOrEmail(app *pocketbase.PocketBase, usernameOrEmail string) (*core.Record, error) {
+func findAuthRecordByUsernameOrEmail(app *pocketbase.PocketBase, usernameOrEmail string) (*core.Record, error) {
 	user, err := app.FindFirstRecordByFilter("users", "username = {:qs} || email = {:qs}", map[string]any{
 		"qs": usernameOrEmail,
 	})
 	return user, err
 }
 
-func SaveCredentials(app *pocketbase.PocketBase, user *core.Record, creds webauthn.Credential) error {
+func saveCredentials(app *pocketbase.PocketBase, user *core.Record, creds webauthn.Credential) error {
 	credID := base64.StdEncoding.EncodeToString(creds.ID) // Parse the credential ID to a string
 	passkeyRecord, err := app.FindFirstRecordByFilter("passkeys", "credential_id = {:id}", map[string]any{
 		"id": credID,
@@ -117,7 +117,7 @@ func Register(app *pocketbase.PocketBase) {
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		// Start of the registration process
 		se.Router.GET("/api/webauthn/registration-options", func(c *core.RequestEvent) error {
-			user, err := FindAuthRecordByUsernameOrEmail(app, c.Request.URL.Query()["usernameOrEmail"][0])
+			user, err := findAuthRecordByUsernameOrEmail(app, c.Request.URL.Query()["usernameOrEmail"][0])
 			if err != nil {
 				return c.JSON(400, responses["failed"])
 			}
@@ -135,7 +135,7 @@ func Register(app *pocketbase.PocketBase) {
 		// Finish the registration process
 		se.Router.POST("/api/webauthn/register", func(c *core.RequestEvent) error {
 			info, _ := c.RequestInfo() // must get the request info to drain the body text
-			user, err := FindAuthRecordByUsernameOrEmail(app, info.Body["usernameOrEmail"].(string))
+			user, err := findAuthRecordByUsernameOrEmail(app, info.Body["usernameOrEmail"].(string))
 			if err != nil {
 				return c.JSON(400, responses["failed"])
 			}
@@ -147,7 +147,7 @@ func Register(app *pocketbase.PocketBase) {
 				return c.JSON(500, responses["reg_error"])
 			}
 
-			if err := SaveCredentials(app, user, *creds); err != nil {
+			if err := saveCredentials(app, user, *creds); err != nil {
 				return c.JSON(500, responses["cred_error"])
 			}
 			return c.JSON(200, responses["reg_success"])
@@ -155,7 +155,7 @@ func Register(app *pocketbase.PocketBase) {
 
 		// Start of the login process
 		se.Router.GET("/api/webauthn/login-options", func(c *core.RequestEvent) error {
-			user, err := FindAuthRecordByUsernameOrEmail(app, c.Request.URL.Query()["usernameOrEmail"][0])
+			user, err := findAuthRecordByUsernameOrEmail(app, c.Request.URL.Query()["usernameOrEmail"][0])
 			if err != nil {
 				return c.JSON(400, responses["failed"])
 			}
@@ -173,7 +173,7 @@ func Register(app *pocketbase.PocketBase) {
 		// Finish the login process
 		se.Router.POST("/api/webauthn/login", func(c *core.RequestEvent) error {
 			info, _ := c.RequestInfo() // must get the request info to drain the body text
-			user, err := FindAuthRecordByUsernameOrEmail(app, info.Body["usernameOrEmail"].(string))
+			user, err := findAuthRecordByUsernameOrEmail(app, info.Body["usernameOrEmail"].(string))
 			if err != nil {
 				return c.JSON(400, responses["failed"])
 			}
@@ -185,7 +185,7 @@ func Register(app *pocketbase.PocketBase) {
 				return c.JSON(500, responses["login_error"])
 			}
 
-			if err := SaveCredentials(app, user, *creds); err != nil {
+			if err := saveCredentials(app, user, *creds); err != nil {
 				return c.JSON(500, responses["cred_error"])
 			}
 			return apis.RecordAuthResponse(c, user, "passkey", nil)
