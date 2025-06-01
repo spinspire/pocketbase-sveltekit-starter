@@ -8,7 +8,7 @@ services:
       - 8090
     working_dir: /app/pb
     environment:
-      - RELEASE=standard # use "custom" for main.go build
+      - RELEASE=${RELEASE:-standard} # use "custom" for main.go build, "standard" for downloaded binary
       - PB_VERSION=0.27.2
       - PB_ARCH=linux_amd64
       - HOME=/app/pb
