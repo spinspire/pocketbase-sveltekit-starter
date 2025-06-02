@@ -82,21 +82,28 @@ button {
   }
 }
 
-[data-label] {
+label {
   position: relative;
-  display: flex;
-  &::after {
-    position: absolute;
-    top: 0;
-    right: 0;
-    color: var(--text-muted);
-    content: attr(data-label);
-    margin-right: 0.75em;
-    font-size: 75%;
-    transition: all 0.3s;
+  margin-top: 1.2rem; // space for the label to move up
+  input {
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
   }
-  &:focus-within::after {
-    font-weight: bold;
+  span {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    color: var(--text-muted);
+    cursor: text;
+    transition: all 0.2s ease-in-out;
+  }
+  input:focus + span,
+  input:not(:placeholder-shown) + span {
+    top: -1.2rem;
+    left: -0.2rem;
+    font-size: 0.8rem;
+    color: var(--text);
+    padding-inline: 0.5rem;
   }
 }
 

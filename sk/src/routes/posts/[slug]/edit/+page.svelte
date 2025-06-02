@@ -54,12 +54,14 @@
 <form onsubmit={store.run}>
   <output>ID: {record.id ?? "-"}</output>
   <div class="flex h">
-    <div data-label="title">
-      <input type="text" bind:value={record.title} />
-    </div>
-    <div data-label="slug">
-      <input type="text" bind:value={record.slug} />
-    </div>
+    <label>
+      <input type="text" placeholder="" bind:value={record.title} />
+      <span>Title</span>
+    </label>
+    <label>
+      <input type="text" placeholder="" bind:value={record.slug} />
+      <span>Slug</span>
+    </label>
     <div data-label="files">
       <FileInput bind:fileInput pasteFile={true} multiple={true} />
     </div>

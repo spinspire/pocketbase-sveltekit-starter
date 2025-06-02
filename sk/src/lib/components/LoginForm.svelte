@@ -48,19 +48,20 @@
 </script>
 
 {#snippet signin()}
-  <input
-    bind:value={form.email}
-    required
-    type="text"
-    placeholder="email/username"
-  />
+  <label>
+    <input bind:value={form.email} required type="text" placeholder="" />
+    <span>Email / Username</span>
+  </label>
   {#if !form.passkey}
-    <input
-      bind:value={form.password}
-      required
-      type="password"
-      placeholder="password"
-    />
+    <label>
+      <input
+        bind:value={form.password}
+        required
+        type="password"
+        placeholder=""
+      />
+      <span>Password</span>
+    </label>
   {/if}
   <label title="sign-in as admin">
     <input type="checkbox" bind:checked={form.admin} />Admin
@@ -83,30 +84,37 @@
           {@render signin()}
         </TabContent>
         <TabContent key="SignUp">
-          <input
-            bind:value={form.email}
-            required
-            type="text"
-            placeholder="email"
-          />
-          <input
-            bind:value={form.password}
-            required
-            type="password"
-            placeholder="password"
-          />
-          <input
-            bind:value={form.passwordConfirm}
-            required
-            type="password"
-            placeholder="confirm password"
-          />
-          <input
-            bind:value={form.name}
-            required
-            type="text"
-            placeholder="name / label"
-          />
+          <label>
+            <input
+              bind:value={form.email}
+              required
+              type="text"
+              placeholder=""
+            />
+            <span>Email</span>
+          </label>
+          <label>
+            <input
+              bind:value={form.password}
+              required
+              type="password"
+              placeholder=""
+            />
+            <span>Password</span>
+          </label>
+          <label>
+            <input
+              bind:value={form.passwordConfirm}
+              required
+              type="password"
+              placeholder=""
+            />
+            <span>Confirm Password</span>
+          </label>
+          <label>
+            <input bind:value={form.name} required type="text" placeholder="" />
+            <span>Name / Label</span>
+          </label>
           <input type="hidden" name="register" value={true} />
           <button type="submit" onclick={() => (signup = true)}>Sign Up</button>
         </TabContent>
@@ -126,3 +134,11 @@
     <!-- pocketbase not working -->
   {/await}
 </form>
+
+<style lang="scss">
+  form {
+    label {
+      display: block;
+    }
+  }
+</style>
