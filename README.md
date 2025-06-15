@@ -1,21 +1,37 @@
 # PocketBase / SvelteKit Starter App
 
-Use this app as a starting point for your own _customized_
+```mermaid
+sequenceDiagram title PocketBase SvelteKit Starter
+   participant br as Browser
+   Note over br: JAMstack client
+
+   participant pb as PocketBase
+   Note over pb: BaaS server
+
+   participant sk as SvelteKit
+   Note over sk: adapter-static
+
+   sk->>pb: compiled SK app
+   pb->>br: serve SK app
+   br->>pb: API calls
+```
+
+Use this project as a starting point for your own _customized_
 [PocketBase](https://github.com/pocketbase/pocketbase) backend
 with [SvelteKit](https://kit.svelte.dev) frontend.
-This is a high-performance frontend+backend combination, since frontend
-is static and backend is a single compiled Golang binary (JAMstack baby!).
+This is a simple yet high-performance frontend+backend combination, since
+frontend is static and backend is a single compiled Golang binary (JAMstack baby!).
 
-- SvelteKit frontend is fully static, client-side only, so that here is no need
+- SK (SvelteKit) frontend is fully static, client-side only, so that here is no need
   for NodeJS at runtime. It is generated using
   [`adapter-static`](https://github.com/sveltejs/kit/tree/master/packages/adapter-static)
   and `ssr` is OFF.
-- PocketBase provides complete (and _fast_) backend including:
+- PB (PocketBase) provides complete (and _fast_) backend including:
   - databse (SQLite)
   - CRUD API for database
   - realtime subscriptions for LIVE data (server push to browser)
   - Authentication and Authorization (email + social login/oauth2)
-  - file storage (local filesystem or S3)
+  - blob/file storage (local filesystem or S3)
   - Extend with hooks and API endpoints in ...
     - [JavaScript](https://pocketbase.io/docs/js-overview/) for easy development.
       See the example [main.pb.ts](./pb/pb_hooks/main.pb.ts).
