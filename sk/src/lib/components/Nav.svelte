@@ -5,6 +5,7 @@
     ["/", "Home"],
     ["/posts/", "Posts"],
     ["/hello/", "Hello"],
+    ["/ref-ui/", "UI Reference"],
   ];
 </script>
 
