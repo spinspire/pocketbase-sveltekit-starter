@@ -56,11 +56,13 @@
 
 <article>
   {#if _alerts.length > 1}
-    <button onclick={dismissAll} class="dismiss">&times; dismiss all</button>
+    <button onclick={dismissAll} class="small">&times; dismiss all</button>
   {/if}
   {#each _alerts as alert}
     <blockquote class={alert.type}>
-      <button onclick={() => dismiss(alert)} class="dismiss">&times;</button>
+      <button onclick={() => dismiss(alert)} class="dismiss small round">
+        &times;
+      </button>
       {#if alert.html}
         {@html alert.message}
       {:else}
@@ -70,25 +72,39 @@
   {/each}
 </article>
 
-<style>
+<style lang="scss">
   .dismiss {
     cursor: pointer;
-    padding: 2px 7px;
-    border-radius: 15px;
+    padding: 10px 10px;
+    border-radius: 50%;
+    height: 1em;
+    width: 1em;
+    display: flex;
   }
+
   blockquote {
-    margin: 0 0;
+    margin: 0.5rem 0;
+    background-color: var(--button-base);
+    display: flex;
+    gap: 1em;
+    > * {
+      flex: 0;
+    }
+  }
+  .info {
+    color: var(--color-info);
+    border-left-color: var(--color-info);
   }
   .success {
-    color: var(--links);
-    border-left-color: var(--links);
+    color: var(--color-success);
+    border-left-color: var(--color-success);
   }
   .warning {
-    color: var(--variable);
-    border-left-color: var(--selection);
+    color: var(--color-warning);
+    border-left-color: var(--color-warning);
   }
   .error {
-    color: var(--danger);
-    border-left-color: var(--variable);
+    color: var(--color-error);
+    border-left-color: var(--color-error);
   }
 </style>

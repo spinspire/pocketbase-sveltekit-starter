@@ -1,3 +1,5 @@
+@use "water_extras.scss";
+
 html {
   display: flex;
   flex-flow: column;
@@ -52,59 +54,6 @@ html {
     #e5e5f7 0,
     #e5e5f7 50%
   );
-}
-
-a.button {
-  display: inline-block;
-  text-decoration: none;
-  background-color: var(--button-base);
-  color: var(--form-text);
-  margin-right: 6px;
-  margin-bottom: 6px;
-  padding: 10px;
-  border: none;
-  border-radius: 6px;
-  outline: none;
-  padding-right: 30px;
-  padding-left: 30px;
-}
-
-a.button,
-button {
-  &.small {
-    padding: 0;
-    margin: 0 0;
-    width: 2.5em;
-    height: 2.5em;
-  }
-  &.round {
-    border-radius: 100%;
-  }
-}
-
-label {
-  position: relative;
-  margin-top: 1.2rem; // space for the label to move up
-  input {
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-  }
-  span {
-    position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    color: var(--text-muted);
-    cursor: text;
-    transition: all 0.2s ease-in-out;
-  }
-  input:focus + span,
-  input:not(:placeholder-shown) + span {
-    top: -1.2rem;
-    left: -0.2rem;
-    font-size: 0.8rem;
-    color: var(--text);
-    padding-inline: 0.5rem;
-  }
 }
 
 pre.body {

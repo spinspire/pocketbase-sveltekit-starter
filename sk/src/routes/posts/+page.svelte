@@ -23,7 +23,7 @@
 <LoginGuard>
   <Link2Modal component={EditPage}>
     {#snippet trigger(onclick)}
-      <a href="{base}/posts/new/edit" class="button" {onclick}>
+      <a href="{base}/posts/new/edit" role="button" {onclick}>
         New Post
         <i class="bx bx-tada bx-list-plus"></i>
       </a>

@@ -1,0 +1,421 @@
+:root {
+  --switch-nub-color: #fff;
+  --switch-checked-color: #007bff;
+  --switch-unchecked-color: var(--button-base);
+  --thead-color: #181f27;
+  --color-info: #73d2de;
+  --color-success: #67ef5b;
+  --color-warning: #c49102;
+  --color-error: #d8111b;
+  --main-radius: 0.5rem;
+  --breakpoint-s: 480px;
+  --breakpoint-m: 768px;
+  --breakpoint-l: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1600px;
+}
+
+/** OVERRIDES **/
+
+dialog {
+  max-width: min(90%, 60vw);
+}
+
+table {
+  caption {
+    font-weight: bold;
+    font-size: larger;
+  }
+  &:last-child {
+    margin-bottom: unset;
+  }
+  table-layout: auto; // counter water.css
+  &.round {
+    border-collapse: separate; // for rounded corners
+    border-radius: var(--main-radius);
+  }
+  border: solid 1px var(--border);
+  --background-color: var(--thead-color);
+  thead {
+    background-color: var(--background-color);
+    border-bottom: solid 1px var(--border);
+    * {
+      margin: 0;
+    }
+  }
+}
+
+button,
+[role="button"] {
+  display: inline-block;
+  cursor: pointer;
+  padding: 1rem;
+  margin-right: unset;
+  margin-bottom: unset;
+  border: none;
+  border-radius: var(--main-radius);
+  background-color: var(--button-base);
+  color: var(--form-text);
+  text-align: center;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+
+  &.small {
+    padding-block: 0.3rem;
+  }
+  &.round {
+    min-width: 1em;
+    border-radius: 2em;
+  }
+  &.small.round {
+    padding: 0;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: 2rem;
+    width: 2rem;
+  }
+  &:hover {
+    text-decoration: none;
+    // this has less side effects than filter: brightness()
+    background-image: linear-gradient(rgb(0 0 0/30%) 0 0);
+  }
+  &:active {
+    transform: scale(0.95);
+  }
+  &:disabled {
+    background-color: var(--button-hover);
+    opacity: 0.9;
+  }
+}
+
+/** EXTRAS **/
+
+/** Generates .bg-<color> and .<color> classes for each type
+  * To add a new color, create a new variable in :root
+  * and add it to the list below.
+  */
+@each $color in ("info", "success", "warning", "error") {
+  .#{$color} {
+    color: var(--color-#{$color});
+  }
+  .bg-#{$color} {
+    background-color: var(--color-#{$color});
+    color: var(--background);
+    &:hover {
+      background-color: var(--color-#{$color});
+    }
+  }
+}
+
+.scroll-x {
+  overflow-x: auto;
+  // TODO: add shadows to left and right when scrolled
+}
+
+/** Example:
+ * <label>
+ *   <input type="text" placeholder="">
+ *   <span>Label</span>
+ * </label>
+ */
+label:has(input[placeholder=""] ~ span) {
+  position: relative;
+  margin-top: 1.2rem; // space for the label to move up
+  input {
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    margin: 0;
+  }
+  span {
+    position: absolute;
+    top: 0.6em;
+    left: 0.5em;
+    color: var(--text-muted);
+    cursor: text;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+  }
+  input:focus + span,
+  input:not(:placeholder-shown) + span {
+    top: -1.2rem;
+    left: -0.2rem;
+    font-size: 0.8rem;
+    color: var(--text);
+    padding-inline: 0.5rem;
+  }
+}
+
+/** Example:
+ * <div role="group">
+ *   <button>Item 1</button>
+ *   <button>Item 2</button>
+ *   <button>Item 3</button>
+ * </div>
+ */
+[role="group"] {
+  display: flex;
+  flex-direction: row;
+
+  button,
+  input,
+  select,
+  textarea {
+    margin: 0;
+  }
+
+  [type="number"] {
+    width: 5em;
+  }
+
+  > * {
+    margin: 0;
+    // Remove border-radius from all but first and last child (must be specific due to watercss)
+    &:not(:first-child, :last-child) {
+      height: unset;
+      margin-inline: 0;
+      border-radius: 0;
+
+      // account for children with border-radius / margin
+      &,
+      * {
+        border-radius: 0;
+      }
+    }
+  }
+
+  // do not apply to single child groups
+  &:has(> :nth-child(2)) {
+    > *:first-child {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+
+      // account for children with border-radius
+      * {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+    }
+
+    > *:last-child {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+
+      // account for children with border-radius
+      * {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+    }
+  }
+
+  // styled inputs margin when inside group
+  // cant use :has() inside another :has() selector
+  &:has(label > input[placeholder=""] ~ span) {
+    margin-top: 1.2rem;
+
+    button,
+    [role="button"] {
+      padding-block: 0.5rem; // buttons will expand to fill the height of the group
+    }
+    input {
+      margin: 0;
+    }
+    label:has(input[placeholder=""] ~ span) {
+      margin: 0;
+    }
+  }
+
+  @media screen and (max-width: 400px) {
+    &:not(.force-row) {
+      flex-direction: column;
+      > * {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        &:first-child {
+          border-top-left-radius: var(--main-radius);
+          border-top-right-radius: var(--main-radius);
+        }
+        &:last-child {
+          border-bottom-left-radius: var(--main-radius);
+          border-bottom-right-radius: var(--main-radius);
+        }
+      }
+    }
+  }
+}
+
+/** Example:
+ * <div role="menu">
+ *   // some visible focusable element
+ *   <menu>
+ *     <button>Item 1</button>
+ *     <button>Item 2</button>
+ *   </menu>
+ * </div>
+ */
+div[role="menu"]:has(menu) {
+  position: relative;
+  > menu {
+    display: none;
+    position: absolute;
+    width: max-content;
+    padding: 0;
+    margin-block: 0;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    z-index: 1;
+    button,
+    [role="button"] {
+      margin: 0;
+    }
+    > * {
+      display: block;
+      padding: 0.5em 1em;
+      border-radius: 0; // reset for role="group"
+      text-align: left;
+    }
+    > button {
+      width: 100%; // causes issues if applied to <a>
+    }
+  }
+  &:focus-within > menu {
+    display: block;
+  }
+}
+
+// smooth-opening details
+details {
+  // WARNING: EXPERIMENTAL
+  interpolate-size: allow-keywords;
+  &::details-content {
+    transition: all 0.25s allow-discrete;
+    overflow: hidden;
+    height: 0;
+  }
+  &[open]::details-content {
+    height: auto;
+  }
+
+  summary {
+    width: 100%;
+    background-color: var(--button-base);
+    &:hover {
+      background-color: var(--button-hover);
+    }
+  }
+}
+
+.cards {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  > * {
+    max-width: calc(var(--breakpoint-s) - 2 * 1rem);
+    width: 100%;
+  }
+}
+
+.cards > *,
+.card {
+  display: flex;
+  flex-direction: column;
+  border: solid var(--border) 2px;
+  border-radius: var(--main-radius);
+  overflow: hidden; // to clip children to rounded borders
+  // main content
+  > div {
+    padding: 6px;
+    flex: 1;
+    background-color: var(--background-body);
+    > table {
+      width: 100%;
+      font-size: large;
+      border: none;
+      td {
+        text-align: end;
+        padding-block: 0.2rem;
+      }
+      tfoot {
+        td {
+          font-size: larger;
+          border: none;
+        }
+      }
+    }
+  }
+  > header {
+    padding: 6px;
+    background-color: var(--thead-color);
+    padding-inline: 0.5em;
+    font-size: larger;
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin: 0;
+    }
+  }
+  > footer {
+    padding: 6px;
+    background-color: var(--thead-color);
+    border-top: unset;
+  }
+}
+
+input[type="checkbox"][role="switch"] {
+  $switch-width: 2.5rem;
+  $switch-height: calc($switch-width / 2);
+  $nub-color: var(--switch-nub-color);
+  $checked-color: var(--switch-checked-color);
+  $unchecked-color: var(--switch-unchecked-color);
+
+  appearance: none;
+  position: relative;
+  display: inline-block;
+  background-color: $unchecked-color;
+  border: 3px solid $unchecked-color;
+  border-radius: 9999px;
+  margin-inline: 0.5rem;
+  width: calc($switch-width + ($switch-height / 3));
+  height: $switch-height;
+
+  // remove onclick bounce
+  &:active,
+  &:focus,
+  &:hover {
+    filter: brightness(0.9);
+    transform: none;
+    outline: none;
+    box-shadow: none;
+  }
+
+  &:checked {
+    background-color: $checked-color;
+    border-color: $checked-color;
+
+    &:before {
+      margin-left: calc($switch-width - $switch-height);
+      margin-inline-start: calc($switch-width - $switch-height);
+    }
+  }
+
+  // checkbox "nub"
+  &:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: $switch-height;
+    height: $switch-height;
+    border-radius: 9999px;
+    background-color: $nub-color;
+    transition: margin 0.1s ease-in-out;
+  }
+}
