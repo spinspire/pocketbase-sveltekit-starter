@@ -18,10 +18,10 @@ services:
       - ${PWD}/sk:/app/sk
       - ${HOME}/go/pkg:/go/pkg
   sk:
-    image: node:22-alpine
+    image: oven/bun:1-alpine
     user: ${UID}:${GID}
     # sveltekit build
-    command: sh -c "npx pnpm install && npm run build"
+    command: sh -c "bun install && bun run build"
     volumes:
       - ${PWD}/sk:/app/sk
       - ${PWD}/pb:/app/pb
