@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { base } from "$app/paths";
   import DateShow from "$lib/components/DateShow.svelte";
   import Image from "$lib/pocketbase/Image.svelte";
   import Link2Modal from "$lib/components/Link2Modal.svelte";
@@ -9,6 +8,7 @@
   import Paginator from "$lib/pocketbase/Paginator.svelte";
   import Spinner, { activityStore } from "$lib/components/Spinner.svelte";
   import { metadata } from "$lib/metadata";
+  import { resolve } from "$app/paths";
 
   const { data } = $props();
   const posts = $derived(data.posts);
@@ -20,21 +20,30 @@
   );
 </script>
 
-<LoginGuard>
+<LoginGuard admin={false}>
   <Link2Modal component={EditPage}>
     {#snippet trigger(onclick)}
-      <a href="{base}/posts/new/edit" role="button" {onclick}>
+      <a
+        href={resolve("/posts/[id]/edit", { id: "new" })}
+        role="button"
+        {onclick}
+      >
         New Post
         <i class="bx bx-tada bx-list-plus"></i>
       </a>
     {/snippet}
   </Link2Modal>
-  <button type="button" onclick={store.run} disabled={$store}
-    ><Spinner active={$store} />
+  <button type="button" onclick={store.run} disabled={$store}>
+    <Spinner active={$store} />
     Generate a random post
   </button>
   {#snippet otherwise()}
-    <p>Please Sign In to create/edit posts.</p>
+    <p>
+      Please Sign In (as non-superuser) to create/edit posts. <a
+        href="/_/#/collections?collection=_pb_users_auth_"
+        >Create a user if needed</a
+      >.
+    </p>
   {/snippet}
 </LoginGuard>
 

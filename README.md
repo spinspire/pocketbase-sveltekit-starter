@@ -23,7 +23,7 @@ This is a simple yet high-performance frontend+backend combination, since
 frontend is static and backend is a single compiled Golang binary (JAMstack baby!).
 
 - SK (SvelteKit) frontend is fully static, client-side only, so that here is no need
-  for NodeJS at runtime. It is generated using
+  for Bun/NodeJS at runtime. It is generated using
   [`adapter-static`](https://github.com/sveltejs/kit/tree/master/packages/adapter-static)
   and `ssr` is OFF.
 - PB (PocketBase) provides complete (and _fast_) backend including:
@@ -74,6 +74,16 @@ Make sure your Docker daemon is running then complete the following steps:
    This starts the frontend dev server.
 5. Both sides are working if you navigate to the "Hello" page on the development server
    and there is an API response that says "Hello World!"
+
+## Without Docker
+
+We recommend using Docker for the best experience, but you can also run the backend and frontend separately without Docker.
+
+1. Setup the backend server by running `go mod tidy` in the `/pb` directory.
+2. Run the backend server using `go run main.go` in the `/pb` directory.
+3. Setup the frontend server by running `bun install` in the `/sk` directory.
+4. Run the frontend dev server using `bun run dev` in the `/sk` directory.
+5. Open a new browser tab and navigate to `http://localhost:5173` to see the frontend running.
 
 ## With pocketbase binary
 
