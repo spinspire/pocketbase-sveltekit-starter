@@ -15,7 +15,7 @@ routerAdd(
     });
   },
   // middleware(s)
-  $apis.requireAuth()
+  $apis.requireAuth(),
 );
 
 /**
@@ -50,7 +50,7 @@ routerAdd(
     return c.json(200, { message });
   },
   // middleware(s)
-  $apis.requireAuth()
+  $apis.requireAuth(),
 );
 
 // public config
@@ -64,7 +64,7 @@ routerAdd(
     config.site.name = settings.meta.appName;
     config.site.copyright = settings.meta.appName;
     return c.json(200, config);
-  } /* no auth */
+  } /* no auth */,
 );
 
 onModelCreate((e) => {
@@ -83,12 +83,14 @@ routerAdd(
   "POST",
   "/api/generate",
   (c) => {
-    const url = "http://metaphorpsum.com/paragraphs/2/4";
+    const url =
+      "https://generate-random.org/api/v1/generate/strings?type=lorem&lorem_type=paragraph&count=3";
     const response = $http.send({ url });
-    const body = response.raw;
-    // last sentence becomes the title
-    const [_, title] = body.match(/([a-zA-Z][ a-zA-Z]*[a-zAZ])[^a-zA-Z]*$/);
-    const slug = title.toLowerCase().replace(" ", "-");
+    const { data } = response.json;
+    const body = data.join("\n\n");
+    // first sentence become the title
+    const [title] = data[0].match(/^[^\.]+/);
+    const slug = title.toLowerCase().replaceAll(" ", "-");
     const coll = $app.findCollectionByNameOrId("posts");
     const record = new Record(coll, { title, body, slug, user: c.auth?.id });
     const form = new RecordUpsertForm($app, record);
@@ -100,5 +102,5 @@ routerAdd(
     // $app.dao().saveRecord(record);
     c.json(200, record);
   },
-  $apis.requireAuth()
+  $apis.requireAuth(),
 );
