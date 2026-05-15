@@ -51,7 +51,7 @@
 {#each $posts.items as item}
   {@const [file] = item.files}
   {@const thumbnail = client.files.getUrl(item, file, { thumb: "100x100" })}
-  <a href={`${base}/posts/${item.slug || item.id}`} class="post">
+  <a href={resolve("/posts/[slug]", item)} class="post">
     <DateShow date={item.updated} />
     <Image record={item} {file} />
     <div>
