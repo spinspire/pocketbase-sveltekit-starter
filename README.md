@@ -55,37 +55,44 @@ Read those README files before proceeding.
 
 Follow these steps CAREFULLY, or else it won't work. Also read the README files referred above before proceeding.
 
+## Git Clone
+
+```
+git clone <url-of-this-repo> pbsk
+cd pbsk
+```
+
 ## With Docker
 
-This method is the most recommended method for setting up this application in most use cases, especially when customizing with Go code.
+This method is strongly recommended method for setting up this application in most use cases, especially when customizing with Go code.
 
 Make sure your Docker daemon is running then complete the following steps:
 
 1. Copy`.env.example` to `.env` and then edit it to match your environment.
-   Also, if you wish, copy `docker-compose.override.yml` to `docker-compose.override.yml`
-   and edit it to your taste before proceeding.
-   And then just run `docker compose up -d`.
-2. Open a new terminal and navigate to the `/sk` directory. Install dependencies by
-   running `npx pnpm install`
-3. In the same terminal, after the dependencies are installed, run the command `npm run dev:backend`
-   This runs `go build` in the `/pb` directory and runs `modd` for live development on a
-   backend server
-4. Open a seperate terminal, navigate to the `/sk` directory, and run the command `npm run dev`.
-   This starts the frontend dev server.
-5. Both sides are working if you navigate to the "Hello" page on the development server
+2. Also, if you wish, copy `docker-compose.override.yml.example` to `docker-compose.override.yml` and edit it to your taste before proceeding.
+3. And then just run `docker compose up -d`.
+4. Visit http://localhost:5173 to see the frontend dev server running.
+5. Visit http://localhost:5173/\_ to see the backend server and setup the first admin user.
+6. Both sides are working if you navigate to the http://localhost:5173/hello page on the development server
    and there is an API response that says "Hello World!"
 
 ## Without Docker
 
-We recommend using Docker for the best experience, but you can also run the backend and frontend separately without Docker.
+We strongly recommend using Docker for the best experience, but you can also run the backend and frontend separately without Docker.
 
-1. Setup the backend server by running `go mod tidy` in the `/pb` directory.
-2. Run the backend server using `go run main.go` in the `/pb` directory.
-3. Setup the frontend server by running `bun install` in the `/sk` directory.
-4. Run the frontend dev server using `bun run dev` in the `/sk` directory.
-5. Open a new browser tab and navigate to `http://localhost:5173` to see the frontend running.
+1. In `pb` folder:
 
-## With pocketbase binary
+- Setup the backend server by running `go mod tidy`
+- Run `go run main.go serve --dev` to run the backend at http://localhost:8090.
+- Visit `http://localhost:8090/_` to create your first admin user.
+
+2. In `sk` folder:
+
+- Setup the frontend server by running `bun install`
+- Run the frontend dev server using `bun run dev`
+- Visit `http://localhost:5173` to see the frontend running.
+
+## Standard pocketbase binary downloaded from GitHub
 
 This method is a good alternative for simple use cases that don't use either Docker or Go, and instead uses JavaScript-exclusive customizations.
 
@@ -102,7 +109,7 @@ This method is a good alternative for simple use cases that don't use either Doc
      - Then, `npm run dev`
 5. Extend JavaScript by [checking out this documentation here.](https://pocketbase.io/docs/js-overview/).
 
-## With Go Tools
+## Custom pocketbase binary compiled with Golang Tools
 
 This method works if you have Go Tools installed and want to set up the machine directly on your specific OS and you don't want to use Docker.
 
@@ -118,6 +125,8 @@ Visit http://localhost:5173 (sk) or http://localhost:8090 (pb)
 
 If you are running `modd`, making changes in the Svelte code (frontend) or Go code (backend) will show
 results (almost) immediately.
+
+This setup turns off automatic generation of database migration files by setting `--automigrate=false`. You can still generate migration files manually by running `pocketbase migrate create <name>` or `pocketbase migrate collections` to create migration files for your collections.
 
 # Usage
 
