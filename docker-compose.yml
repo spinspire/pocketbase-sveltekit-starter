@@ -7,6 +7,9 @@ services:
     user: ${UID}:${GID}
     expose:
       - 8090
+    ports:
+      # localhost:8090 -> container:8090
+      - 127.0.0.1:8090:8090
     working_dir: /app/pb
     environment:
       - RELEASE=${RELEASE:-standard} # use "custom" for main.go build, "standard" for downloaded binary
@@ -22,7 +25,14 @@ services:
     image: oven/bun:1-alpine
     user: ${UID}:${GID}
     # sveltekit build
-    command: sh -c "bun install && bun run build"
+    # command: sh -c "bun install && bun run build"
+    # for live development
+    command: sh -c "bun install && bun run dev -- --host 0.0.0.0"
+    expose:
+      - 5173
+    ports:
+      # localhost:5173 -> container:5173
+      - 127.0.0.1:5173:5173
     volumes:
       - ./sk:/app/sk
       - ./pb:/app/pb
