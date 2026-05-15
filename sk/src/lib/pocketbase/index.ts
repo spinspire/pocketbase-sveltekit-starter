@@ -1,4 +1,7 @@
-import PocketBase, { type AuthProviderInfo, RecordService } from "pocketbase";
+import PocketBase, {
+  type AuthProviderInfo,
+  type RecordService,
+} from "pocketbase";
 import type {
   AuthModel,
   ListResult,

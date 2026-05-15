@@ -29,8 +29,8 @@
   <h2>Alerts</h2>
   <p>
     Alerts can be created by importing <code>alerts</code> from the
-    <code>&lt;Alerts /&gt;</code> component. These alerts will be shown anywhere
-    the component is declared.
+    <code>&lt;Alerts /&gt;</code> component. These alerts will be shown anywhere the
+    component is declared.
   </p>
   <Alerts />
   <div role="group">
@@ -77,6 +77,7 @@
   {/each}
   <br /><br />
   {#each COLORS as color}
+    <!-- svelte-ignore a11y_invalid_attribute -->
     <a href="#" role="button" class="{c} bg-{color}">
       {content ?? "link button"}
     </a>
@@ -88,11 +89,12 @@
   <p>
     links can be styled as buttons using the <code>role="button"</code>:
   </p>
+  <!-- svelte-ignore a11y_invalid_attribute -->
   <a href="#" role="button">This is a link</a>
   <button>This is a button</button>
   <p>
-    You can add <code>.small .round</code> classes to make buttons small / round
-    / circular:
+    You can add <code>.small .round</code> classes to make buttons small / round /
+    circular:
   </p>
   <h3>Small Button</h3>
   <button class="small"> button </button>
@@ -118,7 +120,9 @@
       <button onclick={() => alerts.info("Action 3")}>
         Extra Long Sub Action 3
       </button>
+      <!-- svelte-ignore a11y_invalid_attribute -->
       <a href="#" role="button">Link</a>
+      <!-- svelte-ignore a11y_invalid_attribute -->
       <a href="#" role="button">Extra Long Link</a>
     </menu>
   </div>
@@ -138,7 +142,9 @@
         <button onclick={() => alerts.info("Action 3")}>
           Extra Long Sub Action 3
         </button>
+        <!-- svelte-ignore a11y_invalid_attribute -->
         <a href="#" role="button">Link</a>
+        <!-- svelte-ignore a11y_invalid_attribute -->
         <a href="#" role="button">Extra Long Link</a>
       </menu>
     </div>

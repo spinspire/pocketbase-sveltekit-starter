@@ -9,7 +9,7 @@
   import z from "zod";
 
   const { data } = $props();
-  let record = $state(data.record);
+  let record = $derived(data.record);
   let fileInput = $state() as HTMLInputElement;
   let toBeRemoved = $state([]);
   $effect(() => {

@@ -8,7 +8,7 @@
   import TabGroup from "./TabGroup.svelte";
   import Tab from "./Tab.svelte";
   import TabContent from "./TabContent.svelte";
-  const coll = client.collection(authCollection);
+  const coll = $derived(client.collection(authCollection));
 
   const form = $state({
     email: "",

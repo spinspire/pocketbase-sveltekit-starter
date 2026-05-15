@@ -46,7 +46,7 @@
     <button type="button" class="dismiss" onclick={onclose}>&times;</button>
     <Alerts />
     <h2>{$metadata.headline}</h2>
-    <svelte:component this={component} data={$page.state.selected} />
+    <component data={$page.state.selected}></component>
   </dialog>
 {/if}
 
