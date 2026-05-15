@@ -3,7 +3,7 @@ services:
     # image: alpine:latest
     build: .
     entrypoint: /app/pb/entrypoint.sh
-    command: "/app/pb/pocketbase serve --dev --http 0.0.0.0:8090 --publicDir ../sk/build"
+    command: "/app/pb/pocketbase serve --automigrate=false --dev --http 0.0.0.0:8090 --publicDir ../sk/build"
     user: ${UID}:${GID}
     expose:
       - 8090
@@ -15,8 +15,8 @@ services:
       - HOME=/app/pb
       - AUDITLOG=${AUDITLOG}
     volumes:
-      - ${PWD}/pb:/app/pb
-      - ${PWD}/sk:/app/sk
+      - ./pb:/app/pb
+      - ./sk:/app/sk
       - ${HOME}/go/pkg:/go/pkg
   sk:
     image: oven/bun:1-alpine
@@ -24,8 +24,8 @@ services:
     # sveltekit build
     command: sh -c "bun install && bun run build"
     volumes:
-      - ${PWD}/sk:/app/sk
-      - ${PWD}/pb:/app/pb
+      - ./sk:/app/sk
+      - ./pb:/app/pb
     environment:
       - HOME=/app/sk
     working_dir: /app/sk

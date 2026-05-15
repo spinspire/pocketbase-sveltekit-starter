@@ -12,7 +12,7 @@ PB_ARCH=${PB_ARCH:-"linux_amd64"}
 CMD=$@
 
 if [ "$RELEASE" = "standard" ]; then
-  CMD=${CMD:-"./pocketbase serve --dev --http 0.0.0.0:8090 --publicDir ../sk/build"}
+  CMD=${CMD:-"./pocketbase serve --automigrate=false --dev --http 0.0.0.0:8090 --publicDir ../sk/build"}
   if [ ! -x "pocketbase" ] || [ "`./pocketbase --version`" != "pocketbase version $PB_VERSION" ]; then
     echo "Fetching Pocketbase version: $PB_VERSION, architecture: $PB_ARCH"
 
