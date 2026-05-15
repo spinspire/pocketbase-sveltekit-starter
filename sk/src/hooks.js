@@ -1,4 +1,4 @@
-import { base } from "$app/paths";
+import { base, resolve } from "$app/paths";
 
 /** @type {import('@sveltejs/kit').Reroute} */
 export function reroute({ url }) {
@@ -9,6 +9,6 @@ export function reroute({ url }) {
   if (op === "auditlog" || op === "delete") {
     // render a different route (base route)
     // works only with some help from +layout.svelte in that path
-    return `${base}/${coll}/${id}`;
+    return resolve(`${coll}/${id}`);
   }
 }

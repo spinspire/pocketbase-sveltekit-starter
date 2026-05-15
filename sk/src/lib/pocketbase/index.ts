@@ -8,7 +8,6 @@ import type {
 } from "pocketbase";
 import { readable, type Readable, type Subscriber } from "svelte/store";
 import { browser } from "$app/environment";
-import { base } from "$app/paths";
 import { invalidateAll } from "$app/navigation";
 import type { TypedPocketBase } from "./generated-types";
 import {
@@ -18,7 +17,7 @@ import {
 import { alerts } from "$lib/components/Alerts.svelte";
 
 export const client = new PocketBase(
-  browser ? window.location.origin + base : undefined
+  browser ? window.location.origin : undefined
 ) as TypedPocketBase;
 
 export const authModel = readable<AuthModel | null>(

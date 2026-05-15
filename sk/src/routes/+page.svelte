@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { base } from "$app/paths";
+  import { resolve } from "$app/paths";
   import { metadata } from "$lib/metadata.js";
 
   const { data } = $props();
@@ -32,4 +32,4 @@
   <li>PocketBase: JSVM hook, routes, etc.</li>
 </ul>
 
-<p>Now <a href="{base}/posts">browse/edit/create some posts</a>.</p>
+<p>Now <a href={resolve("/posts")}>browse/edit/create some posts</a>.</p>

@@ -31,13 +31,13 @@ Example:
 ```svelte
 <Tabs bind:active>
   {#snippet tabs()}
-    <a href="{base}/posts/{record.slug}/">
+    <a href="/posts/{record.slug}/">
       <Tab key="view" pathname="/posts/{record.slug}/">View</Tab>
     </a>
-    <a href="{base}/posts/{record.slug}/edit/">
+    <a href="/posts/{record.slug}/edit/">
       <Tab key="edit" pathname="/posts/{record.slug}/edit/">Edit</Tab>
     </a>
-    <a href="{base}/posts/{record.slug}/delete/">
+    <a href="/posts/{record.slug}/delete/">
       <Tab key="delete" pathname="/posts/{record.slug}/delete/">Delete</Tab>
     </a>
   {/snippet}

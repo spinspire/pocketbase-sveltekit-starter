@@ -1,11 +1,11 @@
 <script lang="ts">
   import "../app.scss";
-  import { base } from "$app/paths";
   import { page } from "$app/stores";
   import Alerts from "$lib/components/Alerts.svelte";
   import LoginBadge from "$lib/components/LoginBadge.svelte";
   import Nav from "$lib/components/Nav.svelte";
   import { metadata } from "$lib/metadata";
+  import { resolve } from "$app/paths";
   const { data, children } = $props();
   const config = $derived(data.config ?? {});
 
@@ -21,8 +21,8 @@
 </svelte:head>
 
 <header class="container">
-  <a href={`${base}/`} class="logo">
-    <img src={`${base}/favicon.svg`} alt="application logo" />
+  <a href={resolve("/")} class="logo">
+    <img src={resolve("/favicon.ico")} alt="application logo" />
   </a>
   <Nav />
   <LoginBadge signupAllowed={config.signupAllowed} />

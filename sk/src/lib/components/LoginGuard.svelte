@@ -23,7 +23,7 @@
   const authorized = $derived(
     $authModel && //  must be logged in
       // if admin is specified -- must be admin if admin true, must not be admin if admin false
-      (admin === undefined || admin === client.authStore.isAdmin)
+      (admin === undefined || admin === client.authStore.isSuperuser)
   );
 </script>
 

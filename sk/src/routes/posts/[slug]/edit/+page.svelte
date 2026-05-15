@@ -33,7 +33,7 @@
     const { success, error, data } = schema.safeParse(record);
     if (success) {
       const files = fileInput?.files;
-      const user = client.authStore.isAdmin ? "" : $authModel?.id;
+      const user = client.authStore.isSuperuser ? "" : $authModel?.id;
       record = await save<PostsResponse>("posts", {
         ...data,
         files,

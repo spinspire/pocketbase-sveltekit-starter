@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { base } from "$app/paths";
+  import { base, resolve } from "$app/paths";
   import Tabs from "$lib/components/TabGroup.svelte";
   import Tab from "$lib/components/Tab.svelte";
   import type { Snippet } from "svelte";
@@ -27,26 +27,53 @@
 <LoginGuard>
   <Tabs bind:active>
     {#snippet tabs()}
-      <a href="{base}/posts/{record.slug || record.id}/">
+      <a href={resolve("/posts/[slug]", { slug: record.slug || record.id })}>
         <Tab key="view" pathname="/posts/{record.slug || record.id}/">View</Tab>
       </a>
-      {#if $authModel?.id === record.user || client.authStore.isAdmin}
-        <a href="{base}/posts/{record.id}/edit/">
-          <Tab key="edit" pathname="/posts/{record.id}/edit/">Edit</Tab>
+      {#if $authModel?.id === record.user || client.authStore.isSuperuser}
+        <a
+          href={resolve("/posts/[slug]/edit", {
+            slug: record.slug || record.id,
+          })}
+        >
+          <Tab
+            key="edit"
+            pathname={resolve("/posts/[slug]/edit", {
+              slug: record.slug || record.id,
+            })}>Edit</Tab
+          >
         </a>
-        <a href="{base}/posts/{record.id}/delete/">
-          <Tab key="delete" pathname="/posts/{record.id}/delete/">Delete</Tab>
+        <a
+          href={resolve("/posts/[slug]/delete", {
+            slug: record.slug || record.id,
+          })}
+        >
+          <Tab
+            key="delete"
+            pathname={resolve("/posts/[slug]/delete", {
+              slug: record.slug || record.id,
+            })}>Delete</Tab
+          >
         </a>
       {/if}
-      <a href="{base}/posts/{record.id}/auditlog/">
-        <Tab key="auditlog" pathname="{base}/posts/{record.id}/auditlog/">
+      <a
+        href={resolve("/posts/[slug]/auditlog", {
+          slug: record.slug || record.id,
+        })}
+      >
+        <Tab
+          key="auditlog"
+          pathname={resolve("/posts/[slug]/auditlog", {
+            slug: record.slug || record.id,
+          })}
+        >
           Audit Log
         </Tab>
       </a>
     {/snippet}
     <!-- tab content -->
     {#if active === "auditlog"}
-      {#await preloadData(`${base}/auditlog/posts/${record.id}/`) then result}
+      {#await preloadData(resolve( "/auditlog/[coll]/[id]", { coll: record.collectionName, id: record.id } )) then result}
         {#if result.type === "loaded" && result.status === 200}
           <AuditPage data={result.data as PageData} />
         {:else}
