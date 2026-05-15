@@ -1,8 +1,9 @@
-FROM golang:1.24-alpine AS builder
+FROM golang:1.26-alpine AS builder
 WORKDIR /build
 COPY pb/go.mod pb/go.sum pb/main.go ./
 COPY pb/hooks ./hooks
 COPY pb/auditlog ./auditlog
+COPY pb/webauthn ./webauthn
 RUN apk --no-cache add upx make git gcc libtool musl-dev ca-certificates dumb-init \
   && go mod tidy \
   && CGO_ENABLED=0 go build \

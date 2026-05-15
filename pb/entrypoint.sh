@@ -7,7 +7,7 @@ set -e # exit on any non-zero status (error)
 DIR=$(dirname $0)
 cd $DIR
 RELEASE=${RELEASE:-"standard"}
-PB_VERSION=${PB_VERSION:-"0.27.2"}
+PB_VERSION=${PB_VERSION:-"0.38.0"}
 PB_ARCH=${PB_ARCH:-"linux_amd64"}
 CMD=$@
 
@@ -33,6 +33,8 @@ if [ "$RELEASE" = "custom" ]; then
       go install github.com/cortesi/modd/cmd/modd@latest
       echo "modd installed"
     fi
+  else
+    echo "Either go or main.go is not present, cannot perform custom build"
   fi
 fi
 
