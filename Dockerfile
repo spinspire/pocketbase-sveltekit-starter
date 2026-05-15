@@ -14,7 +14,7 @@ WORKDIR /app/pb
 COPY --from=builder /build/pocketbase /app/pb/pocketbase
 # COPY pb/pb_data ./pb_data #not needed
 COPY pb/pb_hooks ./pb_hooks
-COPY sk/build ./pb_public
+# COPY sk/build ./pb_public
 COPY pb/pb_migrations ./pb_migrations
 COPY pb/data ./data
 # these are the volumes you could mount to your own dirs

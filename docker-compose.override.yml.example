@@ -3,7 +3,7 @@
 services:
   sk:
     # for live development
-    command: sh -c "npx pnpm install && npm run dev -- --host 0.0.0.0"
+    command: sh -c "bun install && bun run dev -- --host 0.0.0.0"
     expose:
       - 5173
     # labels for traefik reverse proxying. Move to "pb" or "sk" depending where you're doing live development
