@@ -50,7 +50,7 @@
 <Paginator store={posts} showIfSinglePage={true} />
 {#each $posts.items as item}
   {@const [file] = item.files}
-  {@const thumbnail = client.files.getUrl(item, file, { thumb: "100x100" })}
+  {@const thumbnail = client.files.getURL(item, file, { thumb: "100x100" })}
   <a href={resolve("/posts/[slug]", item)} class="post">
     <DateShow date={item.updated} />
     <Image record={item} {file} />

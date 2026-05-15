@@ -25,7 +25,7 @@
         : () => (toBeRemoved = [...toBeRemoved, file])}
       <tr>
         <td class:deleted>
-          <a href={client.files.getUrl(record, file)} target="_blank">
+          <a href={client.files.getURL(record, file)} target="_blank">
             {file}
           </a>
         </td>
