@@ -10,10 +10,11 @@
   import Delete from "$lib/components/Delete.svelte";
   import { authModel, client } from "$lib/pocketbase";
   import { metadata } from "$lib/metadata";
+  import { page } from "$app/state";
 
   const { data, children }: { data: any; children: Snippet } = $props();
   const record = $derived(data.record);
-  let active = $state("");
+  let active = $derived(page.url.searchParams.get("active") ?? "");
   $effect(() => {
     if (active === "auditlog")
       $metadata.title =
@@ -25,12 +26,12 @@
 </script>
 
 <LoginGuard>
-  <Tabs bind:active>
+  <Tabs {active}>
     {#snippet tabs()}
       <a href={resolve("/posts/[slug]", { slug: record.slug || record.id })}>
         <Tab key="view" pathname="/posts/{record.slug || record.id}/">View</Tab>
       </a>
-      {#if $authModel?.id === record.user || client.authStore.isSuperuser}
+      {#if ($authModel?.id === record.user || client.authStore.isSuperuser) && record.id}
         <a
           href={resolve("/posts/[slug]/edit", {
             slug: record.slug || record.id,
@@ -44,26 +45,26 @@
           >
         </a>
         <a
-          href={resolve("/posts/[slug]/delete", {
+          href={resolve("/posts/[slug]/?active=delete", {
             slug: record.slug || record.id,
           })}
         >
           <Tab
             key="delete"
-            pathname={resolve("/posts/[slug]/delete", {
+            pathname={resolve("/posts/[slug]/?active=delete", {
               slug: record.slug || record.id,
             })}>Delete</Tab
           >
         </a>
       {/if}
       <a
-        href={resolve("/posts/[slug]/auditlog", {
+        href={resolve("/posts/[slug]/?active=auditlog", {
           slug: record.slug || record.id,
         })}
       >
         <Tab
           key="auditlog"
-          pathname={resolve("/posts/[slug]/auditlog", {
+          pathname={resolve("/posts/[slug]/?active=auditlog", {
             slug: record.slug || record.id,
           })}
         >
