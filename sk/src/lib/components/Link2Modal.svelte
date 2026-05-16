@@ -6,7 +6,7 @@
   import { metadata } from "$lib/metadata";
 
   const {
-    component,
+    component: Comp,
     trigger,
   }: {
     trigger: Snippet<[(e: MouseEvent) => void]>;
@@ -46,7 +46,7 @@
     <button type="button" class="dismiss" onclick={onclose}>&times;</button>
     <Alerts />
     <h2>{$metadata.headline}</h2>
-    <component data={$page.state.selected}></component>
+    <Comp data={$page.state.selected}></Comp>
   </dialog>
 {/if}
 
