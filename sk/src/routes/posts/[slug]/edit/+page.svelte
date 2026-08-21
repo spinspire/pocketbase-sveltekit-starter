@@ -71,7 +71,7 @@
   <div data-label="body">
     <textarea bind:value={record.body} placeholder="body"></textarea>
   </div>
-  <button type="submit">
+  <button type="submit" aria-busy={$store}>
     <Spinner active={$store} />
     Save
   </button>

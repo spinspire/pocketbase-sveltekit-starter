@@ -33,7 +33,7 @@
       </a>
     {/snippet}
   </Link2Modal>
-  <button type="button" onclick={store.run} disabled={$store}>
+  <button type="button" onclick={store.run} disabled={$store} aria-busy={$store}>
     <Spinner active={$store} />
     Generate a random post
   </button>

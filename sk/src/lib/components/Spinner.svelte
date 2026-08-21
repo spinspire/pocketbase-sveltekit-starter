@@ -6,8 +6,6 @@
   let { active = false }: { active?: boolean } = $props();
 </script>
 
-<span aria-busy={active} aria-live="polite">
-  {#if active}
-    <span class="sr-only">Loading...</span>
-  {/if}
-</span>
+{#if active}
+  <span class="sr-only">Loading...</span>
+{/if}

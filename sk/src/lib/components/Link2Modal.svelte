@@ -56,13 +56,14 @@
 
 <style>
   dialog {
-    border: none;
+    border: 1px solid var(--border);
     border-radius: var(--radius-medium);
     padding: 0;
     max-width: 90vw;
     max-height: 90vh;
     color: light-dark(var(--color-1), var(--color-1));
     background: light-dark(var(--bg-1), var(--bg-1));
+    box-shadow: var(--shadow-medium);
   }
   dialog::backdrop {
     background: rgba(0, 0, 0, 0.5);
