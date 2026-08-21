@@ -241,13 +241,13 @@
     padding: var(--space-4);
     margin-block: var(--space-6);
     border-radius: var(--radius-medium);
-    background: light-dark(var(--bg-1), var(--bg-1));
+    background: var(--faint);
   }
   section h2 { margin-top: 0; }
   pre {
     padding: var(--space-3);
     border-radius: var(--radius-medium);
-    background: light-dark(var(--bg-2), var(--bg-2));
+    background: var(--muted);
     overflow-x: auto;
     font-size: 0.85em;
   }

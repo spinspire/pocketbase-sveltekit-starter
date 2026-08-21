@@ -1,7 +1,6 @@
-// Oat-css theme overrides — modern, luminous design
+// Oat-css theme overrides — brand colors only
 @layer theme {
   :root {
-    // Brand colors
     --primary: light-dark(#2563eb, #60a5fa);
     --primary-foreground: light-dark(#fff, #fff);
 
@@ -19,7 +18,7 @@
   }
 }
 
-// Global layout
+// Layout
 html {
   display: flex;
   flex-flow: column;
@@ -27,36 +26,9 @@ html {
 }
 
 body {
-  margin: 0;
   flex: 1 1 auto;
   display: flex;
   flex-flow: column;
-}
-
-// Container
-.container {
-  max-width: 72rem;
-  width: 100%;
-  margin-inline: auto;
-  padding-inline: var(--space-4);
-}
-
-// Code blocks
-code {
-  font-size: 0.9em;
-}
-
-pre {
-  &.body {
-    white-space: pre-wrap;
-  }
-}
-
-// Icon helper
-.icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 // Post list item

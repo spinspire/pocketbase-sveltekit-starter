@@ -151,7 +151,7 @@
   }
   .tab {
     padding: var(--space-3) var(--space-4);
-    color: light-dark(var(--color-2), var(--color-2));
+    color: var(--muted-foreground);
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
@@ -160,7 +160,7 @@
     transition: color 0.15s, border-color 0.15s;
   }
   .tab:hover {
-    color: light-dark(var(--color-1), var(--color-1));
+    color: var(--foreground);
   }
   .tab[data-active] {
     color: var(--primary);

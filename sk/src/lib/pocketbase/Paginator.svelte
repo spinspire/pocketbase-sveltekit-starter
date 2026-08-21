@@ -44,6 +44,6 @@
   }
   .page-info {
     font-size: 0.9em;
-    color: light-dark(var(--color-2), var(--color-2));
+    color: var(--muted-foreground);
   }
 </style>

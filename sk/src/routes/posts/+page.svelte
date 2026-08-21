@@ -96,7 +96,7 @@
     justify-content: center;
     min-width: 4em;
     padding: var(--space-2);
-    background: var(--bg-2);
+    background: var(--muted);
     border-radius: var(--radius-medium);
     font-family: var(--font-alt);
     font-size: 0.85em;

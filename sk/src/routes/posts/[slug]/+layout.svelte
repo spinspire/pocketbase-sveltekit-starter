@@ -91,14 +91,14 @@
   }
   .tabs a {
     padding: var(--space-3) var(--space-4);
-    color: light-dark(var(--color-2), var(--color-2));
+    color: var(--muted-foreground);
     text-decoration: none;
     border-bottom: 2px solid transparent;
     margin-bottom: -2px;
     transition: color 0.15s, border-color 0.15s;
   }
   .tabs a:hover {
-    color: light-dark(var(--color-1), var(--color-1));
+    color: var(--foreground);
   }
   .tabs a[data-active] {
     color: var(--primary);
