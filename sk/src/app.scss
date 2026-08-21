@@ -31,15 +31,3 @@ body {
   flex-flow: column;
 }
 
-// Post list item
-.post {
-  color: inherit;
-  display: flex;
-  gap: 1rem;
-  padding-block: 1rem;
-  text-decoration: none;
-
-  & + & {
-    border-block-start: dashed 1px var(--border);
-  }
-}

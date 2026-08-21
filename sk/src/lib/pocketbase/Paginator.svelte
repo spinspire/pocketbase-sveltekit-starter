@@ -11,7 +11,7 @@
 </script>
 
 {#if showIfSinglePage || $store.totalPages > 1}
-  <nav class="paginator" aria-label="Pagination">
+  <nav class="hstack justify-center gap-3" aria-label="Pagination" style:padding-block="var(--space-3)">
     <button
       type="button"
       class="ghost"
@@ -21,7 +21,9 @@
     >
       <i class="bi bi-chevron-left"></i>
     </button>
-    <span class="page-info">page {$store.page} of {$store.totalPages}</span>
+    <span class="small" style:color="var(--muted-foreground)">
+      page {$store.page} of {$store.totalPages}
+    </span>
     <button
       type="button"
       class="ghost"
@@ -33,17 +35,3 @@
     </button>
   </nav>
 {/if}
-
-<style>
-  .paginator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-3);
-    padding-block: var(--space-3);
-  }
-  .page-info {
-    font-size: 0.9em;
-    color: var(--muted-foreground);
-  }
-</style>
