@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import { authModel, client, webauthnRegister } from "../pocketbase";
-  import Alerts, { alerts } from "./Alerts.svelte";
+  import { alerts } from "$lib/alerts";
+  import Alerts from "./Alerts.svelte";
   import Dialog from "./Dialog.svelte";
   import LoginForm from "./LoginForm.svelte";
   const { signupAllowed = true } = $props();
@@ -23,17 +24,15 @@
 
 {#if $authModel}
   <Dialog>
-    {#snippet trigger(show)}
-      <button class="badge" onclick={show}>
+    {#snippet trigger(show: () => void)}
+      <button class="ghost badge" onclick={show}>
         {#if $authModel.avatar}
           <img
             src={client.getFileUrl($authModel, $authModel.avatar)}
             alt="profile pic"
           />
         {/if}
-        <samp
-          >{$authModel?.name || $authModel?.username || $authModel?.email}</samp
-        >
+        <span>{$authModel?.name || $authModel?.username || $authModel?.email}</span>
       </button>
     {/snippet}
     <div class="wrapper">
@@ -44,19 +43,19 @@
             alt="profile pic"
           />
         {/if}
-        <samp
-          >{$authModel?.name ?? $authModel?.username ?? $authModel?.email}</samp
-        >
+        <span>{$authModel?.name ?? $authModel?.username ?? $authModel?.email}</span>
       </div>
-      <button onclick={() => webauthnRegister($authModel?.email)}
-        >Register Passkey</button
-      >
-      <button onclick={logout}>Sign Out</button>
+      <button onclick={() => webauthnRegister($authModel?.email)}>
+        <i class="bi bi-key"></i> Register Passkey
+      </button>
+      <button class="outline" onclick={logout}>
+        <i class="bi bi-box-arrow-right"></i> Sign Out
+      </button>
     </div>
   </Dialog>
 {:else}
   <Dialog>
-    {#snippet trigger(show)}
+    {#snippet trigger(show: () => void)}
       <button onclick={show}>
         {signupAllowed ? "Sign In / Sign Up" : "Sign In"}
       </button>
@@ -66,32 +65,27 @@
   </Dialog>
 {/if}
 
-<style lang="scss">
+<style>
   .badge {
-    padding: 0;
-    background-color: transparent;
-    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 5px;
-    > img {
-      height: 2em;
-      width: 2em;
-      border-radius: 50%;
-    }
-    > samp {
-      display: inline-block !important;
-      -moz-border-radius: 20px !important;
-      -webkit-border-radius: 20px !important;
-      -khtml-border-radius: 20px !important;
-      border-radius: 20px !important;
-      padding: 0.5rem !important;
-      text-align: center !important;
-      line-height: 1.5rem !important;
-    }
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+  }
+  .badge img {
+    height: 2em;
+    width: 2em;
+    border-radius: 50%;
+    object-fit: cover;
   }
   .wrapper {
     display: flex;
     flex-direction: column;
+    gap: var(--space-3);
+  }
+  .wrapper .badge {
+    justify-content: center;
+    padding-block-end: var(--space-3);
+    border-bottom: 1px solid var(--border);
   }
 </style>

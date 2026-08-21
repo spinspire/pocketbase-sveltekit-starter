@@ -26,8 +26,21 @@
 
 <form onsubmit={submit}>
   <article>
-    <aside>Are you sure you want to delete the following record?</aside>
+    <header>
+      <h3>Confirm Delete</h3>
+    </header>
+    <div>
+      <p>Are you sure you want to delete this record?</p>
+    </div>
+    <footer>
+      <div role="group">
+        <button type="submit">
+          <i class="bi bi-trash"></i> Yes - Delete
+        </button>
+        <button type="reset" class="outline" onclick={back}>
+          <i class="bi bi-x-lg"></i> No - Cancel
+        </button>
+      </div>
+    </footer>
   </article>
-  <button type="submit">Yes - Proceed</button>
-  <button type="reset" onclick={back}>No - Cancel</button>
 </form>

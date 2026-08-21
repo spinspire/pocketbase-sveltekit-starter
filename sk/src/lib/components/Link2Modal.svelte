@@ -18,11 +18,7 @@
   async function onclick(e: MouseEvent) {
     if (e.metaKey || e.ctrlKey) return;
     const { href } = e.currentTarget as HTMLAnchorElement;
-
-    // run `load` functions (or rather, get the result of the `load` functions
-    // that are already running because of `data-sveltekit-preload-data`)
     const result = await preloadData(href);
-
     if (result.type === "loaded" && result.status === 200) {
       pushState(href, { selected: result.data });
       e.preventDefault();
@@ -43,24 +39,41 @@
 
 {#if $page.state.selected}
   <dialog bind:this={dialog} {onclose}>
-    <button type="button" class="dismiss" onclick={onclose}>&times;</button>
-    <Alerts />
-    <h2>{$metadata.headline}</h2>
-    <Comp data={$page.state.selected}></Comp>
+    <form method="dialog">
+      <button class="ghost icon" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </form>
+    <div class="modal-body">
+      <Alerts />
+      <h2>{$metadata.headline}</h2>
+      <Comp data={$page.state.selected}></Comp>
+    </div>
   </dialog>
 {/if}
 
 {@render trigger(onclick)}
 
 <style>
-  .dismiss {
-    border-radius: 5rem;
-    padding: 0 0;
-    width: 2em;
-    height: 2em;
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 6px 6px;
+  dialog {
+    border: none;
+    border-radius: var(--radius-medium);
+    padding: 0;
+    max-width: 90vw;
+    max-height: 90vh;
+    color: light-dark(var(--color-1), var(--color-1));
+    background: light-dark(var(--bg-1), var(--bg-1));
+  }
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+  }
+  dialog > form {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--space-2);
+    padding-bottom: 0;
+  }
+  .modal-body {
+    padding: var(--space-4);
   }
 </style>
