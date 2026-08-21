@@ -31,3 +31,11 @@
     {@render children()}
   </form>
 </dialog>
+
+<style>
+  dialog > form > header {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+</style>
