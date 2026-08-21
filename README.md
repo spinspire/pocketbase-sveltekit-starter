@@ -163,7 +163,8 @@ To use the app as a user / tester ...
 - Navigate around. The Home page is not very interesting.
 - The `hello` page shows and example of frontend calling a custom backend API implemented in Go.
 - The `posts` page shows all existing posts. If that page is empty, then you might want to create some posts. You must be logged in to be able to create posts.
-- Into the `Login` form, you can enter an existing username/password, or check the `register` checkbox to create a new account (it registers the user and log in immediately).
+- Sign in with the test user credentials from `.env` (`PB_USER_EMAIL` / `PB_USER_PASSWORD`). These are created automatically on first startup by the entrypoint.
+- Alternatively, use the `Login` form to register a new account (check the `register` checkbox).
 
 The above are just some sample features. Now go ahead and implement all kinds of new features.
 
