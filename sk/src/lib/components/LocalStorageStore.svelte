@@ -82,13 +82,11 @@
   </tbody>
 </table>
 
-<style lang="scss">
-  table {
-    td {
-      max-width: 40rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+<style>
+  table td {
+    max-width: 40rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 </style>
