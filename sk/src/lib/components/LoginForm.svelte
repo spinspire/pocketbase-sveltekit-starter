@@ -72,20 +72,20 @@
 <form onsubmit={submit}>
   {#if passwordLogin}
     {#if signupAllowed}
-      <nav class="tabs" data-variant="underline">
+      <div role="tablist">
         <button
           type="button"
-          class="tab"
-          data-active={active === "SignIn" || undefined}
+          role="tab"
+          aria-selected={active === "SignIn" || undefined}
           onclick={() => (active = "SignIn")}
         >Sign In</button>
         <button
           type="button"
-          class="tab"
-          data-active={active === "SignUp" || undefined}
+          role="tab"
+          aria-selected={active === "SignUp" || undefined}
           onclick={() => (active = "SignUp")}
         >Sign Up</button>
-      </nav>
+      </div>
       {#if active === "SignIn"}
         {@render signin()}
       {:else}
@@ -142,29 +142,5 @@
 <style>
   form :global(label) {
     display: block;
-  }
-  .tabs {
-    display: flex;
-    gap: 0;
-    border-bottom: 2px solid var(--border);
-    margin-block-end: var(--space-4);
-  }
-  .tab {
-    padding: var(--space-3) var(--space-4);
-    color: var(--muted-foreground);
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
-  }
-  .tab:hover {
-    color: var(--foreground);
-  }
-  .tab[data-active] {
-    color: var(--primary);
-    border-bottom-color: var(--primary);
-    font-weight: 600;
   }
 </style>
