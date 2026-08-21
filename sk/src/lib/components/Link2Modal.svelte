@@ -62,7 +62,7 @@
     max-width: 90vw;
     max-height: 90vh;
     color: light-dark(var(--color-1), var(--color-1));
-    background: light-dark(var(--bg-1), var(--bg-1));
+    background-color: light-dark(var(--bg-1), var(--bg-1));
     box-shadow: var(--shadow-medium);
   }
   dialog::backdrop {
