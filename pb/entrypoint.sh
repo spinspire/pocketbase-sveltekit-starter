@@ -83,7 +83,7 @@ fi
 # Start SvelteKit dev server in dev mode
 if [ "$DEV" = "true" ]; then
   echo "Starting SvelteKit dev server..."
-  cd /app/sk && bun install && bun run dev -- --host 0.0.0.0 &
+  cd /app/sk && bun install && bunx svelte-kit sync && bun run dev -- --host 0.0.0.0 &
   SK_PID=$!
   echo "Waiting for SvelteKit dev server..."
   until curl -sf http://127.0.0.1:5173 >/dev/null 2>&1; do
