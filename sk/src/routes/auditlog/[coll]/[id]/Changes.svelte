@@ -6,10 +6,17 @@
 </script>
 
 <table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Original</th>
+      <th>Changed To</th>
+    </tr>
+  </thead>
   <tbody>
     {#each keys as key}
       <tr>
-        <th>{key}</th>
+        <td>{key}</td>
         <td><pre>{auditlog.original[key]}</pre></td>
         <td><pre>{auditlog.data[key]}</pre></td>
       </tr>

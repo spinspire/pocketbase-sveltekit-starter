@@ -9,12 +9,14 @@
   });
 </script>
 
+<h1>Audit Log</h1>
+
 <table>
   <thead>
     <tr>
-      <th>when</th>
-      <th>what</th>
-      <th>who</th>
+      <th>When</th>
+      <th>Event</th>
+      <th>Who</th>
     </tr>
   </thead>
   <tbody>
