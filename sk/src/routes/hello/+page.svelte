@@ -15,8 +15,11 @@
 </script>
 
 <h1>Hello!</h1>
-<p>Got the following API response from the backend server</p>
-<pre>{JSON.stringify(data, null, 2)}</pre>
+
+<section>
+  <p>API response from the backend server:</p>
+  <pre class="card">{JSON.stringify(data, null, 2)}</pre>
+</section>
 
 <form method="post" onsubmit={sendEmail}>
   <button type="submit">Send me an email</button>
