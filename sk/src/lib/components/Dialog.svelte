@@ -9,31 +9,47 @@
   function show() {
     dialog.showModal();
   }
-  function close(e: any) {
-    function inClientRect(element: Element, event: MouseEvent) {
-      const { left, right, top, bottom } = element.getBoundingClientRect();
-      return (
-        event.clientX >= left &&
-        event.clientX <= right &&
-        event.clientY >= top &&
-        event.clientY <= bottom
-      );
-    }
-    // if the user clicks on the dialog's backdrop
-    if (e?.target === dialog && !inClientRect(dialog, e)) {
+  function close(e: MouseEvent) {
+    if (e.target === dialog) {
       dialog.close();
     }
   }
-  $effect(() => {
-    dialog.addEventListener("click", close);
-  });
 </script>
 
-{#snippet _trigger(show)}
-  <button onclick={show}>Open Dialog</button>
+{#snippet _trigger(show: () => void)}
+  <button onclick={show}>Open</button>
 {/snippet}
 
 {@render trigger(show)}
-<dialog bind:this={dialog}>
+<dialog bind:this={dialog} onclick={close}>
+  <form method="dialog">
+    <button class="ghost icon" aria-label="Close">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </form>
   {@render children()}
 </dialog>
+
+<style>
+  dialog {
+    border: none;
+    border-radius: var(--radius-medium);
+    padding: 0;
+    max-width: 90vw;
+    max-height: 90vh;
+    color: light-dark(var(--color-1), var(--color-1));
+    background: light-dark(var(--bg-1), var(--bg-1));
+  }
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+  }
+  dialog > form {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--space-2);
+    padding-bottom: 0;
+  }
+  dialog > :not(form) {
+    padding: var(--space-4);
+  }
+</style>

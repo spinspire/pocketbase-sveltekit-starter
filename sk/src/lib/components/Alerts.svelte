@@ -1,110 +1,50 @@
-<script lang="ts" module>
-  interface Alert {
-    message: string;
-    type: string;
-    timeout?: number;
-    html?: boolean;
-  }
+<script lang="ts">
+  import { alerts } from "$lib/alerts";
 
-  let _alerts = $state<Alert[]>([]);
-  export const alerts = {
-    add({ message, type = "info", timeout = 0, html = false }: Alert) {
-      const alert = { message, type, html };
-      _alerts = _alerts.concat(alert);
-      if (timeout) {
-        setTimeout(() => {
-          dismiss(alert);
-        }, timeout);
-      }
-    },
-    info(message: string, timeout = 0) {
-      this.add({ message, type: "info", timeout });
-    },
-    success(message: string, timeout = 0) {
-      this.add({ message, type: "success", timeout });
-    },
-    warning(message: string, timeout = 0) {
-      this.add({ message, type: "warning", timeout });
-    },
-    error(message: string, timeout = 0) {
-      this.add({ message, type: "error", timeout });
-    },
-  };
-
-  export function errorAlert(message: string) {
-    const type = "error";
-  }
-
-  function dismiss(alert: Alert) {
-    _alerts = _alerts.filter((a) => a !== alert);
-  }
-
-  function dismissAll() {
-    _alerts = [];
-  }
   function onunhandledrejection(e: PromiseRejectionEvent) {
     alerts.error(e.reason.toString());
     const { data = {} } = e.reason.response ?? {};
     for (const [key, value] of Object.entries(data)) {
-      alerts.error(`${key}: ${value?.message}`);
+      alerts.error(`${key}: ${(value as any)?.message}`);
     }
   }
 </script>
 
-<!-- to display alerts for unhandled promise rejections -->
 <svelte:window {onunhandledrejection} />
 
-<article>
-  {#if _alerts.length > 1}
-    <button onclick={dismissAll} class="small">&times; dismiss all</button>
-  {/if}
-  {#each _alerts as alert}
-    <blockquote class={alert.type}>
-      <button onclick={() => dismiss(alert)} class="dismiss small round">
-        &times;
-      </button>
-      {#if alert.html}
-        {@html alert.message}
-      {:else}
-        {alert.message}
-      {/if}
-    </blockquote>
-  {/each}
-</article>
+{#if $alerts.length > 0}
+  <div class="alerts">
+    {#if $alerts.length > 1}
+      <button onclick={() => alerts.dismissAll()} class="ghost small">dismiss all</button>
+    {/if}
+    {#each $alerts as alert}
+      <div role="alert" data-variant={alert.type === "error" ? "danger" : alert.type}>
+        {#if alert.html}
+          {@html alert.message}
+        {:else}
+          {alert.message}
+        {/if}
+        <button onclick={() => alerts.dismiss(alert)} class="ghost icon small" aria-label="dismiss">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    {/each}
+  </div>
+{/if}
 
-<style lang="scss">
-  .dismiss {
-    cursor: pointer;
-    padding: 10px 10px;
-    border-radius: 50%;
-    height: 1em;
-    width: 1em;
+<style>
+  .alerts {
     display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-block-end: var(--space-4);
   }
-
-  blockquote {
-    margin: 0.5rem 0;
-    background-color: var(--button-base);
+  div[role="alert"] {
     display: flex;
-    gap: 1em;
-    > * {
-      flex: 0;
-    }
-  }
-  .info {
-    color: var(--color-info);
-    border-left-color: var(--color-info);
-  }
-  .success {
-    color: var(--color-success);
-    border-left-color: var(--color-success);
-  }
-  .warning {
-    color: var(--color-warning);
-    border-left-color: var(--color-warning);
-  }
-  .error {
-    color: var(--color-error);
-    border-left-color: var(--color-error);
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-medium);
   }
 </style>
