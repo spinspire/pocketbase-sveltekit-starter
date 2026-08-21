@@ -18,7 +18,7 @@
   <tbody>
     {#each record[fieldName] as file, index}
       {@const deleted = toBeRemoved.includes(file)}
-      {@const icon = deleted ? "trash-alt" : "trash"}
+      {@const icon = deleted ? "arrow-counterclockwise" : "trash"}
       {@const title = deleted ? "click to restore" : "click to remove"}
       {@const onclick = deleted
         ? () => (toBeRemoved = toBeRemoved.filter((f) => f !== file))
@@ -37,7 +37,7 @@
             {title}
             aria-label={title}
           >
-            <i class="bx bx-{icon}"></i>
+            <i class="bi bi-{icon}"></i>
           </button>
         </td>
       </tr>

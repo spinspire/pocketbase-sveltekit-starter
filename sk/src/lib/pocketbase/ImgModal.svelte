@@ -29,12 +29,12 @@
   </Dialog>
 {/if}
 
-<style lang="scss">
+<style>
   .thumbnail {
     padding: 0;
-    > img {
-      border-radius: 5px;
-      box-shadow: 0 0 5px 0px black;
-    }
+  }
+  .thumbnail > img {
+    border-radius: 5px;
+    box-shadow: 0 0 5px 0px black;
   }
 </style>

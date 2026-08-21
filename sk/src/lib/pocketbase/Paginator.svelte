@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
   import type { PageStore } from ".";
 
   const {
@@ -12,26 +11,39 @@
 </script>
 
 {#if showIfSinglePage || $store.totalPages > 1}
-  <div class="paginator">
+  <nav class="paginator" aria-label="Pagination">
     <button
       type="button"
+      class="ghost"
       onclick={() => store.prev()}
-      disabled={$store.page <= 1}>&laquo;</button
+      disabled={$store.page <= 1}
+      aria-label="Previous page"
     >
-    <div>page {$store.page} of {$store.totalPages}</div>
+      <i class="bi bi-chevron-left"></i>
+    </button>
+    <span class="page-info">page {$store.page} of {$store.totalPages}</span>
     <button
       type="button"
+      class="ghost"
       onclick={() => store.next()}
-      disabled={$store.page >= $store.totalPages}>&raquo;</button
+      disabled={$store.page >= $store.totalPages}
+      aria-label="Next page"
     >
-  </div>
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </nav>
 {/if}
 
-<style lang="scss">
+<style>
   .paginator {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin: auto;
+    justify-content: center;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+  }
+  .page-info {
+    font-size: 0.9em;
+    color: light-dark(var(--color-2), var(--color-2));
   }
 </style>
