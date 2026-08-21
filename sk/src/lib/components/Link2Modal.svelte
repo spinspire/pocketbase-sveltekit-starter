@@ -40,13 +40,15 @@
 {#if $page.state.selected}
   <dialog bind:this={dialog} {onclose}>
     <form method="dialog">
-      <button class="ghost icon" aria-label="Close">
-        <i class="bi bi-x-lg"></i>
-      </button>
+      <header>
+        <button class="ghost icon" aria-label="Close">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </header>
+      <Alerts />
+      <h2>{$metadata.headline}</h2>
+      <Comp data={$page.state.selected}></Comp>
     </form>
-    <Alerts />
-    <h2>{$metadata.headline}</h2>
-    <Comp data={$page.state.selected}></Comp>
   </dialog>
 {/if}
 

@@ -23,9 +23,11 @@
 {@render trigger(show)}
 <dialog bind:this={dialog} onclick={close}>
   <form method="dialog">
-    <button class="ghost icon" aria-label="Close" onclick={() => dialog.close()}>
-      <i class="bi bi-x-lg"></i>
-    </button>
+    <header>
+      <button class="ghost icon" aria-label="Close" onclick={() => dialog.close()}>
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </header>
+    {@render children()}
   </form>
-  {@render children()}
 </dialog>
