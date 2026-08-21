@@ -13,7 +13,7 @@
 <svelte:window {onunhandledrejection} />
 
 {#if $alerts.length > 0}
-  <div class="alerts">
+  <div class="vstack gap-2 mb-4">
     {#if $alerts.length > 1}
       <button onclick={() => alerts.dismissAll()} class="ghost small">dismiss all</button>
     {/if}
@@ -31,20 +31,3 @@
     {/each}
   </div>
 {/if}
-
-<style>
-  .alerts {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    margin-block-end: var(--space-4);
-  }
-  div[role="alert"] {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-medium);
-  }
-</style>
