@@ -4,7 +4,12 @@
   const {
     trigger = _trigger,
     children,
-  }: { trigger?: Snippet<[() => void]>; children: Snippet<[]> } = $props();
+    footer,
+  }: {
+    trigger?: Snippet<[() => void]>;
+    children: Snippet<[]>;
+    footer?: Snippet<[]>;
+  } = $props();
   let dialog: HTMLDialogElement;
   function show() {
     dialog.showModal();
@@ -28,7 +33,14 @@
         <i class="bi bi-x-lg"></i>
       </button>
     </header>
-    {@render children()}
+    <div>
+      {@render children()}
+    </div>
+    {#if footer}
+      <footer>
+        {@render footer()}
+      </footer>
+    {/if}
   </form>
 </dialog>
 
