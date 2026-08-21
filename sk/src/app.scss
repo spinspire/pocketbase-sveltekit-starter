@@ -1,61 +1,73 @@
-@use "water_extras.scss";
+// Oat-css theme overrides — modern, luminous design
+@layer theme {
+  :root {
+    // Brand colors
+    --primary: light-dark(#2563eb, #60a5fa);
+    --primary-foreground: light-dark(#fff, #fff);
 
+    --accent: light-dark(#f0f4ff, #1e293b);
+    --accent-foreground: light-dark(#1e293b, #e2e8f0);
+
+    --success: light-dark(#16a34a, #4ade80);
+    --success-foreground: light-dark(#fff, #fff);
+
+    --danger: light-dark(#dc2626, #f87171);
+    --danger-foreground: light-dark(#fff, #fff);
+
+    --warning: light-dark(#d97706, #fbbf24);
+    --warning-foreground: light-dark(#fff, #000);
+  }
+}
+
+// Global layout
 html {
   display: flex;
   flex-flow: column;
   min-height: 100vh;
-  body {
-    flex: 1 1 auto;
-    display: flex;
-    flex-flow: column;
-    // override max-width water.css
-    width: 100%;
-    max-width: unset;
-    // no horizonal scrollbars
-    overflow-x: hidden;
-    // override default fonts
-    font-family:
-      Roboto,
-      Oxygen,
-      Ubuntu,
-      Cantarell,
-      Fira Sans,
-      Droid Sans,
-      Helvetica Neue,
-      Segoe UI Emoji,
-      Apple Color Emoji,
-      Noto Color Emoji,
-      sans-serif;
-  }
 }
 
-.container {
-  max-width: 1280px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.flex {
+body {
+  margin: 0;
+  flex: 1 1 auto;
   display: flex;
-  flex-direction: column;
-  &.h {
-    flex-direction: row;
+  flex-flow: column;
+}
+
+// Container
+.container {
+  max-width: 72rem;
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+// Code blocks
+code {
+  font-size: 0.9em;
+}
+
+pre {
+  &.body {
+    white-space: pre-wrap;
   }
 }
 
-.bg-diagonal {
-  background-color: #e5e5f7;
-  opacity: 0.8;
-  background-size: 10px 10px;
-  background-image: repeating-linear-gradient(
-    45deg,
-    #444cf7 0,
-    #444cf7 1px,
-    #e5e5f7 0,
-    #e5e5f7 50%
-  );
+// Icon helper
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-pre.body {
-  white-space: pre-wrap;
+// Post list item
+.post {
+  color: inherit;
+  display: flex;
+  gap: 1rem;
+  padding-block: 1rem;
+  text-decoration: none;
+
+  & + & {
+    border-block-start: dashed 1px var(--border);
+  }
 }
