@@ -1,6 +1,6 @@
 import type { LayoutLoad } from "./$types";
 import { client } from "$lib/pocketbase";
-import { alerts } from "$lib/components/Alerts.svelte";
+import { alerts } from "$lib/alerts";
 
 // turn off SSR - we're JAMstack here
 export const ssr = false;

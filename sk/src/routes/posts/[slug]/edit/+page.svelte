@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { alerts } from "$lib/components/Alerts.svelte";
+  import { alerts } from "$lib/alerts";
   import FileInput from "$lib/components/FileInput.svelte";
-  import Spinner, { activityStore } from "$lib/components/Spinner.svelte";
+  import Spinner from "$lib/components/Spinner.svelte";
+  import { activityStore } from "$lib/activity";
   import { metadata } from "$lib/metadata.js";
   import { authModel, client, save } from "$lib/pocketbase";
   import FileField from "$lib/pocketbase/FileField.svelte";

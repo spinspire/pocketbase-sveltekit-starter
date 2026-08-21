@@ -19,7 +19,7 @@
   >
     https://github.com/spinspire/pocketbase-sveltekit-starter
   </a>
-  on <i class="bx bxl-github bx-sm"></i>GitHub to read the documentation.
+  on <i class="bi bi-github"></i> GitHub to read the documentation.
 </p>
 
 <h2>Features</h2>

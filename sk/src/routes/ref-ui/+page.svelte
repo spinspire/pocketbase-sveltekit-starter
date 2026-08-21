@@ -1,396 +1,257 @@
 <script lang="ts">
-  import Alerts, { alerts } from "$lib/components/Alerts.svelte";
+  import Alerts from "$lib/components/Alerts.svelte";
+  import { alerts } from "$lib/alerts";
   import Dialog from "$lib/components/Dialog.svelte";
-  import RadioText from "$lib/components/RadioText.svelte";
   import Spinner from "$lib/components/Spinner.svelte";
-  import Stepper from "$lib/components/Stepper.svelte";
-  import ToggleText from "$lib/components/ToggleText.svelte";
   import { metadata } from "$lib/metadata";
-
-  const COLORS = ["info", "success", "warning", "error"];
-
-  function preventDefault(fn: (event: Event) => void) {
-    return function (event: Event) {
-      event.preventDefault();
-      fn.call(this, event);
-    };
-  }
 
   $effect(() => {
     $metadata = {
-      title: "Ref UI",
-      description: "A reference UI for PocketBase",
+      title: "UI Reference",
+      description: "How this project uses oat-css",
       headline: "UI Reference",
     };
   });
+
+  let progressValue = $state(60);
 </script>
 
-<div class="example">
-  <h2>Alerts</h2>
+<p>
+  This project uses <a href="https://oat.ink/demo/" target="_blank" rel="noopener">oat-css</a>
+  as its UI framework. Below are the patterns and customizations specific to this starter.
+  For the full component catalog, see the
+  <a href="https://oat.ink/demo/" target="_blank" rel="noopener">official oat demo</a>.
+</p>
+
+<!-- Custom theme -->
+<section>
+  <h2>Custom Theme</h2>
   <p>
-    Alerts can be created by importing <code>alerts</code> from the
-    <code>&lt;Alerts /&gt;</code> component. These alerts will be shown anywhere the
-    component is declared.
+    Brand colors are defined in <code>app.scss</code> using oat's CSS variables with
+    <code>light-dark()</code> for automatic dark mode:
+  </p>
+  <pre><code>--primary: light-dark(#2563eb, #60a5fa);
+--accent: light-dark(#f0f4ff, #1e293b);
+--success: light-dark(#16a34a, #4ade80);
+--danger: light-dark(#dc2626, #f87171);
+--warning: light-dark(#d97706, #fbbf24);</code></pre>
+  <div class="hstack gap-2">
+    <button>Primary</button>
+    <button data-variant="secondary">Secondary</button>
+    <button data-variant="danger">Danger</button>
+    <button class="outline">Outline</button>
+    <button class="ghost">Ghost</button>
+  </div>
+</section>
+
+<!-- Svelte wrapper: Dialog -->
+<section>
+  <h2>Svelte Wrapper: Dialog</h2>
+  <p>
+    Oat's <code>&lt;dialog&gt;</code> uses <code>commandfor</code>/<code>command</code>.
+    Our <code>&lt;Dialog&gt;</code> Svelte component wraps this with a snippet-based trigger API:
+  </p>
+  <pre><code>&lt;Dialog&gt;
+  {'{'}#snippet trigger(show){'}'}
+    &lt;button onclick={'{'}show{'}'}&gt;Open&lt;/button&gt;
+  {'{/snippet}'}
+  &lt;h2&gt;Modal content&lt;/h2&gt;
+&lt;/Dialog&gt;</code></pre>
+  <Dialog>
+    <h2>Example Modal</h2>
+    <p>Opened via the Svelte <code>&lt;Dialog&gt;</code> wrapper.</p>
+  </Dialog>
+</section>
+
+<!-- Svelte wrapper: Alerts -->
+<section>
+  <h2>Svelte Wrapper: Alerts</h2>
+  <p>
+    The <code>alerts</code> store (<code>$lib/alerts</code>) is a standalone writable store.
+    <code>&lt;Alerts /&gt;</code> renders them anywhere it's placed in the layout.
   </p>
   <Alerts />
-  <div role="group">
-    {#each COLORS as type}
-      <button
-        class="bg-{type}"
-        onclick={() => alerts.add({ message: `This is a ${type} alert`, type })}
-      >
-        {type} alert
-      </button>
-    {/each}
+  <div class="hstack gap-2">
+    <button class="small" onclick={() => alerts.info("Informational message.")}>Info</button>
+    <button class="small" data-variant="secondary" onclick={() => alerts.success("Saved!", 3000)}>Success</button>
+    <button class="small" data-variant="warning" onclick={() => alerts.warning("Check this.")}>Warning</button>
+    <button class="small" data-variant="danger" onclick={() => alerts.error("Failed.")}>Error</button>
   </div>
-</div>
+</section>
 
-<div class="example">
-  <h2>Grouping inputs</h2>
+<!-- Svelte wrapper: Spinner + activityStore -->
+<section>
+  <h2>Svelte Wrapper: Spinner</h2>
   <p>
-    Grouping inputs can be done using the <code>role="group"</code> attribute. This
-    is useful for grouping related inputs together, such as in a form or a set of
-    controls.
+    <code>activityStore</code> (<code>$lib/activity</code>) wraps an async function and tracks its running state.
+    Feed it to <code>&lt;Spinner&gt;</code> for loading indicators on buttons.
   </p>
-  <div role="group">
-    <label>
-      <input type="date" placeholder="" />
-      <span>Date</span>
-    </label>
-    <button onclick={() => alerts.info("Button clicked")}>Submit</button>
+  <pre><code>const store = activityStore(() =&gt; fetch('/api/generate', {'{'} method: 'post' {'}'});
+&lt;button onclick={'{'}store.run{'}'} disabled={'{'}$store{'}'}&gt;
+  &lt;Spinner active={'{'}$store{'}'} /&gt; Generate
+&lt;/button&gt;</code></pre>
+  <div class="hstack gap-2">
+    <div aria-busy="true"></div>
+    <div aria-busy="true" data-spinner="large"></div>
+    <button aria-busy="true" disabled>Loading</button>
   </div>
-  <div role="group">
-    <label>
-      <input type="text" placeholder="" />
-      <span>Username</span>
-    </label>
-    <label>
-      <input type="email" placeholder="" />
-      <span>Email</span>
-    </label>
+</section>
+
+<!-- How we use cards -->
+<section>
+  <h2>Cards in This Project</h2>
+  <p>
+    Oat cards use <code>&lt;article&gt;</code> with <code>&lt;header&gt;</code> and
+    <code>&lt;footer&gt;</code>. We use the <code>.row</code>/<code>.col-*</code> grid for layouts.
+  </p>
+  <div class="row">
+    <article class="card col-4">
+      <header>
+        <h3>Post Card</h3>
+        <span class="badge" data-variant="success">Published</span>
+      </header>
+      <p>Content goes here. No custom classes needed.</p>
+      <footer class="hstack gap-2">
+        <button class="outline small">Edit</button>
+        <button class="small">View</button>
+      </footer>
+    </article>
+    <article class="card col-4">
+      <header>
+        <h3>Interactive Progress</h3>
+      </header>
+      <progress value={progressValue} max="100"></progress>
+      <p class="text-light">{progressValue}% complete</p>
+      <footer class="hstack gap-2">
+        <button class="ghost small" onclick={() => progressValue = Math.max(0, progressValue - 10)}>-10</button>
+        <button class="ghost small" onclick={() => progressValue = Math.min(100, progressValue + 10)}>+10</button>
+      </footer>
+    </article>
+    <article class="card col-4">
+      <header>
+        <h3>Empty State</h3>
+      </header>
+      <p class="text-light text-center">Nothing here yet.</p>
+      <footer class="hstack justify-center mt-4">
+        <button onclick={() => alerts.info("Created!")}>New Item</button>
+      </footer>
+    </article>
   </div>
-</div>
+</section>
 
-{#snippet buttonColorShowcase(c, content)}
-  {#each COLORS as color}
-    <button class="{c} bg-{color}">{content ?? "button"}</button>
-  {/each}
-  <br /><br />
-  {#each COLORS as color}
-    <!-- svelte-ignore a11y_invalid_attribute -->
-    <a href="#" role="button" class="{c} bg-{color}">
-      {content ?? "link button"}
-    </a>
-  {/each}
-{/snippet}
-
-<div class="example">
-  <h2>Buttons</h2>
+<!-- Forms pattern -->
+<section>
+  <h2>Forms Pattern</h2>
   <p>
-    links can be styled as buttons using the <code>role="button"</code>:
+    Oat uses <code>&lt;label data-field&gt;</code> for styled inputs.
+    Input groups use <code>&lt;fieldset class="group"&gt;</code> or <code>role="group"</code>.
   </p>
-  <!-- svelte-ignore a11y_invalid_attribute -->
-  <a href="#" role="button">This is a link</a>
-  <button>This is a button</button>
-  <p>
-    You can add <code>.small .round</code> classes to make buttons small / round /
-    circular:
-  </p>
-  <h3>Small Button</h3>
-  <button class="small"> button </button>
-  {@render buttonColorShowcase("small")}
-  <h3>Round Button</h3>
-  <button class="round"> button </button>
-  {@render buttonColorShowcase("round")}
-  <h3>Small Round Button</h3>
-  <button class="small round"> x </button>
-  {@render buttonColorShowcase("small round", "x")}
-</div>
-
-<div class="example">
-  <h2>Action Buttons</h2>
-  <p>Action buttons allow you to hide a dropdown menu inside a button:</p>
-  <div role="menu">
-    <button title="Sub Actions" aria-label="Sub Actions">
-      Click for Actions
-    </button>
-    <menu>
-      <button onclick={() => alerts.info("Action 1")}>Sub Action 1</button>
-      <button onclick={() => alerts.info("Action 2")}>Sub Action 2</button>
-      <button onclick={() => alerts.info("Action 3")}>
-        Extra Long Sub Action 3
-      </button>
-      <!-- svelte-ignore a11y_invalid_attribute -->
-      <a href="#" role="button">Link</a>
-      <!-- svelte-ignore a11y_invalid_attribute -->
-      <a href="#" role="button">Extra Long Link</a>
-    </menu>
-  </div>
-  <p>
-    In this example the action button is wrapped with another button using
-    [role="group"]
-  </p>
-  <div role="group">
-    <button>Main Action</button>
-    <div role="menu">
-      <button title="Sub Actions" aria-label="Sub Actions">
-        <i class="bx bx-dots-vertical"></i>
-      </button>
-      <menu>
-        <button onclick={() => alerts.info("Action 1")}>Sub Action 1</button>
-        <button onclick={() => alerts.info("Action 2")}>Sub Action 2</button>
-        <button onclick={() => alerts.info("Action 3")}>
-          Extra Long Sub Action 3
-        </button>
-        <!-- svelte-ignore a11y_invalid_attribute -->
-        <a href="#" role="button">Link</a>
-        <!-- svelte-ignore a11y_invalid_attribute -->
-        <a href="#" role="button">Extra Long Link</a>
-      </menu>
+  <div class="row">
+    <div class="col-6">
+      <form onsubmit={(e) => e.preventDefault()}>
+        <label data-field>
+          Name
+          <input type="text" placeholder="Enter name" />
+        </label>
+        <label data-field>
+          <input type="checkbox" role="switch" /> Notifications
+        </label>
+        <fieldset class="hstack gap-4">
+          <legend>Priority</legend>
+          <label><input type="radio" name="p" value="low" /> Low</label>
+          <label><input type="radio" name="p" value="med" checked /> Medium</label>
+          <label><input type="radio" name="p" value="high" /> High</label>
+        </fieldset>
+        <button type="submit">Save</button>
+      </form>
+    </div>
+    <div class="col-6">
+      <div role="group">
+        <label>
+          <input type="text" placeholder="" />
+          <span>Search</span>
+        </label>
+        <button><i class="bi bi-search"></i></button>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<div class="example">
-  <h2>Radios & Switches</h2>
+<!-- Tabs + Dropdown (WebComponents) -->
+<section>
+  <h2>WebComponents</h2>
   <p>
-    For basic switches use <code>[role="switch"]</code>:
+    Oat ships <code>&lt;ot-tabs&gt;</code> and <code>&lt;ot-dropdown&gt;</code> as zero-config web components.
   </p>
-  <label>
-    <input type="checkbox" role="switch" />
-    <span></span>
-  </label>
-  <p>
-    For descriptive switches, use the <code>ToggleText</code> component:
-  </p>
-  <ToggleText optionDefault="Off" optionChecked="On" />
-  <p>
-    For radio buttons, use the <code>RadioText</code> component:
-  </p>
-  <RadioText choices={["foo", "bar", "baz"]} value="bar" />
-</div>
-
-<div class="example">
-  <h2>Stepper</h2>
-  <p>
-    Use the <code>role="tablist"</code> attribute to create a stepper. Steps can
-    be <code>&lt;li&gt;</code> or <code>&lt;button&gt;</code> for interactive steps.
-  </p>
-  <blockquote>
-    NOTE: There must always be one active step otherwise the styling breaks.
-  </blockquote>
-  <h3>Non-interactive</h3>
-  <ol role="tablist">
-    <li>Step 1</li>
-    <li>Step 2</li>
-    <li class="active">Step 3</li>
-    <li>Step 4</li>
-    <li>Step 5</li>
-  </ol>
-  <h3>Interactive</h3>
-  <Stepper
-    steps={[
-      { name: "step1", label: "Step 1" },
-      { name: "step2", label: "Step 2" },
-      { name: "step3", label: "Step 3" },
-      { name: "step4", label: "Step 4" },
-    ]}
-    currentStep={0}
-    interactive={true}
-    hideLabels={true}
-  >
-    {#snippet children({ data, index, total, step: { label }, next, previous })}
-      {@const isLastStep = index === total - 1}
-      <form
-        onsubmit={preventDefault(
-          isLastStep ? () => alert("Form Submitted") : next
-        )}
-      >
-        <section class="card">
-          <header><h2>{label}</h2></header>
-          <div>
-            {#if index === 0}
-              <label>
-                <input
-                  type="text"
-                  bind:value={data.name}
-                  placeholder=""
-                  required
-                />
-                <span>Name</span>
-              </label>
-              <label>
-                <input type="text" bind:value={data.email} placeholder="" />
-                <span>Email</span>
-              </label>
-            {:else if index === 1}
-              <label>
-                <input
-                  type="text"
-                  bind:value={data.address}
-                  placeholder=""
-                  required
-                />
-                <span>Address</span>
-              </label>
-              <label>
-                <input type="text" bind:value={data.city} placeholder="" />
-                <span>City</span>
-              </label>
-            {:else if index === 2}
-              <label>
-                <input type="text" bind:value={data.zip} placeholder="" />
-                <span>Zip Code</span>
-              </label>
-            {:else if index === 3}
-              <label>
-                <input type="text" bind:value={data.country} placeholder="" />
-                <span>Country</span>
-              </label>
-            {/if}
-          </div>
-          <footer>
-            <div role="group">
-              <button type="button" onclick={previous}>previous</button>
-              <button type="submit">next</button>
-            </div>
-          </footer>
-        </section>
-      </form>
-    {/snippet}
-  </Stepper>
-  <h3>With Icons (or text)</h3>
-  <ol role="tablist">
-    <li><span><i class="bx bx-cart"></i></span></li>
-    <li class="active">
-      <span>Foo</span>
-    </li>
-    <li><span><i class="bx bx-truck"></i></span></li>
-  </ol>
-</div>
-
-<div class="example">
-  <h2>Colors</h2>
-  <p>
-    You can set set the color / background color of an element using the
-    <code>.&lt;COLOR&gt;</code> and <code>.bg-&lt;COLOR&gt;</code>
-  </p>
-  <ul>
-    {#each COLORS as color}
-      <li class={color}>This is a {color} text</li>
-      <li class="bg-{color}">This is a {color} background</li>
-    {/each}
-  </ul>
-</div>
-
-<div class="example">
-  <h2>Spinners</h2>
-  <p>
-    The <code>&lt;Spinner /&gt;</code> component is used to indicate loading or processing
-    states.
-  </p>
-  <Spinner active />
-</div>
-
-<div class="example">
-  <h2>Dialog</h2>
-  <p>For a pop-out dialog use <code>&lt;Dialog /&gt;</code>:</p>
-  <Dialog>
-    <h2>Dialog Title</h2>
-    <p>This is a dialog content area.</p>
-    <p>You can put any content here, including forms, text, images, etc.</p>
-  </Dialog>
-</div>
-
-<div class="example">
-  <h2>Details</h2>
-  <details>
-    <summary>Details block</summary>
-    <p>
-      This is a details block. It can be used to hide or show content. Click the
-      summary to toggle visibility.
-    </p>
-    <p>
-      You can put any content inside, including other components, text, images,
-      etc.
-    </p>
-    <p>
-      For example, you can include a form, a table, or any other HTML elements.
-    </p>
-  </details>
-</div>
-
-<div class="example">
-  <h2>Cards</h2>
-  <div class="cards">
-    <section>
-      <header><h1>Header H1</h1></header>
-      <div>
-        <p>para 1</p>
-        <p>para 2</p>
-      </div>
-      <footer>this is footer</footer>
-    </section>
-    <section>
-      <header><h2>Header H2</h2></header>
-      <div>
-        <p>para 1</p>
-        <p>para 2</p>
-        <p>para 3</p>
-      </div>
-      <footer>this is footer</footer>
-    </section>
-    <section>
-      <header><h3>Header H3</h3></header>
-      <div>
-        <p>para 1</p>
-        <p>para 2</p>
-      </div>
-      <footer>this is footer</footer>
-    </section>
-    <section>
-      <header>Header</header>
-      <div>
-        <p>para 1</p>
-        <p>para 2</p>
-      </div>
-      <footer>this is footer</footer>
-    </section>
+  <div class="row">
+    <div class="col-6">
+      <ot-tabs>
+        <div role="tablist">
+          <button role="tab">Tab 1</button>
+          <button role="tab">Tab 2</button>
+        </div>
+        <div role="tabpanel"><p>First panel content.</p></div>
+        <div role="tabpanel"><p>Second panel content.</p></div>
+      </ot-tabs>
+    </div>
+    <div class="col-6">
+      <ot-dropdown>
+        <button popovertarget="ref-menu" class="outline">Actions <i class="bi bi-chevron-down"></i></button>
+        <menu popover id="ref-menu">
+          <button role="menuitem" onclick={() => alerts.info("Edit")}><i class="bi bi-pencil"></i> Edit</button>
+          <button role="menuitem" onclick={() => alerts.info("Duplicate")}><i class="bi bi-copy"></i> Duplicate</button>
+          <hr>
+          <button role="menuitem" onclick={() => alerts.warning("Deleted")}><i class="bi bi-trash"></i> Delete</button>
+        </menu>
+      </ot-dropdown>
+    </div>
   </div>
-  <p>
-    Cards with a direct child <code>&lt;table&gt;</code> will be styled as a table
-    card:
-  </p>
-  <div class="cards">
-    <section>
-      <header>Table Card</header>
-      <div>
-        <table>
-          <tbody>
-            {#each COLORS as color}
-              <tr>
-                <th class={color}>{color}</th>
-                <td
-                  >This is a {color}
-                  <span class="bg-{color}">background</span></td
-                >
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </div>
-</div>
+</section>
 
-<style lang="scss">
-  div.example {
-    h2 {
-      margin-top: 0;
-    }
-    padding: 1rem;
-    margin-block: 1.5rem;
-    border-radius: var(--main-radius);
-    background-color: var(--background);
+<!-- Utilities we use -->
+<section>
+  <h2>Layout Utilities</h2>
+  <p>
+    <code>.hstack</code>/<code>.vstack</code> for flex, <code>.gap-*</code> for spacing,
+    <code>.row</code>/<code>.col-*</code> for grid. <code>.text-light</code> for muted text.
+  </p>
+  <div class="hstack gap-2 mb-4">
+    <span class="badge">Default</span>
+    <span class="badge" data-variant="success">Success</span>
+    <span class="badge" data-variant="warning">Warning</span>
+    <span class="badge" data-variant="danger">Danger</span>
+    <span class="badge outline">Outline</span>
+  </div>
+  <div class="table">
+    <table>
+      <thead><tr><th>Class</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>.hstack</code></td><td>Horizontal flex with gap</td></tr>
+        <tr><td><code>.vstack</code></td><td>Vertical flex with gap</td></tr>
+        <tr><td><code>.gap-2</code></td><td>0.5rem gap</td></tr>
+        <tr><td><code>.text-light</code></td><td>Muted text color</td></tr>
+        <tr><td><code>.justify-center</code></td><td>Flex center justify</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<style>
+  section {
+    padding: var(--space-4);
+    margin-block: var(--space-6);
+    border-radius: var(--radius-medium);
+    background: light-dark(var(--bg-1), var(--bg-1));
   }
+  section h2 { margin-top: 0; }
+  pre {
+    padding: var(--space-3);
+    border-radius: var(--radius-medium);
+    background: light-dark(var(--bg-2), var(--bg-2));
+    overflow-x: auto;
+    font-size: 0.85em;
+  }
+  code { font-size: 0.9em; }
+  .mb-4 { margin-block-end: var(--space-4); }
+  .mt-4 { margin-block-start: var(--space-4); }
 </style>

@@ -53,7 +53,7 @@
   </p>
 </footer>
 
-<style lang="scss">
+<style>
   main {
     flex-grow: 1;
     padding-block: var(--space-6);
