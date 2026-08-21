@@ -12,7 +12,13 @@
 
   const { data, children }: { data: any; children: Snippet } = $props();
   const record = $derived(data.record);
-  let active = $derived(page.url.searchParams.get("active") ?? "");
+  let active = $derived.by(() => {
+    const searchActive = page.url.searchParams.get("active");
+    if (searchActive) return searchActive;
+    const path = page.url.pathname;
+    if (path.endsWith("/edit") || path.endsWith("/edit/")) return "edit";
+    return "";
+  });
   $effect(() => {
     if (active === "auditlog")
       $metadata.title =

@@ -52,27 +52,38 @@
   const store = activityStore<SubmitEvent>((e) => onsubmit(e));
 </script>
 
-<form onsubmit={store.run}>
-  <output>ID: {record.id ?? "-"}</output>
-  <div class="flex h">
-    <label>
+<form onsubmit={store.run} class="vstack gap-4">
+  <output class="small muted">ID: {record.id ?? "-"}</output>
+
+  <div class="hstack gap-4">
+    <label class="half">
       <input type="text" placeholder="" bind:value={record.title} />
       <span>Title</span>
     </label>
-    <label>
+    <label class="half">
       <input type="text" placeholder="" bind:value={record.slug} />
       <span>Slug</span>
     </label>
-    <div data-label="files">
-      <FileInput bind:fileInput pasteFile={true} multiple={true} />
-    </div>
   </div>
+
+  <div data-label="Upload files">
+    <FileInput bind:fileInput pasteFile={true} multiple={true} />
+  </div>
+
   <FileField {record} fieldName="files" bind:toBeRemoved />
-  <div data-label="body">
-    <textarea bind:value={record.body} placeholder="body"></textarea>
+
+  <div data-label="Body">
+    <textarea bind:value={record.body} placeholder="body" rows="8"></textarea>
   </div>
+
   <button type="submit" aria-busy={$store}>
     <Spinner active={$store} />
     Save
   </button>
 </form>
+
+<style>
+  .half {
+    flex: 1 1 0;
+  }
+</style>
