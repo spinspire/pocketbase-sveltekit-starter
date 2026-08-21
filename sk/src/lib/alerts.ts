@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { writable, type Writable } from "svelte/store";
 
 interface Alert {
   message: string;
@@ -7,7 +7,17 @@ interface Alert {
   html?: boolean;
 }
 
-function createAlerts() {
+interface AlertsStore extends Writable<Alert[]> {
+  add(alert: Alert): void;
+  info(message: string, timeout?: number): void;
+  success(message: string, timeout?: number): void;
+  warning(message: string, timeout?: number): void;
+  error(message: string, timeout?: number): void;
+  dismiss(alert: Alert): void;
+  dismissAll(): void;
+}
+
+function createAlerts(): AlertsStore {
   const { subscribe, update, set } = writable<Alert[]>([]);
 
   function dismiss(alert: Alert) {

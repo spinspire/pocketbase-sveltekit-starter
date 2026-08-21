@@ -22,34 +22,37 @@
 
 {@render trigger(show)}
 <dialog bind:this={dialog} onclick={close}>
-  <form method="dialog">
-    <button class="ghost icon" aria-label="Close">
+  <header>
+    <button class="ghost icon" aria-label="Close" onclick={() => dialog.close()}>
       <i class="bi bi-x-lg"></i>
     </button>
-  </form>
-  {@render children()}
+  </header>
+  <div class="dialog-body">
+    {@render children()}
+  </div>
 </dialog>
 
 <style>
   dialog {
-    border: none;
+    border: 1px solid var(--border);
     border-radius: var(--radius-medium);
     padding: 0;
     max-width: 90vw;
     max-height: 90vh;
     color: light-dark(var(--color-1), var(--color-1));
     background: light-dark(var(--bg-1), var(--bg-1));
+    box-shadow: var(--shadow-medium);
   }
   dialog::backdrop {
     background: rgba(0, 0, 0, 0.5);
   }
-  dialog > form {
+  header {
     display: flex;
     justify-content: flex-end;
     padding: var(--space-2);
     padding-bottom: 0;
   }
-  dialog > :not(form) {
+  .dialog-body {
     padding: var(--space-4);
   }
 </style>
