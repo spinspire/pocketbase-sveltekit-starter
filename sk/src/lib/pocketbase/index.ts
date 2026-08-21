@@ -17,7 +17,7 @@ import {
   startAuthentication,
   startRegistration,
 } from "@simplewebauthn/browser";
-import { alerts } from "$lib/components/Alerts.svelte";
+import { alerts } from "$lib/alerts";
 
 export const client = new PocketBase(
   browser ? window.location.origin : undefined
