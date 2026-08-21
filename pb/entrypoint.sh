@@ -80,4 +80,16 @@ if [ -n "$PB_USER_EMAIL" ] && [ -n "$PB_USER_PASSWORD" ]; then
   wait $PB_PID 2>/dev/null || true
 fi
 
+# Start SvelteKit dev server in dev mode
+if [ "$DEV" = "true" ]; then
+  echo "Starting SvelteKit dev server..."
+  cd /app/sk && bun install && bun run dev -- --host 0.0.0.0 &
+  SK_PID=$!
+  echo "Waiting for SvelteKit dev server..."
+  until curl -sf http://127.0.0.1:5173 >/dev/null 2>&1; do
+    sleep 1
+  done
+  echo "SvelteKit dev server ready on http://localhost:5173"
+fi
+
 exec $CMD

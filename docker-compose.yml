@@ -14,6 +14,7 @@ services:
       - PB_ARCH=linux_amd64
       - HOME=/app/pb
       - AUDITLOG=${AUDITLOG}
+      - DEV=${DEV:-true}
       - PB_SUPERUSER_EMAIL=${PB_SUPERUSER_EMAIL}
       - PB_SUPERUSER_PASSWORD=${PB_SUPERUSER_PASSWORD}
       - PB_USER_EMAIL=${PB_USER_EMAIL}
@@ -22,18 +23,3 @@ services:
       - ./pb:/app/pb
       - ./sk:/app/sk
       - ${HOME}/go/pkg:/go/pkg
-  sk:
-    image: oven/bun:1-alpine
-    user: ${UID}:${GID}
-    # sveltekit build
-    # command: sh -c "bun install && bun run build"
-    # for live development
-    command: sh -c "bun install && bun run dev -- --host 0.0.0.0"
-    expose:
-      - 5173
-    volumes:
-      - ./sk:/app/sk
-      - ./pb:/app/pb
-    environment:
-      - HOME=/app/sk
-    working_dir: /app/sk

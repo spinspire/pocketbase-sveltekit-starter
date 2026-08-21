@@ -9,8 +9,8 @@ RUN apk --no-cache add upx make git gcc libtool musl-dev ca-certificates dumb-in
   && CGO_ENABLED=0 go build \
   && upx pocketbase
 
-FROM alpine
-RUN apk --no-cache add curl
+FROM oven/bun:1-alpine
+RUN apk --no-cache add curl wget unzip
 WORKDIR /app/pb
 COPY --from=builder /build/pocketbase /app/pb/pocketbase
 COPY pb/pb_hooks ./pb_hooks

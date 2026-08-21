@@ -1,0 +1,7 @@
+# docker-compose.override.yml
+# Copy to docker-compose.override.yml (git-ignored) for local port mappings.
+services:
+  pb:
+    ports:
+      - "127.0.0.1:8090:8090"
+      - "127.0.0.1:5173:5173"
