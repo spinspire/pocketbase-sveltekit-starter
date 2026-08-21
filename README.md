@@ -69,12 +69,38 @@ This method is strongly recommended method for setting up this application in mo
 Make sure your Docker daemon is running then complete the following steps:
 
 1. Copy`.env.example` to `.env` and then edit it to match your environment.
-2. Also, if you wish, copy `docker-compose.override.yml.example` to `docker-compose.override.yml` and edit it to your taste before proceeding.
+2. Also, if you wish, copy `docker-compose.override-example.yml` to `docker-compose.override.yml` and edit it to your taste before proceeding.
 3. And then just run `docker compose up -d`.
 4. Visit http://localhost:5173 to see the frontend dev server running.
 5. Visit http://localhost:5173/\_ to see the backend server and setup the first admin user.
 6. Both sides are working if you navigate to the http://localhost:5173/hello page on the development server
    and there is an API response that says "Hello World!"
+
+### How it works
+
+A single Docker container runs both PocketBase and the SvelteKit dev server (when `DEV=true`):
+
+```mermaid
+sequenceDiagram
+   participant br as Browser (localhost:5173)
+   participant vite as Vite Dev Server
+   participant pb as PocketBase (localhost:8090)
+
+   br->>vite: GET / (SvelteKit page)
+   vite->>br: HMR hot reload
+   br->>vite: POST /api/...
+   vite->>pb: proxy /api → PocketBase
+   pb->>vite: API response
+   vite->>br: return response
+```
+
+- **DEV=true** (default): Vite runs on `localhost:5173`, proxies `/api` and `/_` to PocketBase on `localhost:8090` (configurable via `POCKETBASE_URL` env var). Full HMR for frontend edits.
+- **DEV=false** or unset: Only PocketBase runs, serving the pre-built `sk/build/` on `localhost:8090`. No Vite, no HMR.
+
+To access ports from the host, copy the override example:
+```bash
+cp docker-compose.override-example.yml docker-compose.override.yml
+```
 
 ## Without Docker
 
@@ -121,10 +147,11 @@ This method works if you have Go Tools installed and want to set up the machine 
 
 # Developing
 
-Visit http://localhost:5173 (sk) or http://localhost:8090 (pb)
+Visit http://localhost:5173 (Vite + SvelteKit) or http://localhost:8090 (PocketBase admin UI at /_)
 
-If you are running `modd`, making changes in the Svelte code (frontend) or Go code (backend) will show
-results (almost) immediately.
+With `DEV=true`, changes to Svelte code hot-reload instantly via Vite HMR.
+Changes to PocketBase JS hooks (`pb/pb_hooks/`) auto-reload.
+Changes to Go code (`pb/main.go`) require `RELEASE=custom` and `modd` for live reload.
 
 This setup turns off automatic generation of database migration files by setting `--automigrate=false`. You can still generate migration files manually by running `pocketbase migrate create <name>` or `pocketbase migrate collections` to create migration files for your collections.
 

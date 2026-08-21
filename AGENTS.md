@@ -4,15 +4,31 @@
 
 - **pb/** — PocketBase backend (Go binary + JS hooks). Owns the SQLite DB, auth, file storage, and custom API routes.
 - **sk/** — SvelteKit frontend. Fully static (`adapter-static`), SSR off. No Node/Bun needed at runtime.
-- Both services run in Docker Compose; start with `docker compose up -d`.
+- Single Docker container runs both services; start with `docker compose up -d`.
+
+## DEV Mode
+
+The container runs in dev mode by default (`DEV=true` in docker-compose.yml).
+
+- **DEV=true**: Entrypoint starts Vite (`bun run dev`) in background before PocketBase.
+  - Vite on `localhost:5173` with HMR for SvelteKit edits.
+  - Vite proxies `/api` and `/_` to PocketBase (via `POCKETBASE_URL`, default `http://127.0.0.1:8090`).
+  - PocketBase serves API + admin UI on `localhost:8090`.
+- **DEV=false** or unset: Only PocketBase runs, serving pre-built `sk/build/` on `localhost:8090`. No Vite, no HMR.
+
+Port mapping requires `docker-compose.override.yml` (see `docker-compose.override-example.yml`).
 
 ## Key Commands
 
 ```bash
-# Start everything (dev mode with hot reload)
+# Start everything (dev mode with HMR)
 docker compose up -d
 
-# Frontend only (live reload)
+# Start in prod mode (no Vite, serves built files)
+# Set DEV=false in .env, then:
+docker compose up -d
+
+# Frontend only (without Docker)
 cd sk && bun run dev
 
 # Backend only (Go live reload via modd)
