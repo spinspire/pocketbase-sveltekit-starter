@@ -9,7 +9,7 @@
   ];
 </script>
 
-<ul class="unstyled hstack gap-0">
+<ul class="nav-links unstyled hstack gap-0">
   {#each links as [path, label]}
     {@const active = $page.url.pathname === path}
     <li>
@@ -30,5 +30,21 @@
     font-weight: var(--font-bold);
     text-decoration: underline;
     text-underline-offset: var(--space-1);
+  }
+  @media (max-width: 768px) {
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      padding: 0 var(--space-3);
+    }
+    .nav-links a {
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-small);
+      width: 100%;
+    }
+    .nav-links a:hover {
+      background-color: var(--muted);
+    }
   }
 </style>
