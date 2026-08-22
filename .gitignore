@@ -5,3 +5,4 @@
 .ash_history
 /docker-compose.override.yml
 pbsk.code-workspace
+/tmp

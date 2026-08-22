@@ -71,3 +71,24 @@ cd sk && bun run check
 
 System collections: `_mfas`, `_otps`, `_externalAuths`, `_authOrigins`, `_superusers`
 App collections: `users`, `posts`, `auditlog`, `hooks`, `passkeys`
+
+## Browser Testing
+
+- **URL**: `http://<CONTAINER_HOSTNAME>:5173/` — get hostname via `docker compose ps --format '{{.Name}}'` (NOT localhost)
+- **PB API** accessible via Vite proxy at same host: `http://pbsk-pb-1:5173/api/...`
+- **Auth tokens** (reusable across sessions):
+  - Regular user: `cat ./tmp/user_token` — `user@example.com` / `changeme123` (collection: `users`)
+  - Superuser: `cat ./tmp/admin_token` — `admin@example.com` / `changeme123` (collection: `_superusers`)
+- **Set auth in browser**: 
+  ```bash
+  # Get full auth response with record
+  curl -s http://pbsk-pb-1:5173/api/collections/users/auth-with-password \
+    -X POST -H 'Content-Type: application/json' \
+    -d '{"identity":"user@example.com","password":"changeme123"}' | \
+    jq -c '{token: .token, record: .record}' > ./tmp/user_auth.json
+  
+  # Set in localStorage (PB JS SDK uses key "pocketbase_auth")
+  AUTH_JSON=$(cat ./tmp/user_auth.json)
+  agent-browser eval "localStorage.setItem('pocketbase_auth', '$AUTH_JSON')"
+  agent-browser reload
+  ```
