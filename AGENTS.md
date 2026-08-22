@@ -62,15 +62,20 @@ cd sk && bun run check
 - **Audit logging**: controlled by `AUDITLOG` env var (e.g. `AUDIOGLOG=posts,users`). JS implementation in `pb/pb_hooks/auditlog.pb.js`.
 - Admin UI: `http://localhost:8090/_`
 
+System collections: `_mfas`, `_otps`, `_externalAuths`, `_authOrigins`, `_superusers`
+App collections: `users`, `posts`, `auditlog`, `hooks`, `passkeys`
+
 ## SvelteKit
 
 - TypeScript types auto-generated from PB schema: `sk/src/lib/pocketbase/generated-types.ts`. Regenerate after collections change.
 - Frontend served by PocketBase via `--publicDir ../sk/build`.
 
-## Collections
+## Oat-css Gotchas
 
-System collections: `_mfas`, `_otps`, `_externalAuths`, `_authOrigins`, `_superusers`
-App collections: `users`, `posts`, `auditlog`, `hooks`, `passkeys`
+- **`title` on `<i class="bi-*">` breaks Bootstrap Icons**: Oat-css JS converts `title` → `data-tooltip`, which sets `display: block` on the element, collapsing the icon to 0×0. Never use `title` on icon elements. (Tested: ref-ui `/ref-ui` icons section.)
+- **`<span>` vs `<i>` for icons**: Oat-css sets `display: block` on `<span>` elements. Always use `<i>` for Bootstrap Icons.
+- **Scoped CSS `:where()` has 0 specificity**: Svelte's scoped styles use `:where(.hash)` which loses to oat-css rules. Use `!important` or global selectors when overriding oat-css.
+- **`<a role="button">` ignores oat button classes**: Oat link styles override `outline`/`ghost` classes on `<a>`. Use a `.toolbar` wrapper with explicit styles for consistent appearance.
 
 ## Browser Testing
 
