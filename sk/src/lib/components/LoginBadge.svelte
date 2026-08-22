@@ -43,7 +43,7 @@
             alt="profile pic"
           />
         {/if}
-        <span>{$authModel?.name ?? $authModel?.username ?? $authModel?.email}</span>
+        <span>{$authModel?.name || $authModel?.username || $authModel?.email}</span>
       </div>
       <button onclick={() => webauthnRegister($authModel?.email)}>
         <i class="bi bi-key"></i> Register Passkey
