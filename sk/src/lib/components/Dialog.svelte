@@ -29,7 +29,7 @@
 <dialog bind:this={dialog} onclick={close}>
   <form method="dialog">
     <header>
-      <button class="ghost icon" aria-label="Close" onclick={() => dialog.close()}>
+      <button class="ghost icon" aria-label="Close" onclick={() => dialog.close()} style:margin-inline-start="auto">
         <i class="bi bi-x-lg"></i>
       </button>
     </header>
