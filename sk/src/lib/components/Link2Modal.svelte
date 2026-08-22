@@ -54,11 +54,4 @@
   </dialog>
 {/if}
 
-<style>
-  dialog > form > header {
-    display: flex;
-    justify-content: flex-end;
-  }
-</style>
-
 {@render trigger(onclick)}

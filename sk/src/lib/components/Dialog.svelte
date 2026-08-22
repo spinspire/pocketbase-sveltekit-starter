@@ -43,10 +43,3 @@
     {/if}
   </form>
 </dialog>
-
-<style>
-  dialog > form > header {
-    display: flex;
-    justify-content: flex-end;
-  }
-</style>

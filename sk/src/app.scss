@@ -31,3 +31,9 @@ body {
   flex-flow: column;
 }
 
+// Dialog header: row layout so dismiss button can be right-aligned
+dialog > form > header {
+  flex-direction: row;
+  justify-content: space-between;
+}
+
