@@ -23,6 +23,40 @@
   <a href="https://oat.ink/demo/" target="_blank" rel="noopener">official oat demo</a>.
 </p>
 
+<!-- Bootstrap Icons -->
+<section>
+  <h2>Bootstrap Icons</h2>
+  <p>Testing icon rendering in various contexts.</p>
+  <p><strong>Gotcha:</strong> Don't use <code>title</code> on <code>&lt;i class="bi-*"&gt;</code> — oat-css JS converts it to <code>data-tooltip</code> which breaks icon rendering.</p>
+  <div class="hstack gap-4" style="flex-wrap: wrap;">
+    <div><i class="bi bi-calendar"></i> bi-calendar (i)</div>
+    <div><i class="bi bi-calendar3"></i> bi-calendar3 (i)</div>
+    <div><i class="bi bi-calendar-event"></i> bi-calendar-event (i)</div>
+    <div><i class="bi bi-search"></i> bi-search (i)</div>
+    <div><i class="bi bi-pencil"></i> bi-pencil (i)</div>
+    <div><i class="bi bi-trash"></i> bi-trash (i)</div>
+    <div><i class="bi bi-x-lg"></i> bi-x-lg (i)</div>
+    <div><i class="bi bi-plus-circle"></i> bi-plus-circle (i)</div>
+    <div><i class="bi bi-key"></i> bi-key (i)</div>
+    <div><i class="bi bi-box-arrow-right"></i> bi-box-arrow-right (i)</div>
+    <div><i class="bi bi-chevron-down"></i> bi-chevron-down (i)</div>
+    <div><i class="bi bi-chevron-left"></i> bi-chevron-left (i)</div>
+    <div><i class="bi bi-chevron-right"></i> bi-chevron-right (i)</div>
+  </div>
+  <h3>As buttons</h3>
+  <div class="hstack gap-2">
+    <button><i class="bi bi-search"></i> Search</button>
+    <button class="ghost icon"><i class="bi bi-x-lg"></i></button>
+    <button class="outline"><i class="bi bi-pencil"></i> Edit</button>
+  </div>
+  <h3>Standalone icon buttons</h3>
+  <div class="hstack gap-2">
+    <button class="ghost icon"><i class="bi bi-chevron-left"></i></button>
+    <button class="ghost icon"><i class="bi bi-chevron-right"></i></button>
+    <button class="ghost icon"><i class="bi bi-calendar"></i></button>
+  </div>
+</section>
+
 <!-- Custom theme -->
 <section>
   <h2>Custom Theme</h2>

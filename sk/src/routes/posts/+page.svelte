@@ -51,22 +51,18 @@
 <Paginator store={posts} showIfSinglePage={true} />
 {#each $posts.items as item}
   {@const [file] = item.files}
-  {@const thumbnail = client.files.getURL(item, file, { thumb: "100x100" })}
   <a href={resolve("/posts/[slug]", item)} class="post">
-    <time class="date" datetime={item.updated}>
-      <span class="dow">{new Date(item.updated).toLocaleDateString(undefined, { weekday: 'short' })}</span>
-      <span class="mon">{new Date(item.updated).toLocaleDateString(undefined, { month: 'short' })}</span>
-      <span class="dom">{new Date(item.updated).getDate()}</span>
-    </time>
-    <Image record={item} {file} />
+    <div class="thumb">
+      <Image record={item} {file} />
+    </div>
     <div>
-      <div>
-        <i class="bi bi-calendar" title="on date"></i>
+      <div class="meta">
+        <i class="bi bi-calendar"></i>
         {new Intl.DateTimeFormat(undefined, { dateStyle: "full" }).format(
           new Date(item.updated)
         )}
         {#if item.expand?.user?.name}
-          <i class="bi bi-pen" title="author"></i>
+          <i class="bi bi-pen"></i>
           {item.expand.user.name}
         {/if}
       </div>
@@ -82,6 +78,7 @@
   .post {
     color: inherit;
     display: flex;
+    align-items: center;
     gap: var(--space-4);
     padding-block: var(--space-4);
     text-decoration: none;
@@ -89,21 +86,32 @@
   .post + .post {
     border-block-start: dashed 1px var(--border);
   }
-  .date {
-    display: inline-flex;
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-size-sm);
+    color: var(--muted-fg);
+    margin-block-end: var(--space-1);
+  }
+  .meta .bi {
+    font-size: 0.85em;
+    opacity: 0.6;
+  }
+  .meta + h2 {
+    margin: 0;
+  }
+  .thumb {
+    display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-width: 4em;
-    padding: var(--space-2);
-    background: var(--muted);
-    border-radius: var(--radius-medium);
-    font-family: var(--font-alt);
-    font-size: 0.85em;
-    line-height: 1.2;
+    gap: var(--space-1);
     flex-shrink: 0;
   }
-  .date .dow { font-weight: 600; }
-  .date .mon { text-transform: uppercase; font-size: 0.8em; opacity: 0.7; }
-  .date .dom { font-size: 1.4em; font-weight: 700; }
+  .thumb :global(img) {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: var(--radius-medium);
+  }
 </style>
