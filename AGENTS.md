@@ -1,5 +1,7 @@
 # Agents
 
+**Always read `pb/README.md`** for backend-specific context.
+
 ## Project Structure
 
 - **pb/** — PocketBase backend (Go binary + JS hooks). Owns the SQLite DB, auth, file storage, and custom API routes.

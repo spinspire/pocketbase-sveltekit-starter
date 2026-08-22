@@ -87,6 +87,8 @@ router.api.post('/api/myapp/send-email', async (e) => {
 
 ## Migrations
 
+**System fields**: Collections created via migration files **must** include `created` and `updated` system fields.
+
 **Auto-migrate**: Collections changed via Admin UI auto-generate migrations in `pb_migrations/`
 
 **Manual JS migration**:
