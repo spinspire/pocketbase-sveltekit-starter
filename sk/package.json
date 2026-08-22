@@ -36,7 +36,7 @@
   "type": "module",
   "dependencies": {
     "@simplewebauthn/browser": "^13.3.0",
-    "pocketbase": "^0.26.8",
+    "pocketbase": "^0.28.0",
     "zod": "^3.25.76"
   },
   "pnpm": {

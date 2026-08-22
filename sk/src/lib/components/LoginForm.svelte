@@ -129,7 +129,7 @@
     {/if}
   {/if}
   {#await coll.listAuthMethods({ $autoCancel: false }) then methods}
-    {#each methods.authProviders as p}
+    {#each methods.oauth2.providers as p}
       <button type="button" onclick={() => providerLogin(p, coll)}
         >Sign-in with {p.name}</button
       >
