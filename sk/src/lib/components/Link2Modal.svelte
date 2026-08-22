@@ -45,11 +45,20 @@
           <i class="bi bi-x-lg"></i>
         </button>
       </header>
-      <Alerts />
-      <h2>{$metadata.headline}</h2>
-      <Comp data={$page.state.selected}></Comp>
+      <div>
+        <h2>{$metadata.headline}</h2>
+        <Alerts />
+        <Comp data={$page.state.selected}></Comp>
+      </div>
     </form>
   </dialog>
 {/if}
+
+<style>
+  dialog > form > header {
+    display: flex;
+    justify-content: flex-end;
+  }
+</style>
 
 {@render trigger(onclick)}
