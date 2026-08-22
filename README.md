@@ -28,6 +28,7 @@ frontend is static and backend is a single compiled Golang binary (JAMstack baby
   and `ssr` is OFF.
 - UI styled with [oat-css](https://oat.ink/) (lightweight semantic CSS framework)
   and [Bootstrap Icons](https://icons.getbootstrap.com/).
+- **mdsvex** enabled: pages can be `.md` (Markdown + Svelte) or `.svelte`. The front page (`+page.md`) demonstrates this.
 - **AI-ready**: [AGENTS.md](./AGENTS.md) gives AI coding assistants full context on architecture, commands, and gotchas.
 - PB (PocketBase) provides complete (and _fast_) backend including:
   - databse (SQLite)

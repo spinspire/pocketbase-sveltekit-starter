@@ -75,6 +75,7 @@ App collections: `users`, `posts`, `auditlog`, `hooks`, `passkeys`
 
 - TypeScript types auto-generated from PB schema: `sk/src/lib/pocketbase/generated-types.ts`. Regenerate after collections change.
 - Frontend served by PocketBase via `--publicDir ../sk/build`.
+- **mdsvex** enabled: pages can be `.md` (Markdown + Svelte) or `.svelte`. The front page (`+page.md`) demonstrates this. See [mdsvex docs](https://mdsvex.pngwn.io/docs) for syntax.
 
 ## Oat-css Gotchas
 
