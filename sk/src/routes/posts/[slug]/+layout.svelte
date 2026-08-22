@@ -12,6 +12,7 @@
 
   const { data, children }: { data: any; children: Snippet } = $props();
   const record = $derived(data.record);
+  const slug = $derived(record.slug || record.id || "new");
   let active = $derived.by(() => {
     const searchActive = page.url.searchParams.get("active");
     if (searchActive) return searchActive;
@@ -32,7 +33,7 @@
 <LoginGuard>
   <nav class="tabs" data-variant="underline">
     <a
-      href={resolve("/posts/[slug]", { slug: record.slug || record.id })}
+      href={resolve("/posts/[slug]", { slug })}
       data-active={active === "" || undefined}
     >
       View
@@ -40,7 +41,7 @@
     {#if ($authModel?.id === record.user || client.authStore.isSuperuser) && record.id}
       <a
         href={resolve("/posts/[slug]/edit", {
-          slug: record.slug || record.id,
+          slug,
         })}
         data-active={active === "edit" || undefined}
       >
@@ -48,7 +49,7 @@
       </a>
       <a
         href={resolve("/posts/[slug]/?active=delete", {
-          slug: record.slug || record.id,
+          slug,
         })}
         data-active={active === "delete" || undefined}
       >
@@ -57,7 +58,7 @@
     {/if}
     <a
       href={resolve("/posts/[slug]/?active=auditlog", {
-        slug: record.slug || record.id,
+        slug,
       })}
       data-active={active === "auditlog" || undefined}
     >
