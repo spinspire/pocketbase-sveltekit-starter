@@ -32,7 +32,7 @@
             alt="profile pic"
           />
         {/if}
-        <span>{$authModel?.name || $authModel?.username || $authModel?.email}</span>
+        <span>{$authModel?.name || $authModel?.email || $authModel?.username}</span>
       </button>
     {/snippet}
     <div class="wrapper">
@@ -43,7 +43,7 @@
             alt="profile pic"
           />
         {/if}
-        <span>{$authModel?.name || $authModel?.username || $authModel?.email}</span>
+        <span>{$authModel?.name || $authModel?.email || $authModel?.username}</span>
       </div>
       <button onclick={() => webauthnRegister($authModel?.email)}>
         <i class="bi bi-key"></i> Register Passkey
@@ -71,6 +71,7 @@
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-1) var(--space-3);
+    line-height: 1;
   }
   .badge img {
     height: 2em;
