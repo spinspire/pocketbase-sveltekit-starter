@@ -161,9 +161,10 @@
     .mobile-menu {
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: var(--space-2);
     }
-    :global(nav[data-topnav] .nav-links) {
+    :global(nav[data-topnav]) {
       display: none;
     }
   }
