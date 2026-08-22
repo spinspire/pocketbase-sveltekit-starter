@@ -56,25 +56,27 @@
   <output class="small muted">ID: {record.id ?? "-"}</output>
 
   <div class="hstack gap-4">
-    <label class="half">
-      <input type="text" placeholder="" bind:value={record.title} />
-      <span>Title</span>
+    <label data-field class="half">
+      Title
+      <input type="text" placeholder="Enter post title" bind:value={record.title} />
     </label>
-    <label class="half">
-      <input type="text" placeholder="" bind:value={record.slug} />
-      <span>Slug</span>
+    <label data-field class="half">
+      Slug
+      <input type="text" placeholder="url-friendly-slug" bind:value={record.slug} />
     </label>
   </div>
 
-  <div data-label="Upload files">
+  <label data-field>
+    Upload files
     <FileInput bind:fileInput pasteFile={true} multiple={true} />
-  </div>
+  </label>
 
   <FileField {record} fieldName="files" bind:toBeRemoved />
 
-  <div data-label="Body">
-    <textarea bind:value={record.body} placeholder="body" rows="8"></textarea>
-  </div>
+  <label data-field>
+    Body
+    <textarea bind:value={record.body} placeholder="Write your post content here..." rows="8"></textarea>
+  </label>
 
   <button type="submit" aria-busy={$store}>
     <Spinner active={$store} />

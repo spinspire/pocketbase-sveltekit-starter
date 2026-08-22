@@ -45,19 +45,19 @@
 </script>
 
 {#snippet signin()}
-  <label>
-    <input bind:value={form.email} required type="text" placeholder="" />
-    <span>Email / Username</span>
+  <label data-field>
+    Email / Username
+    <input bind:value={form.email} required type="text" placeholder="Enter email or username" />
   </label>
   {#if !form.passkey}
-    <label>
+    <label data-field>
+      Password
       <input
         bind:value={form.password}
         required
         type="password"
-        placeholder=""
+        placeholder="Enter password"
       />
-      <span>Password</span>
     </label>
   {/if}
   <label title="sign-in as admin">
@@ -89,36 +89,36 @@
       {#if active === "SignIn"}
         {@render signin()}
       {:else}
-        <label>
+        <label data-field>
+          Email
           <input
             bind:value={form.email}
             required
             type="text"
-            placeholder=""
+            placeholder="Enter email"
           />
-          <span>Email</span>
         </label>
-        <label>
+        <label data-field>
+          Password
           <input
             bind:value={form.password}
             required
             type="password"
-            placeholder=""
+            placeholder="Enter password"
           />
-          <span>Password</span>
         </label>
-        <label>
+        <label data-field>
+          Confirm Password
           <input
             bind:value={form.passwordConfirm}
             required
             type="password"
-            placeholder=""
+            placeholder="Confirm password"
           />
-          <span>Confirm Password</span>
         </label>
-        <label>
-          <input bind:value={form.name} required type="text" placeholder="" />
-          <span>Name / Label</span>
+        <label data-field>
+          Name / Label
+          <input bind:value={form.name} required type="text" placeholder="Your name" />
         </label>
         <input type="hidden" name="register" value={true} />
         <button type="submit" onclick={() => (signup = true)}>Sign Up</button>
@@ -138,9 +138,3 @@
     <!-- pocketbase not working -->
   {/await}
 </form>
-
-<style>
-  form :global(label) {
-    display: block;
-  }
-</style>
