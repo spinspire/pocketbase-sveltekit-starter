@@ -33,14 +33,18 @@
       <p>Are you sure you want to delete this record?</p>
     </div>
     <footer>
-      <div role="group">
-        <button type="submit">
-          <i class="bi bi-trash"></i> Yes - Delete
-        </button>
-        <button type="reset" class="outline" onclick={back}>
-          <i class="bi bi-x-lg"></i> No - Cancel
-        </button>
-      </div>
+      <menu class="buttons">
+        <li>
+          <button type="submit">
+            <i class="bi bi-trash"></i> Yes - Delete
+          </button>
+        </li>
+        <li>
+          <button type="reset" class="outline" onclick={back}>
+            <i class="bi bi-x-lg"></i> No - Cancel
+          </button>
+        </li>
+      </menu>
     </footer>
   </article>
 </form>
