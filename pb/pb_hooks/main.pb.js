@@ -2,6 +2,23 @@
 
 /// <reference path="../pb_data/types.d.ts" />
 
+// Return 404 for unmatched /api/* routes (prevents SPA fallback serving index.html)
+routerAdd("GET", "/api/{path...}", (c) => {
+  throw new NotFoundError("API route not found");
+});
+routerAdd("POST", "/api/{path...}", (c) => {
+  throw new NotFoundError("API route not found");
+});
+routerAdd("PUT", "/api/{path...}", (c) => {
+  throw new NotFoundError("API route not found");
+});
+routerAdd("PATCH", "/api/{path...}", (c) => {
+  throw new NotFoundError("API route not found");
+});
+routerAdd("DELETE", "/api/{path...}", (c) => {
+  throw new NotFoundError("API route not found");
+});
+
 /**
  * Demo route implemented in JS. Says hello to the user's name or email.
  */
