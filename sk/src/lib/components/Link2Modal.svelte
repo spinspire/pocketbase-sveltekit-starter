@@ -41,12 +41,12 @@
   <dialog bind:this={dialog} {onclose}>
     <form method="dialog">
       <header>
+        <h2>{$metadata.headline}</h2>
         <button class="ghost icon" aria-label="Close">
           <i class="bi bi-x-lg"></i>
         </button>
       </header>
       <div>
-        <h2>{$metadata.headline}</h2>
         <Alerts />
         <Comp data={$page.state.selected}></Comp>
       </div>
