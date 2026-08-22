@@ -304,6 +304,31 @@ Enable in Dashboard → Settings → Application → Rate limiting. Defaults are
 
 Enable MFA/OTP on the `_superusers` collection for an extra auth layer.
 
+### Settings encryption at rest
+
+PocketBase stores app settings (SMTP password, S3 keys, etc.) as plain JSON in SQLite. If someone gets your database file, they can read those secrets. The `--encryptionEnv` flag encrypts all settings at rest:
+
+```bash
+# 1. Generate a 32-character key
+openssl rand -base64 32
+
+# 2. Set it as an env var
+export PB_ENCRYPTION_KEY="2fSolc9inLl3UxRDW5waUQuBffSg60HH"
+
+# 3. Start PocketBase pointing to that env var
+pocketbase serve --encryptionEnv=PB_ENCRYPTION_KEY
+```
+
+In Docker Compose:
+
+```yaml
+environment:
+  - PB_ENCRYPTION_KEY=2fSolc9inLl3UxRDW5waUQuBffSg60HH
+command: pocketbase serve --http=0.0.0.0:8090 --encryptionEnv=PB_ENCRYPTION_KEY
+```
+
+Once enabled, do not lose the key — encrypted settings cannot be recovered without it.
+
 ---
 
 ## SQLite Performance
