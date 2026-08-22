@@ -37,3 +37,7 @@ dialog > form > header {
   justify-content: space-between;
 }
 
+// fights oat .hstack > * { margin: 0; }
+.hstack > dialog {
+  margin: auto;
+}
