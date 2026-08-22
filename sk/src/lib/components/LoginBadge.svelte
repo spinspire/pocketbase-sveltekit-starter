@@ -86,7 +86,7 @@
   }
   .wrapper .badge {
     justify-content: center;
-    padding-block-end: var(--space-3);
+    padding-block: var(--space-2);
     border-bottom: 1px solid var(--border);
   }
 </style>
