@@ -18,6 +18,10 @@ The container runs in dev mode by default (`DEV=true` in docker-compose.yml).
 
 Port mapping requires `docker-compose.override.yml` (see `docker-compose.override-example.yml`).
 
+## Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for production setup: VPS, Cloudflare proxy, S3/R2 file storage, Litestream replication, email, and security hardening.
+
 ## Key Commands
 
 ```bash

@@ -185,6 +185,10 @@ Please read about the "hooks" system in [./pb/README.md](./pb/README.md)
 It is a very easy and powerful way to extend your application with minimal
 configuration and perhaps no code.
 
+# Deploying
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for production deployment: Docker, VPS, Cloudflare, S3/R2, Litestream, email, and security hardening.
+
 # Feedback
 
 Please provide feedback by
