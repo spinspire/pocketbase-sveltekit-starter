@@ -7,5 +7,5 @@
 </script>
 
 {#if active}
-  <span class="sr-only">Loading...</span>
+  <span class="visually-hidden">Loading...</span>
 {/if}
