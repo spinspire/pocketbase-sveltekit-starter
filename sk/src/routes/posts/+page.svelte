@@ -21,22 +21,25 @@
 </script>
 
 <LoginGuard admin={false}>
-  <Link2Modal component={EditPage}>
-    {#snippet trigger(onclick)}
-      <a
-        href={resolve("/posts/[id]/edit", { id: "new" })}
-        role="button"
-        {onclick}
-      >
-        New Post
-        <i class="bi bi-plus-circle"></i>
-      </a>
-    {/snippet}
-  </Link2Modal>
-  <button type="button" onclick={store.run} disabled={$store} aria-busy={$store}>
-    <Spinner active={$store} />
-    Generate a random post
-  </button>
+  <div class="hstack gap-2 toolbar">
+    <Link2Modal component={EditPage}>
+      {#snippet trigger(onclick)}
+        <a
+          href={resolve("/posts/[id]/edit", { id: "new" })}
+          role="button"
+          {onclick}
+        >
+          <i class="bi bi-plus-lg"></i>
+          New Post
+        </a>
+      {/snippet}
+    </Link2Modal>
+    <button type="button" onclick={store.run} disabled={$store} aria-busy={$store}>
+      <Spinner active={$store} />
+      <i class="bi bi-shuffle"></i>
+      Generate
+    </button>
+  </div>
   {#snippet otherwise()}
     <p>
       Please Sign In (as non-superuser) to create/edit posts. Use the test
@@ -113,5 +116,23 @@
     height: 100px;
     object-fit: cover;
     border-radius: var(--radius-medium);
+  }
+  .toolbar a,
+  .toolbar button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-medium);
+    background: transparent;
+    color: inherit;
+    text-decoration: none;
+    font: inherit;
+    cursor: pointer;
+  }
+  .toolbar a:hover,
+  .toolbar button:hover {
+    background: var(--faint);
   }
 </style>
