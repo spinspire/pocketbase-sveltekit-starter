@@ -166,10 +166,10 @@
       </form>
     </div>
     <div class="col-6">
-      <div role="group">
+      <fieldset class="group">
         <input type="text" placeholder="Search..." />
         <button><i class="bi bi-search"></i></button>
-      </div>
+      </fieldset>
     </div>
   </div>
 </section>
