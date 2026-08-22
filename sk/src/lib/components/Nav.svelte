@@ -37,6 +37,7 @@
       flex-direction: column;
       gap: 0;
       padding: 0 var(--space-3);
+      align-items: center;
     }
     .nav-links a {
       padding: var(--space-3) var(--space-4);
