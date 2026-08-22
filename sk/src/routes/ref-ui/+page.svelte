@@ -167,10 +167,7 @@
     </div>
     <div class="col-6">
       <div role="group">
-        <label>
-          <input type="text" placeholder="" />
-          <span>Search</span>
-        </label>
+        <input type="text" placeholder="Search..." />
         <button><i class="bi bi-search"></i></button>
       </div>
     </div>
