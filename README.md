@@ -26,6 +26,9 @@ frontend is static and backend is a single compiled Golang binary (JAMstack baby
   for Bun/NodeJS at runtime. It is generated using
   [`adapter-static`](https://github.com/sveltejs/kit/tree/master/packages/adapter-static)
   and `ssr` is OFF.
+- UI styled with [oat-css](https://oat.ink/) (lightweight semantic CSS framework)
+  and [Bootstrap Icons](https://icons.getbootstrap.com/).
+- **AI-ready**: [AGENTS.md](./AGENTS.md) gives AI coding assistants full context on architecture, commands, and gotchas.
 - PB (PocketBase) provides complete (and _fast_) backend including:
   - databse (SQLite)
   - CRUD API for database
@@ -152,6 +155,7 @@ Visit http://localhost:5173 (Vite + SvelteKit) or http://localhost:8090 (PocketB
 With `DEV=true`, changes to Svelte code hot-reload instantly via Vite HMR.
 Changes to PocketBase JS hooks (`pb/pb_hooks/`) auto-reload.
 Changes to Go code (`pb/main.go`) require `RELEASE=custom` and `modd` for live reload.
+The `ref-ui` page (`/ref-ui`) is a living style guide showing all UI components, patterns, and oat-css usage — check it before building new features.
 
 This setup turns off automatic generation of database migration files by setting `--automigrate=false`. You can still generate migration files manually by running `pocketbase migrate create <name>` or `pocketbase migrate collections` to create migration files for your collections.
 
