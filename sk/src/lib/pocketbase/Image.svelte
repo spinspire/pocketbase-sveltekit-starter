@@ -17,7 +17,7 @@
   } = $props();
   const src = $derived(
     file
-      ? client.getFileUrl(record, file, { thumb })
+      ? client.files.getURL(record, file, { thumb })
       : fallback === "external"
         ? `https://via.placeholder.com/${thumb}`
         : internal_fallback_img

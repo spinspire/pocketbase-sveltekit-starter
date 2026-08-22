@@ -15,7 +15,7 @@
 </script>
 
 {#if record && filename}
-  {@const src = client.getFileUrl(record, filename, { thumb: "100x100" })}
+  {@const src = client.files.getURL(record, filename, { thumb: "100x100" })}
   <Dialog>
     {#snippet trigger(show)}
       <button onclick={show} type="button" class="thumbnail">
@@ -23,7 +23,7 @@
       </button>
     {/snippet}
     {#if !thumbOnly}
-      {@const src = client.getFileUrl(record, filename)}
+      {@const src = client.files.getURL(record, filename)}
       <img {src} alt="todo" />
     {/if}
   </Dialog>

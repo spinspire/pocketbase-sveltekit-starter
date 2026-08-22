@@ -28,7 +28,7 @@
       <button class="ghost badge" onclick={show}>
         {#if $authModel.avatar}
           <img
-            src={client.getFileUrl($authModel, $authModel.avatar)}
+            src={client.files.getURL($authModel, $authModel.avatar)}
             alt="profile pic"
           />
         {/if}
@@ -39,7 +39,7 @@
       <div class="badge">
         {#if $authModel.avatar}
           <img
-            src={client.getFileUrl($authModel, $authModel.avatar)}
+            src={client.files.getURL($authModel, $authModel.avatar)}
             alt="profile pic"
           />
         {/if}
