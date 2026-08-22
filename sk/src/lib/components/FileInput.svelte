@@ -1,12 +1,16 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   let {
     fileInput = $bindable(),
     pasteFile = false,
     multiple = false,
+    children,
   }: {
     fileInput?: HTMLInputElement;
     pasteFile?: boolean;
     multiple?: boolean;
+    children: Snippet;
   } = $props();
 
   function onpaste(e: ClipboardEvent) {
@@ -29,7 +33,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <label onpaste={pasteFile ? onpaste : undefined}>
   <input type="file" bind:this={fileInput} {multiple} />
-  <slot />
+  {@render children()}
 </label>
 
 <style>
